@@ -24,3 +24,130 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/dist/woff2/OpenDyslexic-Regular.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Base Theme Variables */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-main: #0f2942;
+  --text-muted: #64748b;
+  --focus-ring-color: #f95738;
+  /* Vibrant Orange for high visibility */
+  --success-accent: #10b981;
+  --error-accent: #ef4444;
+  --border-color: #e2e8f0;
+}
+
+/* High Contrast*/
+[data-theme="high-contrast"] {
+  --bg-primary: #000000;
+  --bg-secondary: #121212;
+  --bg-tertiary: #1e1e1e;
+  --text-main: #ffffff;
+  --text-muted: #cbd5e1;
+  --focus-ring-color: #ffff00;
+  /* Neon Yellow - max contrast on black */
+  --success-accent: #00ffcc;
+  /* Neon Cyan */
+  --error-accent: #ff3333;
+  /* Neon Red */
+  --border-color: #ffffff;
+}
+
+/* Protanopia Theme */
+[data-theme="protanopia"] {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --focus-ring-color: #38bdf8;
+  /* Cobalt Blue */
+  --success-accent: #0284c7;
+  /* Clear Blue */
+  --error-accent: #f59e0b;
+  /* Amber (contrast from blue) */
+  --border-color: #475569;
+}
+
+/* Deuteranopia Theme */
+[data-theme="deuteranopia"] {
+  --bg-primary: #0b0f19;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  --text-main: #f8fafc;
+  --text-muted: #cbd5e1;
+  --focus-ring-color: #6366f1;
+  /* Indigo */
+  --success-accent: #4338ca;
+  --error-accent: #f59e0b;
+  /* Amber */
+  --border-color: #475569;
+}
+
+/*Tritanopia Theme */
+[data-theme="tritanopia"] {
+  --bg-primary: #0c0a09;
+  --bg-secondary: #1c1917;
+  --bg-tertiary: #292524;
+  --text-main: #fafaf9;
+  --text-muted: #d6d3d1;
+  --focus-ring-color: #f43f5e;
+  /* Rose */
+  --success-accent: #ec4899;
+  /* Pink */
+  --error-accent: #14b8a6;
+  /* Teal */
+  --border-color: #44403c;
+}
+
+/*OpenDyslexic Typography Rule */
+[data-font="dyslexic"] {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
+  letter-spacing: 0.08em;
+  word-spacing: 0.12em;
+  line-height: 1.6;
+}
+
+html {
+  font-size: var(--text-scale, 100%);
+  transition: font-size 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+}
+
+/*Focus Indicator*/
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 3px solid var(--focus-ring-color) !important;
+  outline-offset: 2px !important;
+}
+
+/*Cognitive Distraction-Free Profile overrides */
+[data-focus-profile="distraction-free"] .decorative-glow,
+[data-focus-profile="distraction-free"] .promo-banner,
+[data-focus-profile="distraction-free"] .gamification-element {
+  display: none !important;
+}
+
+[data-focus-profile="distraction-free"] * {
+  animation: none !important;
+  transition: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
