@@ -20,7 +20,7 @@ export default function AccessibilityToolbar() {
         return (
             <button
                 onClick={() => setIsToolbarOpen(true)}
-                className="fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 bg-[#f95738] text-white hover:bg-orange-600 rounded-full font-bold shadow-lg transition-transform focus:scale-105 active:scale-95 cursor-pointer"
+                className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-2.5 bg-[#f95738] text-white hover:bg-orange-600 rounded-full font-bold shadow-lg transition-transform focus:scale-105 active:scale-95 cursor-pointer"
                 aria-haspopup="dialog"
                 aria-expanded="false"
                 aria-label="Open Accessibility Settings Toolbar"
@@ -57,7 +57,7 @@ export default function AccessibilityToolbar() {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="toolbar-title"
-                className="fixed top-0 right-0 z-50 h-screen w-80 max-w-full bg-[var(--bg-primary)] text-[var(--text-main)] shadow-2xl border-l border-[var(--border-color)] overflow-y-auto flex flex-col p-6 animate-slide-in"
+                className="fixed bottom-0 right-0 z-50 h-screen w-80 max-w-full bg-[var(--bg-primary)] text-[var(--text-main)] shadow-2xl border-l border-[var(--border-color)] overflow-y-auto flex flex-col p-6 animate-slide-in"
             >
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 border-b border-[var(--border-color)] pb-4">
