@@ -57,7 +57,7 @@ export default function AccessibilityToolbar() {
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="toolbar-title"
-                className="fixed bottom-0 right-0 z-50 h-screen w-80 max-w-full bg-[var(--bg-primary)] text-[var(--text-main)] shadow-2xl border-l border-[var(--border-color)] overflow-y-auto flex flex-col p-6 animate-slide-in"
+                className=" fixed bottom-0 right-0 z-50 h-screen w-80 max-w-full bg-[var(--bg-primary)] text-[var(--text-main)] shadow-2xl border-l border-[var(--border-color)] overflow-y-auto flex flex-col p-6 animate-slide-in"
             >
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 border-b border-[var(--border-color)] pb-4">
