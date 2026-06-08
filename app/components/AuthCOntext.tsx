@@ -15,9 +15,9 @@ interface AuthContextProps {
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [role, setRole] = useState(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    const [user, setUser] = useState<string | null>(null);
+    const [role, setRole] = useState<Role | null>(null);
     const isAuthenticated = !!user;
 
     useEffect(() => {
