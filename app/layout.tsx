@@ -41,11 +41,14 @@ export default function RootLayout({
           >
             Skip to Main Content
           </a>
-          <NavbarMain />
-          <AccessibilityToolbar />
-          <AuthProvider>{children}</AuthProvider>
-          <Footer />
+          <AuthProvider>
+            <NavbarMain />
+            <AccessibilityToolbar />
+            {children}
+          </AuthProvider>
         </AccessibilityProvider>
+        <Footer />
+
       </body>
     </html>
   );
