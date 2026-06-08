@@ -5,6 +5,7 @@ import NavbarMain from "@/app/components/NavbarMain";
 import { AccessibilityProvider } from "@/app/components/AccessibilityContext";
 import AccessibilityToolbar from "@/app/components/AccessibilityToolbar";
 import Footer from "./components/Footer";
+import { AuthProvider } from "./components/AuthCOntext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,7 +43,7 @@ export default function RootLayout({
           </a>
           <NavbarMain />
           <AccessibilityToolbar />
-          {children}
+          <AuthProvider>{children}</AuthProvider>
           <Footer />
         </AccessibilityProvider>
       </body>
