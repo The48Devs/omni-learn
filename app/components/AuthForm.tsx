@@ -82,14 +82,37 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                             <span className="ml-2 text-sm text-[var(--text-muted)]">
                                 Tutor</span>
                         </label>
-                    </fieldset> 
-                    {/*Submit button*/}
+                    </fieldset>
+                )}
+                {/*Submit button*/}
                 <button
                     type="submit"
                     className="w-full py-2 rounded-full font-bold bg-[#0b1b3d] text-white hover:bg-[#152c5a] focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-colors">
                     {mode == "login" ? "Login" : "Create Account"}
                 </button>
-                )}
+
+                {/*switch link*/}
+                <p className="text-sm text-[var(--text-muted)]">
+                    {mode == "register" ? (
+                        <>
+                            <link href="/auth/signup"
+                                className="text-[var(-focus-ring-color)] underline">
+                                Sign Up
+                            </link>
+                        </>
+                    ) : (
+                        <>
+                            Already have an account?{" "}
+                            <link
+                                href="/auth/signin"
+                                className="text-[var(--focus-ring-color)] underline"
+                            >
+                                Sign in
+                            </link>
+                        </>
+
+                    )}
+                </p>
             </form>
 
         </section>
