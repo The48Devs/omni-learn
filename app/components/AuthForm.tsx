@@ -17,4 +17,41 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
             register(email, password, role);
         }
     };
+
+    return (
+        <section className="max-w-md max-auto py-12">
+            <h2 className="text-2xl font-bold mb-6 text =[var(--text-main)]">
+                {mode == "login" ? "Log In" : "Create Account"}
+            </h2>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+                {/*Email*/}
+                <label htmlFor="block">
+                    <span className="text-sm font-medium text-[var(--text-muted)]">
+                        Email
+                    </span>
+
+                    <input type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-[bar(--border-color)] bg-[var--bg-secondary)] text=[var(--text.main)] focus:border-[var(--focus-ring-color)] focus:outline-none " />
+                </label>
+
+                {/*Password*/}
+                <label htmlFor="block">
+                    <span className="text-sm font-medium text-[var(--text-muted)]">
+                        Password
+                    </span>
+
+                    <input type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-[bar(--border-color)] bg-[var--bg-secondary)] text=[var(--text.main)] focus:border-[var(--focus-ring-color)] focus:outline-none " />
+                </label>
+            </form>
+
+        </section>
+    );
 }
