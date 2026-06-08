@@ -86,17 +86,14 @@ export default function Navbar() {
                             </>
                         )}
                     </ul>
-                    {/* Mobile menu button – unchanged (you can keep your existing logic) */}
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         className="md:hidden text-[var(--text-main)] focus:outline-none"
                     >
-                        {/* icon (you already have an SVG or similar) */}
                         ☰
                     </button>
                 </div>
             </div>
-            {/* Mobile menu – you can copy the same auth‑aware list inside the collapse if you need it */}
         </nav>
     );
 }
