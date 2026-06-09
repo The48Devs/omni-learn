@@ -6,9 +6,23 @@ import { useAuth } from "./AuthCOntext";
 
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const { login, register } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  //state vars
   const [role, setRole] = useState<"student" | "tutor">("student");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [customId, setCustomId] = useState("");
+
+  //tutor or student ID
+  const [mobile, setMobile] = useState("");
+  const [institution, setInstitution] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  //submit handlign logic
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
