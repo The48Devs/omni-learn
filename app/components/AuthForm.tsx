@@ -434,5 +434,92 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
     );
   }
 
-
+  //login view
+  return (
+    <main
+      id="main-content"
+      className="auth-page-bg min-h-screen flex flex-col items-center justify-center py-10 px-4"
+    >
+      <h1 className="text-3xl font-bold text-[var(--text-main)] mb-1 text-center">
+        <span className="font-extrabold">Welcome</span>{" "}
+        <span className="font-light text-[#7ecef4]">Back</span>
+      </h1>
+      <p className="text-sm text-[var(--text-muted)] mb-6 text-center">
+        Log in to continue your learning journey.
+      </p>
+      <div className="auth-card w-full max-w-md p-8">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Email */}
+          <div>
+            <label htmlFor="loginEmail" className="block text-sm font-medium text-[var(--text-main)] mb-1">
+              Email Address
+            </label>
+            <input
+              id="loginEmail"
+              type="email"
+              required
+              placeholder="john@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          {/* Password */}
+          <div>
+            <label htmlFor="loginPassword" className="block text-sm font-medium text-[var(--text-main)] mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="loginPassword"
+                type={showPassword ? "text" : "password"}
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${inputClass} pr-10`}
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2"
+              >
+                <EyeIcon visible={showPassword} />
+              </button>
+            </div>
+            <Link
+              href="/auth/forgot"
+              className="mt-1 block text-right text-xs text-[#7ecef4] hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full flex items-center justify-center gap-2 rounded-full bg-[var(--focus-ring-color)] py-2.5 font-semibold text-white hover:opacity-90 focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-opacity"
+          >
+            Log In
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </button>
+        </form>
+        <p className="mt-6 text-center text-sm text-[var(--text-muted)]">
+          Don't Have an Account?{" "}
+          <Link href="/auth/signup" className="text-[#7ecef4] font-medium hover:underline">
+            Create an Account
+          </Link>
+        </p>
+      </div>
+    </main>
+  );
 }
