@@ -161,3 +161,110 @@ textarea:focus-visible,
   box-shadow: none !important;
   background-image: none !important;
 }
+
+.auth-page-bg {
+  background-color: #eef0f4;
+}
+
+[data-theme="high-contrast"] .auth-page-bg {
+  background-color: var(--bg-primary);
+}
+
+[data-theme="protanopia"] .auth-page-bg {
+  background-color: var(--bg-primary);
+}
+
+[data-theme="deuteranopia"] .auth-page-bg {
+  background-color: var(--bg-primary);
+}
+
+[data-theme="tritanopia"] .auth-page-bg {
+  background-color: var(--bg-primary);
+}
+
+.auth-card {
+  background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+}
+
+[data-theme="high-contrast"] .auth-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+[data-theme="protanopia"] .auth-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+[data-theme="deuteranopia"] .auth-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+[data-theme="tritanopia"] .auth-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: none;
+}
+
+.role-pill-track {
+  display: inline-flex;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  padding: 4px;
+  gap: 0;
+}
+
+.role-pill-track {
+  display: inline-flex;
+  background-color: #f1f5f9;
+  border-radius: 9999px;
+  padding: 4px;
+  gap: 0;
+}
+
+.role-pill {
+  padding: 0.375rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: background-color 0.2s, color 0.2s;
+  border: none;
+  background: transparent;
+}
+
+.role-pill.active {
+  background-color: #0f2942;
+  color: #ffffff;
+}
+
+[data-theme="high-contrast"] .role-pill.active {
+  background-color: var(--button-primary);
+  color: #ffffff;
+}
+
+[data-theme="protanopia"] .role-pill.active {
+  background-color: var(--button-primary);
+  color: #ffffff;
+}
+
+[data-theme="deuteranopia"] .role-pill.active {
+  background-color: var(--button-primary);
+  color: #ffffff;
+}
+
+[data-theme="tritanopia"] .role-pill.active {
+  background-color: var(--button-primary);
+  color: #ffffff;
+}
+
+[data-focus-profile="distraction-free"] .auth-card {
+  box-shadow: none !important;
+}

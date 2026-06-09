@@ -46,8 +46,9 @@ export default function RootLayout({
             <AccessibilityToolbar />
             {children}
           </AuthProvider>
+          <Footer />
         </AccessibilityProvider>
-        <Footer />
+
 
       </body>
     </html>
