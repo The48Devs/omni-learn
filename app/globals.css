@@ -51,6 +51,7 @@ body {
   --success-accent: #10b981;
   --error-accent: #ef4444;
   --border-color: #e2e8f0;
+  --button-promary: #0b1b3d;
 }
 
 /* High Contrast*/
@@ -67,6 +68,7 @@ body {
   --error-accent: #ff3333;
   /* Neon Red */
   --border-color: #ffffff;
+  --button-primary: #000000;
 }
 
 /* Protanopia Theme */
@@ -83,6 +85,7 @@ body {
   --error-accent: #f59e0b;
   /* Amber (contrast from blue) */
   --border-color: #475569;
+  --button-primary: #0a1a48;
 }
 
 /* Deuteranopia Theme */
@@ -98,6 +101,7 @@ body {
   --error-accent: #f59e0b;
   /* Amber */
   --border-color: #475569;
+  --button-primary: #0c1c4e;
 }
 
 /*Tritanopia Theme */
@@ -114,6 +118,7 @@ body {
   --error-accent: #14b8a6;
   /* Teal */
   --border-color: #44403c;
+  --button-primary: #0d1d4f;
 }
 
 /*OpenDyslexic Typography Rule */
