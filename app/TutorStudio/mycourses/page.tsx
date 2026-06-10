@@ -102,30 +102,60 @@ export default function MyCoursesPage() {
                 <div className="absolute right-0 top-0 w-1/3 h-full bg-white/5 skew-x-12 transform origin-top-right decorative-glow">
                 </div>
             </div>
+
             {/*Card grid*/}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredCourses.map((course) => (
                     <div
                         key={course.id}
-                        className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm flex flex-col justify-between h-[420px] transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
-                        {/*Frame*/}
+                        className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm flex flex-col justify-between h-[420px] transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+                    >
+                        {/* Frame */}
                         <div className={`p-6 bg-gradient-to-br ${course.bgClass} flex-1 flex flex-col justify-between relative`}>
                             <div className="flex justify-between items-start">
                                 <span className="text-xs font-semibold px-4 py-1.5 rounded-full bg-white/15 border border-white/10 backdrop-blur-md text-slate-100">
                                     {course.tag}
                                 </span>
                                 {course.status === "draft" && (
-                                    <span className="ext-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/90 text-white">
+                                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/90 text-white">
                                         Draft
                                     </span>
                                 )}
                             </div>
+                            {/* Icon */}
+                            <div className="flex justify-center items-center py-4">
+                                <div className="p-4 rounded-full bg-white/10 border border-white/5 backdrop-blur-xs shadow-inner">
+                                    {course.icon}
+                                </div>
+                            </div>
+                            <div />
+                        </div>
+                        {/* Bottom Frame */}
+                        <div className="p-6 bg-[var(--bg-primary)] flex-1 flex flex-col justify-between border-t border-[var(--border-color)]">
+                            <div className="space-y-2">
+                                <h4 className="text-lg font-bold text-[var(--text-main)] line-clamp-1">
+                                    {course.title}
+                                </h4>
+                                <p className="text-xs text-[var(--text-muted)] leading-relaxed line-clamp-3">
+                                    {course.description}
+                                </p>
+                            </div>
+                            <Link
+                                href={`/TutorStudio/mycourses/${course.id}`}
+                                className="w-full text-center border border-[var(--border-color)] text-slate-700 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-main)] font-semibold text-xs py-3 rounded-xl transition-colors outline-none focus-visible:outline-3 focus-visible:outline-yellow-400 block"
+                            >
+                                View Course
+                            </Link>
                         </div>
                     </div>
                 ))}
+                {filteredCourses.length == 0 && (
+                    <div className="col-span-full text-center py-12 text-[var(--text-muted)] text-sm font-semibold">
+                        No courses found under this category.
+                    </div>
+                )}
             </div>
 
-
-        </div >
-    )
+        </div>
+    );
 }
