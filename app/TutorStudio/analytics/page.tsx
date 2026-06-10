@@ -300,10 +300,10 @@ export default function TutorAnalyticsPage() {
                                             <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden shadow-inner">
                                                 <div
                                                     className={`h-full rounded-full ${student.status === "Excelling"
-                                                            ? "bg-teal-500"
-                                                            : student.status === "At Risk"
-                                                                ? "bg-rose-500"
-                                                                : "bg-orange-500"
+                                                        ? "bg-teal-500"
+                                                        : student.status === "At Risk"
+                                                            ? "bg-rose-500"
+                                                            : "bg-orange-500"
                                                         }`}
                                                     style={{ width: `${student.progress}%` }}
                                                 />
@@ -363,6 +363,42 @@ export default function TutorAnalyticsPage() {
                     </div>
                 </div>
             </section>
+
+            {/*Extra Metrics*/}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Metric 1 */}
+                <div className="bg-[var(--bg-primary)] p-6 rounded-xl border border-[var(--border-color)] shadow-xs flex items-center gap-4">
+                    <div className="p-3 bg-teal-50 rounded-xl">
+                        <svg className="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                    </div>
+                    <div>
+                        <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Avg. Completion</div>
+                        <div className="text-2xl font-extrabold text-[var(--text-main)] mt-0.5">76.4%</div>
+                    </div>
+                    <span className="ml-auto text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">+12%</span>
+                </div>
+                {/* Metric 2 */}
+                <div className="bg-[var(--bg-primary)] p-6 rounded-xl border border-[var(--border-color)] shadow-xs flex items-center gap-4">
+                    <div className="p-3 bg-rose-50 rounded-xl">
+                        <svg className="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </div>
+                    <div>
+                        <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">At Risk Students</div>
+                        <div className="text-2xl font-extrabold text-[var(--text-main)] mt-0.5">12</div>
+                    </div>
+                    <span className="ml-auto text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">3 Alert</span>
+                </div>
+                {/* Metric 3 */}
+                <div className="bg-[var(--bg-primary)] p-6 rounded-xl border border-[var(--border-color)] shadow-xs flex items-center gap-4">
+                    <div className="p-3 bg-blue-50 rounded-xl">
+                        <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    </div>
+                    <div>
+                        <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Active Now</div>
+                        <div className="text-2xl font-extrabold text-[var(--text-main)] mt-0.5">148</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
