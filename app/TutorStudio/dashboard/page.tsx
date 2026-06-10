@@ -103,9 +103,53 @@ export default function TutorDashboard() {
                 <div className="absolute right-0 top-0 w-1/3 h-full bg-white/5 skew-x-12 transform origin-top-right transition-all duration-300 decorative-glow" />
             </div>
             {/*Published courses*/}
+            <section aria-labelledby="published-courses-heading"
+                className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <h3 id="published-courses-heading"
+                        className="text-2xl font-bold text-[var(--text-main)]">
+                        Published Courses
+                    </h3>
+                    <Link href="/tutorstudio/mycourses"
+                        className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline outline-none focus-visible:outline-3 focus-visible:outline-yellow-400">
+                        View All Courses
+                    </Link>
+                </div>
+                {/*Cards grdi*/}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {courses.map((courses) => (
+                        <div
+                            key={courses.id}
+                            className="g-[var(--bg-primary)] rounded-2xl shadow-md border border-[var(--border-color)] overflow-hidden flex flex-col justify-between h-72 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+                            {/*Bg Gradient*/}
+                            <div className="`p-6 bg-gradient-to-br ${course.bgClass} text-white flex-1 flex flex-col justify-between`">
+                                <span className="self-start text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2.5 py-1 rounded-full">
+                                    {courses.tag}</span>
+                                <h4 className="text-xl font-bold leading-snug">
+                                    {courses.title}
+                                </h4>
+                            </div>
+
+                            {/*Meta data*/}
+                            <div className="p-5 flex items-center justify-between bg-[var(--bg-primary)]">
+                                <span className="text-xs text-[var(--text-muted)] font-medium">
+                                    View Analytics
+                                </span>
+                                <Link href={`/TutorStudio/analytics?courseId=${courses.id}`}
+                                    className={`w-9 h-9 rounded-full ${courses.buttonColor} flex items-center justify-center text-white transition-colors duration-150 outline-none focus-visible:ring-4 focus-visible:ring-yellow-400`}
+                                    aria-label={`View detailed analytics for ${courses.title}`}>
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                    </svg>
+                                </Link>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
 
         </div>
-        </div >
     )
 
 
