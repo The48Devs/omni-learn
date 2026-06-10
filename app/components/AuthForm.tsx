@@ -34,6 +34,9 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         alert("Passwords do not match.");
         return;
       }
+      if (fullName) {
+        localStorage.setItem("auth-user-name", fullName);
+      }
       register(email, password, role);
     }
   };
