@@ -88,5 +88,21 @@ export default function TutorDashboard() {
         },
     ];
 
+    return (
+        <div className="space-y-10">
+            {/* Welcome banner */}
+            <div className="w-full rounded-2xl bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-700 p-10 md:p-14 text-white shadow-xl relative overflow-hidden transition-colors duration-200
+                   data-[theme=high-contrast]:bg-none data-[theme=high-contrast]:bg-black data-[theme=high-contrast]:border-2 data-[theme=high-contrast]:border-white"
+                data-testid="welcome-banner">
+                <div className="relative z-10">
+                    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                        Welcome Back, {userName}
+                    </h2>
+                </div>
+
+            </div>
+        </div>
+    )
+
 
 }
