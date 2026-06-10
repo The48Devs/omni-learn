@@ -144,11 +144,61 @@ export default function TutorAnalyticsPage() {
                     <span className="text-xs font-semibold text-emerald-600">↗ +1.5% vs last week</span>
                 </div>
             </div>
+            {/* Engagement Graphs */}
+            <div className="space-y-6">
+                {/*Sandbox Engagement */}
+                <div className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] p-6 shadow-xs relative">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-bold text-[var(--text-main)]">Daily Sandbox Engagement</h3>
+                        <button className="text-[var(--text-muted)] hover:text-[var(--text-main)]">•••</button>
+                    </div>
+
+                    {/* Beautiful SVG Line Graph mockup */}
+                    <div className="w-full h-56 flex items-end">
+                        <svg className="w-full h-full" viewBox="0 0 700 200" preserveAspectRatio="none">
+                            {/* Gridlines */}
+                            <line x1="50" y1="20" x2="680" y2="20" stroke="rgba(0,0,0,0.05)" />
+                            <line x1="50" y1="60" x2="680" y2="60" stroke="rgba(0,0,0,0.05)" />
+                            <line x1="50" y1="100" x2="680" y2="100" stroke="rgba(0,0,0,0.05)" />
+                            <line x1="50" y1="140" x2="680" y2="140" stroke="rgba(0,0,0,0.05)" />
+                            <line x1="50" y1="180" x2="680" y2="180" stroke="rgba(0,0,0,0.1)" />
+                            {/* Engagement Path Area / Trend representation */}
+                            <path
+                                d="M 50 180 Q 150 140 250 80 T 450 120 T 650 40 L 680 40 L 680 180 Z"
+                                fill="url(#sandboxGradient)"
+                                opacity="0.15"
+                            />
+                            <path
+                                d="M 50 180 Q 150 140 250 80 T 450 120 T 650 40"
+                                fill="none"
+                                stroke="#3b82f6"
+                                strokeWidth="3.5"
+                                strokeLinecap="round"
+                            />
+
+                            {/* Gradients */}
+                            <defs>
+                                <linearGradient id="sandboxGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#3b82f6" />
+                                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div className="flex justify-between pl-[40px] pr-[15px] pt-4 text-xs font-semibold text-[var(--text-muted)]">
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                        <span>Sun</span>
+                    </div>
+                </div>
 
 
-
+            </div>
         </div>
-        </div >
 
     )
 
