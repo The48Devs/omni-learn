@@ -9,7 +9,7 @@ export default function TutorDashboard() {
     const { user } = useAuth();
     const userName = user ? user.split("@")[0].toUpperCase() : "DANIEL";
 
-    // published courses section
+    // published courses mappings
     const courses = [
         {
             id: "physics-1",
@@ -31,6 +31,60 @@ export default function TutorDashboard() {
             tag: "History",
             bgClass: "ffrom-[#0d5c75] to-[#128a9b]",
             buttonColor: "bg-orange-800 hover:bg-orange-900",
+        },
+    ];
+
+    //Analytics card mappings
+    const anyalyticsData = [
+        {
+            title: "Completion Rate",
+            value: "84.2%",
+            comparison: "+2.4% vs last week",
+            trend: "up",
+            color: "border-bblue-400",
+            icon: (
+                <svg
+                    className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            ),
+        },
+        {
+            title: "AVG. TIME SPENT",
+            value: "4h 12m",
+            comparison: "Stable vs last week",
+            trend: "stable",
+            color: "border-indigo-400",
+            icon: (
+                <svg className="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            )
+        },
+        {
+            title: "STRUGGLING RATE",
+            value: "12",
+            comparison: "+3 vs last week",
+            trend: "down",
+            color: "border-orange-400",
+            icon: (
+                <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            )
+        },
+        {
+            title: "AVG. QUIZ SCORE",
+            value: "78%",
+            comparison: "+1.5% vs last week",
+            trend: "up",
+            color: "border-teal-500",
+            icon: (
+                <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5a2 2 0 10-2 2h2zm0 0h4a2 2 0 110 4h-4m0-4h-4a2 2 0 100 4h4" />
+                </svg>
+            )
         },
     ];
 
