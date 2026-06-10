@@ -88,7 +88,8 @@ export default function MyCoursesPage() {
                 </div>
             </div>
             {/*Create course */}
-            <div className="w-full rounded-2xl bbg-gradient-to-r from blue-900/95 via-blue-800/90 to-cyan-700/85 p-8 md:p-10 text-white shadow-lg relative overflow-hidden transition-all duration-200 data-[theme=high-contrast]:bg-none data-[theme=high-contrast]:bg-black data-[theme=high-contrast]:border-2 data-[theme=high-contrast]:border-white" >
+            <div className="-full rounded-2xl bg-gradient-to-r from-blue-900/95 via-blue-800/90 to-cyan-700/85 p-8 md:p-10 text-white shadow-lg relative overflow-hidden transition-all duration-200
+                   data-[theme=high-contrast]:bg-none data-[theme=high-contrast]:bg-black data-[theme=high-contrast]:border-2 data-[theme=high-contrast]:border-white" >
                 <div className="relative z-10 max-w-lg space-y-4">
                     <h3 className="text-2xl font-extrabold tracking-tight">
                         Publish a New Course</h3>
@@ -100,9 +101,30 @@ export default function MyCoursesPage() {
                         Create Course</Link></div>
                 <div className="absolute right-0 top-0 w-1/3 h-full bg-white/5 skew-x-12 transform origin-top-right decorative-glow">
                 </div>
-
-
             </div>
+            {/*Card grid*/}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredCourses.map((course) => (
+                    <div
+                        key={course.id}
+                        className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-sm flex flex-col justify-between h-[420px] transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
+                        {/*Frame*/}
+                        <div className={`p-6 bg-gradient-to-br ${course.bgClass} flex-1 flex flex-col justify-between relative`}>
+                            <div className="flex justify-between items-start">
+                                <span className="text-xs font-semibold px-4 py-1.5 rounded-full bg-white/15 border border-white/10 backdrop-blur-md text-slate-100">
+                                    {course.tag}
+                                </span>
+                                {course.status === "draft" && (
+                                    <span className="ext-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/90 text-white">
+                                        Draft
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
 
         </div >
     )
