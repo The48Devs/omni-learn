@@ -58,9 +58,24 @@ export default function TutorStudioLayout({
                             </span>
                         </div>
                         <nav className="space-y-1.5" aria-label="Tutor Studio Navigation">
-
+                            {navItems.map((item) => {
+                                const isActive = pathname === item.href;
+                                return (
+                                    <Link
+                                        key={item.name}
+                                        href={item.href}
+                                        className={`flex items-center gap-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 outline-none
+                                                ${isActive ? "bg-blue-600/30 text-white border-l-4 border-blue-500" : "text-slate-400 hover:bg-slate-800/40 hover:text-slate-100"}
+                                                focus-visible:outline-3 focus-visible:outline-yellow-400
+                                                `}>
+                                        {item.icon}
+                                        <span>{item.name}</span>
+                                    </Link>
+                                );
+                            })}
                         </nav>
                     </div>
+
                 </aside>
 
             </div>
