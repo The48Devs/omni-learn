@@ -230,6 +230,139 @@ export default function TutorAnalyticsPage() {
                     </div>
                 </div>
             </div>
+
+            {/*Student Engagement Tabe*/}
+            <section aria-labelledby="student-engagement-heading" className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] overflow-hidden shadow-xs">
+                <div className="p-6 border-b border-[var(--border-color)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h3 id="student-engagement-heading" className="text-xl font-bold text-[var(--text-main)]">
+                            Student Engagement
+                        </h3>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">
+                            Real-time learning metrics and activity status.
+                        </p>
+                    </div>
+                    {/* Filters dropdown & search */}
+                    <div className="flex items-center gap-3">
+                        <input
+                            type="text"
+                            placeholder="Search student..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="px-3.5 py-1.5 text-xs rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-main)] outline-none focus:border-[var(--focus-ring-color)]"
+                        />
+
+                        <div className="flex items-center gap-2 text-xs">
+                            <span className="font-bold text-[var(--text-muted)] uppercase tracking-wider text-[10px]">Filter by:</span>
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value as any)}
+                                className="bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] rounded-lg px-2.5 py-1.5 font-semibold cursor-pointer outline-none focus:border-[var(--focus-ring-color)]"
+                            >
+                                <option value="All">All Students</option>
+                                <option value="Excelling">Excelling</option>
+                                <option value="On Track">On Track</option>
+                                <option value="At Risk">At Risk</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                {/* Data Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-[var(--bg-secondary)] text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-color)]">
+                                <th className="py-4 px-6">STUDENT NAME</th>
+                                <th className="py-4 px-6">COURSE PROGRESS</th>
+                                <th className="py-4 px-6">LAST ACTIVE</th>
+                                <th className="py-4 px-6">AVG. SCORE</th>
+                                <th className="py-4 px-6">STATUS</th>
+                                <th className="py-4 px-6 text-right">ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[var(--border-color)] text-sm text-[var(--text-main)]">
+                            {filteredStudents.map((student, idx) => (
+                                <tr key={idx} className="hover:bg-slate-50/45 transition-colors duration-150">
+                                    {/* Student Name */}
+                                    <td className="py-4 px-6 flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-full ${student.avatarColor} text-white flex items-center justify-center font-bold text-xs shadow-sm`}>
+                                            {student.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <div className="font-semibold">{student.name}</div>
+                                            <div className="text-xs text-[var(--text-muted)]">{student.email}</div>
+                                        </div>
+                                    </td>
+
+
+                                    <td className="py-4 px-6">
+                                        <div className="flex items-center gap-3 max-w-[150px]">
+                                            <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden shadow-inner">
+                                                <div
+                                                    className={`h-full rounded-full ${student.status === "Excelling"
+                                                            ? "bg-teal-500"
+                                                            : student.status === "At Risk"
+                                                                ? "bg-rose-500"
+                                                                : "bg-orange-500"
+                                                        }`}
+                                                    style={{ width: `${student.progress}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-xs font-bold text-[var(--text-muted)]">{student.progress}%</span>
+                                        </div>
+                                    </td>
+
+                                    {/* Last Active */}
+                                    <td className="py-4 px-6 text-xs font-medium text-[var(--text-muted)]">
+                                        {student.lastActive}
+                                    </td>
+
+                                    {/* Avg. Score */}
+                                    <td className="py-4 px-6 font-extrabold">
+                                        {student.avgScore}%
+                                    </td>
+
+                                    {/* Status Badge */}
+                                    <td className="py-4 px-6">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide border
+                      ${student.status === "Excelling"
+                                                ? "bg-teal-50 border-teal-200 text-teal-700"
+                                                : student.status === "At Risk"
+                                                    ? "bg-rose-50 border-rose-200 text-rose-700 font-extrabold"
+                                                    : "bg-orange-50 border-orange-200 text-orange-700"
+                                            }`}
+                                        >
+                                            {student.status}
+                                        </span>
+                                    </td>
+
+                                    <td className="py-4 px-6 text-right">
+                                        <button className="text-[var(--text-muted)] hover:text-[var(--text-main)] outline-none focus-visible:outline-3 focus-visible:outline-yellow-400 p-1 rounded">
+                                            •••
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    {filteredStudents.length === 0 && (
+                        <div className="text-center py-10 text-xs font-semibold text-[var(--text-muted)]">
+                            No student records match filters.
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-4 border-t border-[var(--border-color)] flex items-center justify-between text-xs font-semibold text-[var(--text-muted)] bg-[var(--bg-secondary)]">
+                    <span>Showing {filteredStudents.length} of {initialStudents.length} students</span>
+                    <div className="flex items-center gap-1.5">
+                        <span className="cursor-pointer">Pagination</span>
+                        <button className="p-1 px-2 border border-[var(--border-color)] rounded bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)]" disabled>&lt;</button>
+                        <span className="px-2 font-bold text-[var(--text-main)]">1</span>
+                        <button className="p-1 px-2 border border-[var(--border-color)] rounded bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)]" disabled>&gt;</button>
+                    </div>
+                </div>
+            </section>
         </div>
 
 
