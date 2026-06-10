@@ -49,4 +49,45 @@ export default function MyCoursesPage() {
         if (activeTab == "all") return true;
         return course.status == activeTab;
     });
+
+    return (
+        <div
+            className="space-y-8">
+            {/* Header & filtering buttons*/}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h2 className="text-3xl font-extrabold text-[var(--text-main)]">
+                        Your Courses
+                    </h2>
+                    <p className="text-sm text-[var(--text-muted)] mt-1">
+                        Track your tutoring progress.
+                    </p>
+                </div>
+
+                <div className="flex bg-slate-100/80 p-1 rounded-xl gap-1 border border-slate-200/40 self-start
+                     data-[theme=high-contrast]:bg-black data-[theme=high-contrast]:border-white"
+                    role="tablist"
+                    aria-label="Filter courses by release status">
+                    {(["all", "published", "draft"] as const).map((tab) => {
+                        const isSelected = activeTab == tab;
+                        return (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                role="tab"
+                                aria-selected={isSelected}
+                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all duration-150 cursor-pointer outline-none capitalize
+                  ${isSelected
+                                        ? "bg-[#0b1b3d] text-white shadow-sm"
+                                        : "text-slate-600 hover:text-slate-800 hover:bg-slate-200/50"
+                                    }
+                  focus-visible:outline-3 focus-visible:outline-yellow-400 
+                `}> {tab == "all" ? "All Courses" : tab}</button>
+                        );
+                    })}
+                </div>
+            </div>
+
+        </div>
+    )
 }
