@@ -95,8 +95,14 @@ export default function TutorStudioLayout({
 
                     </div>
                 </aside>
-
-
+                {/*content wrapper*/}
+                <div className="flex-1 flex flex-col min-2-8">
+                    <main id="main-content"
+                        className="flex-1 p-8 overflow-y-auto"
+                        tabIndex={-1}>
+                        {children}
+                    </main>
+                </div>
             </div>
         </RequireAuth>
     )
