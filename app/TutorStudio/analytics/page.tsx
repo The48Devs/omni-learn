@@ -153,7 +153,7 @@ export default function TutorAnalyticsPage() {
                         <button className="text-[var(--text-muted)] hover:text-[var(--text-main)]">•••</button>
                     </div>
 
-                    {/* Beautiful SVG Line Graph mockup */}
+                    {/* svg line mockup */}
                     <div className="w-full h-56 flex items-end">
                         <svg className="w-full h-full" viewBox="0 0 700 200" preserveAspectRatio="none">
                             {/* Gridlines */}
@@ -162,7 +162,7 @@ export default function TutorAnalyticsPage() {
                             <line x1="50" y1="100" x2="680" y2="100" stroke="rgba(0,0,0,0.05)" />
                             <line x1="50" y1="140" x2="680" y2="140" stroke="rgba(0,0,0,0.05)" />
                             <line x1="50" y1="180" x2="680" y2="180" stroke="rgba(0,0,0,0.1)" />
-                            {/* Engagement Path Area / Trend representation */}
+                            {/*Trend representation */}
                             <path
                                 d="M 50 180 Q 150 140 250 80 T 450 120 T 650 40 L 680 40 L 680 180 Z"
                                 fill="url(#sandboxGradient)"
@@ -196,9 +196,42 @@ export default function TutorAnalyticsPage() {
                     </div>
                 </div>
 
-
+                {/*Daily Course Engagement */}
+                <div className="bg-[var(--bg-primary)] rounded-2xl border border-[var(--border-color)] p-6 shadow-xs relative">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-bold text-[var(--text-main)]">Daily Course Engagement</h3>
+                        <button className="text-[var(--text-muted)] hover:text-[var(--text-main)]">•••</button>
+                    </div>
+                    {/* SVG Bar Chart */}
+                    <div className="w-full h-56 flex items-end">
+                        <svg className="w-full h-full" viewBox="0 0 700 200" preserveAspectRatio="none">
+                            <line x1="50" y1="20" x2="680" y2="20" stroke="rgba(0,0,0,0.05)" />
+                            <line x1="50" y1="60" x2="680" y2="60" stroke="rgba(0,0,0,0.05)" />
+                            <line x1="50" y1="100" x2="680" y2="100" stroke="rgba(0,0,0,0.05)" />
+                            <line x1="50" y1="140" x2="680" y2="140" stroke="rgba(0,0,0,0.05)" />
+                            <line x1="50" y1="180" x2="680" y2="180" stroke="rgba(0,0,0,0.1)" />
+                            <rect x="75" y="60" width="28" height="120" rx="6" fill="#128a9b" />
+                            <rect x="175" y="90" width="28" height="90" rx="6" fill="#128a9b" />
+                            <rect x="275" y="40" width="28" height="140" rx="6" fill="#128a9b" />
+                            <rect x="375" y="110" width="28" height="70" rx="6" fill="#128a9b" />
+                            <rect x="475" y="70" width="28" height="110" rx="6" fill="#128a9b" />
+                            <rect x="575" y="140" width="28" height="40" rx="6" fill="#128a9b" />
+                            <rect x="640" y="50" width="28" height="130" rx="6" fill="#128a9b" />
+                        </svg>
+                    </div>
+                    <div className="flex justify-between pl-[40px] pr-[15px] pt-4 text-xs font-semibold text-[var(--text-muted)]">
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                        <span>Sun</span>
+                    </div>
+                </div>
             </div>
         </div>
+
 
     )
 
