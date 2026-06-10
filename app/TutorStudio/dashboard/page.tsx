@@ -148,9 +148,50 @@ export default function TutorDashboard() {
                 </div>
             </section>
 
+            {/*Analytics cards*/}
+            <section aria-labelledby="analytics-heading"
+                className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <h3 id="analytics-headings" className="text-2xl font-bold text-[var(--text-main)]">
+                        Analytics Overview
+                    </h3>
+                    <Link href={"/TutorStudio/analytics"} className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline outline-none focus-visible:outline-3 focus-visible:outline-yellow-400">
+                        View more
+                    </Link>
+                </div>
+                {/*Grid*/}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {anyalyticsData.map((stat, i) => (
+                        <div
+                            key={i}
+                            className={`g-[var(--bg-primary)] border-t-4 ${stat.color} p-6 rounded-xl shadow-sm border border-[var(--border-color)] flex flex-col items-center justify-center text-center space-y-4`}>
+                            <div className="w-14 h-14 rounded-full bg-slate-100/80 flex items-center justify-center shadow-inner">
+                                {stat.icon}
+                            </div>
+                            <span className="text-3xl font-extrabold text-[var(--text-main)]">
+                                {stat.value}
+                            </span>
+
+                            {/* Trend info*/}
+                            <span className={`text-xs font-semibold flex items-center gap-1
+                ${stat.trend === "up"
+                                    ? "text-emerald-600"
+                                    : stat.trend === "down"
+                                        ? "text-rose-500 font-bold"
+                                        : "text-[var(--text-muted)]"
+                                }`}>
+                                {stat.trend === "up" && "↗ "}
+                                {stat.trend === "down" && "⚠ "}
+                                {stat.comparison}
+                            </span>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
 
         </div>
-    )
+    );
 
 
 }
