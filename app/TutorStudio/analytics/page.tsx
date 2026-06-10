@@ -57,4 +57,13 @@ export default function TutorAnalyticsPage() {
         },
     ];
 
+    //filtering logic
+    const filteredStudents = initialStudents.filter((student) => {
+        const matchesStatus = filterStatus === "All" || student.status === filterStatus;
+        const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            student.email.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesStatus && matchesSearch;
+    });
+
+
 }
