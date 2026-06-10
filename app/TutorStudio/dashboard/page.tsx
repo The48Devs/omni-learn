@@ -99,9 +99,13 @@ export default function TutorDashboard() {
                         Welcome Back, {userName}
                     </h2>
                 </div>
-
+                {/*dec bg detail*/}
+                <div className="absolute right-0 top-0 w-1/3 h-full bg-white/5 skew-x-12 transform origin-top-right transition-all duration-300 decorative-glow" />
             </div>
+            {/*Published courses*/}
+
         </div>
+        </div >
     )
 
 
