@@ -87,7 +87,23 @@ export default function MyCoursesPage() {
                     })}
                 </div>
             </div>
+            {/*Create course */}
+            <div className="w-full rounded-2xl bbg-gradient-to-r from blue-900/95 via-blue-800/90 to-cyan-700/85 p-8 md:p-10 text-white shadow-lg relative overflow-hidden transition-all duration-200 data-[theme=high-contrast]:bg-none data-[theme=high-contrast]:bg-black data-[theme=high-contrast]:border-2 data-[theme=high-contrast]:border-white" >
+                <div className="relative z-10 max-w-lg space-y-4">
+                    <h3 className="text-2xl font-extrabold tracking-tight">
+                        Publish a New Course</h3>
+                    <p className="text-sm text-slate-200/90 leading-relaxed">
+                        Create a new learning materials and help the community grow!</p>
+                    <Link
+                        href="/TutorStudio/mycourses/newcourse"
+                        className="inline-block bg-[#ff5a36] hover:bg-[#e04e2d] text-white font-bold text-sm px-6 py-3 rounded-xl shadow-md transition-all duration-150 outline-none focus-visible:ring-4 focus-visible:ring-yellow-400">
+                        Create Course</Link></div>
+                <div className="absolute right-0 top-0 w-1/3 h-full bg-white/5 skew-x-12 transform origin-top-right decorative-glow">
+                </div>
 
-        </div>
+
+            </div>
+
+        </div >
     )
 }
