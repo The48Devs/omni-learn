@@ -264,6 +264,49 @@ export default function TutorSettingsContent() {
                         </fieldset>
                     </div>
                 )}
+
+                {/* clasroom defaults */}
+                {activeTab === "classroom" && (
+                    <div
+                        id="tabpanel-classroom"
+                        role="tabpanel"
+                        aria-labelledby="tab-btn-classroom"
+                        className="space-y-[1.5rem] animate-fadeIn"
+                    >
+                        <fieldset className="border border-gray-200 p-[1.5rem] rounded-lg">
+                            <legend className="text-[1.1rem] font-bold text-[#041A3E] px-[0.5rem]">Automated Workflows</legend>
+                            <div className="flex items-start justify-between mt-[1rem] gap-[1.5rem]">
+                                <div className="space-y-[0.25rem]">
+                                    <label htmlFor="linter-toggle" className="text-[1rem] font-semibold text-gray-900 cursor-pointer">
+                                        Enable Automated Courseware Compliance Linter
+                                    </label>
+                                    <p className="text-[0.9rem] text-gray-500">
+                                        Automatically scans newly uploaded course text, videos, and images for missing descriptions,
+                                        captions, or alt text attributes.
+                                    </p>
+                                </div>
+                                {/* Accessible Toggle*/}
+                                <button
+                                    id="linter-toggle"
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={enableLinter}
+                                    onClick={() => {
+                                        setEnableLinter(!enableLinter);
+                                        announce(`Automated compliance linter ${!enableLinter ? "enabled" : "disabled"}.`);
+                                    }}
+                                    className={`relative inline-flex h-[1.5rem] w-[2.75rem] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none
+                    ${enableLinter ? "bg-[#FF6B35]" : "bg-gray-300"}`}
+                                >
+                                    <span
+                                        className={`pointer-events-none inline-block h-[1.25rem] w-[1.25rem] transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out
+                      ${enableLinter ? "translate-x-[1.25rem]" : "translate-x-0"}`}
+                                    />
+                                </button>
+                            </div>
+                        </fieldset>
+                    </div>
+                )}
             </form>
         </div>
     );
