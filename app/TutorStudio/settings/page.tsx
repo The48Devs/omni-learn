@@ -307,6 +307,89 @@ export default function TutorSettingsContent() {
                         </fieldset>
                     </div>
                 )}
+
+                {/* notif center*/}
+                {activeTab === "notifications" && (
+                    <div
+                        id="tabpanel-notifications"
+                        role="tabpanel"
+                        aria-labelledby="tab-btn-notifications"
+                        className="space-y-[2rem] animate-fadeIn"
+                    >
+                        {/* app alerts */}
+                        <fieldset className="border border-gray-200 p-[1.5rem] rounded-lg space-y-[1rem]">
+                            <legend className="text-[1.1rem] font-bold text-[#041A3E] px-[0.5rem]">In-App Alerts</legend>
+                            <div className="space-y-[0.75rem]">
+                                <label className="flex items-center gap-[0.75rem] text-[1rem] text-gray-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={notification.studentFlag}
+                                        onChange={(e) => setNotifications({ ...notification, studentFlag: e.target.checked })}
+                                        className="w-[1.25rem] h-[1.25rem] text-[#FF6B35] rounded border-gray-300 bg-[#F3F4F6] focus:ring-[#FF6B35] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2"
+                                    />
+                                    <span>Notify when a student flags a critical blocking issue inside a lesson.</span>
+                                </label>
+                                <label className="flex items-center gap-[0.75rem] text-[1rem] text-gray-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={notification.scoringComplete}
+                                        onChange={(e) => setNotifications({ ...notification, scoringComplete: e.target.checked })}
+                                        className="w-[1.25rem] h-[1.25rem] text-[#FF6B35] rounded border-gray-300 bg-[#F3F4F6] focus:ring-[#FF6B35] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2"
+                                    />
+                                    <span>Notify when an assignment scoring task completes its run cycle.</span>
+                                </label>
+                                <label className="flex items-center gap-[0.75rem] text-[1rem] text-gray-700 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={notification.discussionReply}
+                                        onChange={(e) => setNotifications({ ...notification, discussionReply: e.target.checked })}
+                                        className="w-[1.25rem] h-[1.25rem] text-[#FF6B35] rounded border-gray-300 bg-[#F3F4F6] focus:ring-[#FF6B35] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2"
+                                    />
+                                    <span>Notify when a discussion thread gets a new community reply.</span>
+                                </label>
+                            </div>
+                        </fieldset>
+                        {/* Email Frequency */}
+                        <fieldset className="border border-gray-200 p-[1.5rem] rounded-lg space-y-[1rem]">
+                            <legend className="text-[1.1rem] font-bold text-[#041A3E] px-[0.5rem]">Email Notification Frequency</legend>
+                            <div className="space-y-[0.75rem]">
+                                <label className="flex items-center gap-[0.75rem] text-[1rem] text-gray-700 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="email-frequency"
+                                        value="realtime"
+                                        checked={emailFrequency === "realtime"}
+                                        onChange={() => setEmailFrequency("realtime")}
+                                        className="w-[1.25rem] h-[1.25rem] text-[#FF6B35] border-gray-300 bg-[#F3F4F6] focus:ring-[#FF6B35] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2"
+                                    />
+                                    <span>Real-time system alerts</span>
+                                </label>
+                                <label className="flex items-center gap-[0.75rem] text-[1rem] text-gray-700 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="email-frequency"
+                                        value="digest"
+                                        checked={emailFrequency === "digest"}
+                                        onChange={() => setEmailFrequency("digest")}
+                                        className="w-[1.25rem] h-[1.25rem] text-[#FF6B35] border-gray-300 bg-[#F3F4F6] focus:ring-[#FF6B35] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2"
+                                    />
+                                    <span>Daily Digest summary emails</span>
+                                </label>
+                                <label className="flex items-center gap-[0.75rem] text-[1rem] text-gray-700 cursor-pointer">
+                                    <input
+                                        type="radio"
+                                        name="email-frequency"
+                                        value="weekly"
+                                        checked={emailFrequency === "weekly"}
+                                        onChange={() => setEmailFrequency("weekly")}
+                                        className="w-[1.25rem] h-[1.25rem] text-[#FF6B35] border-gray-300 bg-[#F3F4F6] focus:ring-[#FF6B35] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2"
+                                    />
+                                    <span>Weekly technical & analytics reports</span>
+                                </label>
+                            </div>
+                        </fieldset>
+                    </div>
+                )}
             </form>
         </div>
     );
