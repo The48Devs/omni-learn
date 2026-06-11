@@ -1,53 +1,56 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { useAuth } from "@/app/components/AuthCOntext";
+import React from "react";
+import { useAccessibility } from "@/app/components/AccessibilityContext";
 
-export default function TutorDashboard() {
-    const { user } = useAuth();
-    const [userName, setUserName] = useState("Daniel");
+interface Course {
+    id: string;
+    title: string;
+    category: string;
+    gradientClass: string;
+    accessibilityCompliant: boolean;
+}
 
-    //name retrieval
-    useEffect(() => {
-        const storedName = localStorage.getItem("auth-user-name");
-        if (storedName) {
-            setUserName(storedName);
-        } else if (user) {
-            const emailPrefix = user.split("@")[0];
-            // username formatting (fixed)
-            if (emailPrefix.toLowerCase().startsWith("manuja")) {
-                setUserName("Manuja");
-            } else {
-                setUserName(emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1));
-            }
-        }
-    }, [user]);
+export default function TutorDashboardContent() {
+    const { announce } = useAccessibility();
 
-    // courses to be displayed (info)
-    const courses = [
+    // use session data 
+    const userSession = {
+        fullName: "Manuja Samarathunga",
+        handle: "T-20043",
+        institution: "Nalanda College",
+        avatarInitials: "MS",
+    };
+
+    // Published Courses Data
+    const courses: Course[] = [
         {
-            id: "physics-1",
+            id: "course-1",
             title: "Advanced Quantum Mechanics",
-            tag: "Physics",
-            bgClass: "from-[#1d3d6e] to-[#407bb0]",
-            buttonColor: "bg-[#a83307] hover:bg-[#be3d0c]",
+            category: "Physics",
+            gradientClass: "from-teal-600 to-emerald-700",
+            accessibilityCompliant: true,
         },
         {
-            id: "biology-1",
-            title: "Cellular Biology: Structure & Function",
-            tag: "Biology",
-            bgClass: "from-[#4ca5bf] to-[#128a9b]",
-            buttonColor: "bg-[#a83307] hover:bg-[#be3d0c]",
+            id: "course-2",
+            title: "Cellular Biology & Genetics",
+            category: "Biology",
+            gradientClass: "from-blue-600 to-indigo-800",
+            accessibilityCompliant: true,
         },
         {
-            id: "history-1",
-            title: "European History: The Renaissance",
-            tag: "History",
-            bgClass: "from-[#084f64] to-[#107b8a]",
-            buttonColor: "bg-[#a83307] hover:bg-[#be3d0c]",
+            id: "course-3",
+            title: "Industrial Revolution & Modernity",
+            category: "History",
+            gradientClass: "from-slate-700 to-gray-900",
+            accessibilityCompliant: true,
         },
     ];
+
+    const handleCourseClick = (title: string) => {
+        announce(`Navigating to ${title} details.`);
+        alert(`Viewing Details for: ${title}`);
+    };
 
     const analyticsData = [
         {
@@ -100,88 +103,127 @@ export default function TutorDashboard() {
         },
     ];
 
+
     return (
-        <div className="space-y-10">
-            {/* Welcome banner */}
-            <div
-                className="w-full rounded-2xl bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-700 p-10 md:p-14 text-white shadow-xl relative overflow-hidden transition-colors duration-200
-                           data-[theme=high-contrast]:bg-none data-[theme=high-contrast]:bg-black data-[theme=high-contrast]:border-2 data-[theme=high-contrast]:border-white"
-                data-testid="welcome-banner"
+        <div className="w-full max-w-[80rem] mx-auto bg-[#F9FAFB] min-h-screen text-gray-900 p-[1.5rem] md:p-[3rem] space-y-[2.5rem]">
+
+            {/* Hero banner */}
+            <section
+                aria-label="Tutor profile banner"
+                className="relative bg-gradient-to-r from-[#041A3E] via-[#092c66] to-[#041A3E] text-white rounded-2xl p-[1.5rem] md:p-[2.5rem] shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-[1.5rem]"
             >
-                <div className="relative z-10">
-                    <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                        Welcome Back, {userName.toUpperCase()}
-                    </h2>
-                </div>
-                <div className="absolute right-0 top-0 w-1/3 h-full bg-white/5 skew-x-12 transform origin-top-right transition-all duration-300 decorative-glow" />
-            </div>
-
-            {/* Published Courses */}
-            <section aria-labelledby="published-courses-heading" className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h3 id="published-courses-heading" className="text-2xl font-bold text-[var(--text-main)]">
-                        Published Courses
-                    </h3>
-                    <Link
-                        href="/TutorStudio/mycourses"
-                        className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline outline-none focus-visible:outline-3 focus-visible:outline-yellow-400"
+                {/* ID block */}
+                <div className="flex items-center gap-[1.25rem]">
+                    {/* placeholder */}
+                    <div
+                        className="w-[4.5rem] h-[4.5rem] rounded-full bg-[#FF6B35] flex items-center justify-center text-[1.5rem] font-bold text-white shadow-inner select-none"
+                        aria-hidden="true"
                     >
-                        View All Courses
-                    </Link>
+                        {userSession.avatarInitials}
+                    </div>
+                    <div className="space-y-[0.25rem]">
+                        <h1 className="text-[1.8rem] md:text-[2.2rem] font-bold tracking-tight leading-tight">
+                            {userSession.fullName}
+                        </h1>
+                        <p className="text-[0.95rem] md:text-[1.05rem] text-gray-300">
+                            @{userSession.handle} &bull; Instructor at {userSession.institution}
+                        </p>
+                    </div>
                 </div>
 
-                {/* Course Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {courses.map((course) => (
-                        <div
-                            key={course.id}
-                            className="bg-[var(--bg-primary)] rounded-2xl shadow-md border border-[var(--border-color)] overflow-hidden flex flex-col justify-between h-72 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
-                        >
-
-                            <div className={`p-6 bg-gradient-to-br ${course.bgClass} text-white flex-1 flex flex-col justify-between`}>
-                                <div className="flex">
-                                    <span className="text-xs font-semibold px-4 py-1.5 rounded-full bg-white/15 border border-white/10 backdrop-blur-md text-slate-100">
-                                        {course.tag}
-                                    </span>
-                                </div>
-                                <h4 className="text-xl font-bold leading-snug">
-                                    {course.title}
-                                </h4>
-                            </div>
-
-                            {/* View Analytics bar */}
-                            <div className="p-5 flex items-center justify-between bg-[var(--bg-primary)] border-t border-[var(--border-color)]">
-                                <span className="text-xs text-[var(--text-muted)] font-medium">
-                                    View analytics
-                                </span>
-                                <Link
-                                    href={`/TutorStudio/analytics?courseId=${course.id}`}
-                                    className={`w-9 h-9 rounded-full ${course.buttonColor} flex items-center justify-center text-white transition-colors duration-150 outline-none focus-visible:ring-4 focus-visible:ring-yellow-400`}
-                                    aria-label={`View detailed analytics for ${course.title}`}
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                    </svg>
-                                </Link>
-                            </div>
-                        </div>
-                    ))}
+                {/*quick stats */}
+                <div className="grid grid-cols-3 gap-[1rem] md:gap-[2rem] w-full md:w-auto border-t md:border-t-0 border-blue-900 pt-[1.5rem] md:pt-0">
+                    <div className="text-center md:text-right space-y-[0.15rem]">
+                        <span className="block text-[0.8rem] md:text-[0.9rem] uppercase tracking-wider text-blue-300">Total Learners</span>
+                        <span className="block text-[1.4rem] md:text-[1.8rem] font-bold text-white">1,240</span>
+                    </div>
+                    <div className="text-center md:text-right space-y-[0.15rem]">
+                        <span className="block text-[0.8rem] md:text-[0.9rem] uppercase tracking-wider text-blue-300">Active Modules</span>
+                        <span className="block text-[1.4rem] md:text-[1.8rem] font-bold text-white">8</span>
+                    </div>
+                    <div className="text-center md:text-right space-y-[0.15rem]">
+                        <span className="block text-[0.8rem] md:text-[0.9rem] uppercase tracking-wider text-blue-300">Accessibility</span>
+                        <span className="block text-[1.4rem] md:text-[1.8rem] font-bold text-[#FF6B35]">98%</span>
+                    </div>
                 </div>
             </section>
 
-            {/* Analytics Summary */}
-            <section aria-labelledby="analytics-heading" className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <h3 id="analytics-heading" className="text-2xl font-bold text-[var(--text-main)]">
-                        Analytics Overview
-                    </h3>
-                    <Link
-                        href="/TutorStudio/analytics"
-                        className="text-sm font-semibold text-blue-600 hover:text-blue-700 hover:underline outline-none focus-visible:outline-3 focus-visible:outline-yellow-400"
+            {/* published courses*/}
+            <section className="space-y-[1.5rem]">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-[1.5rem] font-bold text-[#041A3E]">Published Courses</h2>
+                    <a
+                        href="#all-courses"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            announce("Redirecting to all courses.");
+                        }}
+                        className="text-[0.95rem] font-semibold text-[#FF6B35] hover:underline focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 rounded"
                     >
-                        View more
-                    </Link>
+                        View All Courses
+                    </a>
                 </div>
+
+                {/* grid wrapper */}
+                <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1.5rem]" role="list">
+                    {courses.map((course) => (
+                        <li key={course.id}>
+                            <article className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-100 flex flex-col h-full">
+                                {/* bg gradient */}
+                                <div className={`p-[1.5rem] bg-gradient-to-br ${course.gradientClass} min-h-[9rem] flex flex-col justify-between`}>
+                                    {/* Category */}
+                                    <span className="inline-block self-start text-[0.75rem] font-bold tracking-wider text-white uppercase bg-white/20 px-[0.75rem] py-[0.25rem] rounded-full backdrop-blur-sm">
+                                        {course.category}
+                                    </span>
+
+                                    {/* Title */}
+                                    <h3 className="text-[1.2rem] font-bold text-white tracking-wide mt-[1rem]">
+                                        {course.title}
+                                    </h3>
+                                </div>
+
+                                {/* Footer */}
+                                <div className="p-[1.25rem] bg-white flex justify-between items-center mt-auto border-t border-gray-50">
+                                    <div className="space-y-[0.25rem]">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCourseClick(course.title)}
+                                            className="text-[0.85rem] font-semibold text-[#041A3E] hover:underline block text-left focus-visible:outline-[2px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-1 rounded"
+                                        >
+                                            View analytics
+                                        </button>
+                                        {course.accessibilityCompliant && (
+                                            <span className="inline-block text-[0.75rem] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-[0.5rem] py-[0.1rem] rounded">
+                                                WCAG Compliant
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    {/* arrow button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleCourseClick(course.title)}
+                                        aria-label={`Open ${course.title} settings`}
+                                        className="w-[2.5rem] h-[2.5rem] rounded-full bg-[#FF6B35] text-white flex items-center justify-center shadow hover:bg-[#e05825] transition-colors duration-200 focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
+                                    >
+                                        <svg
+                                            aria-hidden="true"
+                                            className="w-[1.25rem] h-[1.25rem] fill-none stroke-current stroke-2"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </article>
+                        </li>
+                    ))}
+                </ul>
+            </section>
+
+            {/* Analytics overview */}
+            <section className="space-y-[1rem]">
+                <h2 className="text-[1.5rem] font-bold text-[#041A3E]">Analytics Overview</h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {analyticsData.map((stat, i) => (
@@ -214,6 +256,7 @@ export default function TutorDashboard() {
                     ))}
                 </div>
             </section>
+
         </div>
     );
 }
