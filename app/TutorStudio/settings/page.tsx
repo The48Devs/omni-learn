@@ -46,10 +46,10 @@ export default function TutorSettingsContent() {
 
     //tab configurations
     const tabs = [
-        { id: "profile", label: "Profile Settings" },
-        { id: "classroom", label: "Classroom Defaults" },
-        { id: "notifications", label: "Notifications Center" },
-        { id: "financials", label: "Financials(MVP)" },
+        { id: "profile", label: "Profile Settings", disabled: false },
+        { id: "classroom", label: "Classroom Defaults", disabled: false },
+        { id: "notifications", label: "Notification Center", disabled: false },
+        { id: "financials", label: "Financials (MVP)", disabled: true },
     ] as const;
 
     const handleTabChange = (tabID: typeof activeTab) => {
@@ -88,7 +88,36 @@ export default function TutorSettingsContent() {
                     Configure your personal profile settings, automated tools, notifications and payouts
                 </p>
             </header>
-        </div>
+            {/*Tabs*/}
+            <nav aria-label="Settings sub-tabs">
+                <ul className="flex flex-wrap border-b border-gray-200 gap-[1rem]" role="tablist">
+                    {tabs.map((tab) => {
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <li key={tab.id} role="presentation">
+                                <button
+                                    id={`tab-btn-${tab.id}`}
+                                    role="tab"
+                                    aria-selected={isActive}
+                                    aria-controls={`tabpanel-${tab.id}`}
+                                    onClick={() => handleTabChange(tab.id)}
+                                    className={`py-[0.75rem] px-[1.25rem] text-[1rem] font-medium border-b-2 transition-all duration-200 relative
+                    focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none
+                    ${isActive
+                                            ? "border-[#041A3E] text-[#041A3E] font-semibold"
+                                            : "border-transparent text-gray-500 hover:text-gray-700"
+                                        }
+                    ${tab.disabled ? "text-gray-400 cursor-not-allowed" : ""}
+                  `}
+                                >
+                                    {tab.label}
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </nav>
+        </div >
     )
 
 }
