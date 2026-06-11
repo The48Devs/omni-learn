@@ -390,6 +390,47 @@ export default function TutorSettingsContent() {
                         </fieldset>
                     </div>
                 )}
+
+                {/* financials tab */}
+                {activeTab === "financials" && (
+                    <div
+                        id="tabpanel-financials"
+                        role="tabpanel"
+                        aria-labelledby="tab-btn-financials"
+                        className="space-y-[1.5rem] animate-fadeIn opacity-50 pointer-events-none"
+                        aria-disabled="true"
+                    >
+                        <div className="border border-gray-200 rounded-lg p-[2rem] bg-gray-50 flex flex-col items-center justify-center text-center gap-[1.5rem]">
+                            <div className="max-w-[30rem] space-y-[0.5rem]">
+                                <h3 className="text-[1.25rem] font-bold text-[#041A3E]">Stripe Account Integration</h3>
+                                <p className="text-[0.95rem] text-gray-500">
+                                    Securely connect a Stripe account to receive automated student tuition payouts and subscriptions.
+                                    Financial features will be enabled fully in a future release.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                disabled
+                                className="bg-gray-400 text-white font-medium text-[1rem] py-[0.75rem] px-[1.5rem] rounded-lg transition-colors cursor-not-allowed"
+                            >
+                                Connect Stripe Account (Post-MVP Release)
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* action bar */}
+                {activeTab !== "financials" && (
+                    <div className="flex justify-end pt-[1.5rem] border-t border-gray-200">
+                        <button
+                            type="submit"
+                            className="bg-[#FF6B35] hover:bg-[#e05825] text-white font-semibold text-[1rem] py-[0.75rem] px-[2rem] rounded-lg transition-all duration-200 focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
+                        >
+                            Save Changes
+                        </button>
+                    </div>
+                )}
+
             </form>
         </div>
     );
