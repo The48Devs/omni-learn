@@ -152,7 +152,7 @@ export default function Home() {
               Student Portal
             </Link>
             <Link
-              href="/TutorStudio"
+              href="/TutorStudio/dashboard"
               className="px-8 py-3.5 rounded-full text-base font-bold bg-[#f05a28] text-white hover:bg-[#d8481b] shadow-md hover:shadow-lg focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-all duration-200 active:scale-95 text-center min-w-[9.375rem]"
               aria-label="Enter Tutor Studio to create and manage courses"
             >
