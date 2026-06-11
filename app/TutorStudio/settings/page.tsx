@@ -79,4 +79,16 @@ export default function TutorSettingsContent() {
         announce(`Removed expertise tag:${tag}`);
     };
 
+    return (
+        <div className="w-full max-w-[80rem] mx-auto bg-white min-h-screen text-gray-900 p-[1.5rem] md:p-[3rem] space-y-[2rem]">
+            {/*Header*/}
+            <header className="border-b border-gray-200 pb-[1rem0">
+                <h1 className="text-[2rem] font-bold text-[#041A3E]"> Tutor Settings</h1>
+                <p className="text-[1rem] text-gray-500 mt-[0.25rem">
+                    Configure your personal profile settings, automated tools, notifications and payouts
+                </p>
+            </header>
+        </div>
+    )
+
 }
