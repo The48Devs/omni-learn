@@ -117,7 +117,154 @@ export default function TutorSettingsContent() {
                     })}
                 </ul>
             </nav>
-        </div >
-    )
 
+            {/* content wrapper */}
+            <form onSubmit={handleSave} className="space-y-[2.5rem]">
+                {/* profile settings */}
+                {activeTab === "profile" && (
+                    <div
+                        id="tabpanel-profile"
+                        role="tabpanel"
+                        aria-labelledby="tab-btn-profile"
+                        className="space-y-[2rem] animate-fadeIn"
+                    >
+                        <fieldset className="space-y-[1.5rem]">
+                            <legend className="sr-only">Profile Settings Details</legend>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[1.5rem]">
+                                {/* Display Name */}
+                                <div className="flex flex-col gap-[0.5rem]">
+                                    <label htmlFor="display-name" className="text-[0.95rem] font-semibold text-[#041A3E]">
+                                        Display Name
+                                    </label>
+                                    <input
+                                        id="display-name"
+                                        type="text"
+                                        value={profile.displayName}
+                                        onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
+                                        className="w-full bg-[#F3F4F6] text-gray-900 rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none border-transparent"
+                                        required
+                                    />
+                                </div>
+                                {/* email */}
+                                <div className="flex flex-col gap-[0.5rem]">
+                                    <label htmlFor="account-email" className="text-[0.95rem] font-semibold text-[#041A3E]">
+                                        Account Email (Read-Only)
+                                    </label>
+                                    <input
+                                        id="account-email"
+                                        type="email"
+                                        value={profile.email}
+                                        disabled
+                                        className="w-full bg-gray-200 text-gray-500 rounded-lg p-[0.75rem] text-[1rem] cursor-not-allowed border-transparent focus:outline-none"
+                                    />
+                                </div>
+                                {/* handle*/}
+                                <div className="flex flex-col gap-[0.5rem]">
+                                    <label htmlFor="tutor-handle" className="text-[0.95rem] font-semibold text-[#041A3E]">
+                                        Tutor Handle
+                                    </label>
+                                    <div className="relative flex items-center">
+                                        <span className="absolute left-[0.75rem] text-gray-500 text-[1rem] select-none">@</span>
+                                        <input
+                                            id="tutor-handle"
+                                            type="text"
+                                            value={profile.tutorHandle}
+                                            disabled
+                                            className="w-full bg-gray-200 text-gray-500 rounded-lg p-[0.75rem] pl-[1.75rem] text-[1rem] cursor-not-allowed border-transparent focus:outline-none"
+                                        />
+                                    </div>
+                                </div>
+                                {/*Phone */}
+                                <div className="flex flex-col gap-[0.5rem]">
+                                    <label htmlFor="contact-phone" className="text-[0.95rem] font-semibold text-[#041A3E]">
+                                        Contact Phone
+                                    </label>
+                                    <input
+                                        id="contact-phone"
+                                        type="tel"
+                                        value={profile.phone}
+                                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                        className="w-full bg-[#F3F4F6] text-gray-900 rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none border-transparent"
+                                    />
+                                </div>
+                                {/* Institution */}
+                                <div className="flex flex-col gap-[0.5rem]">
+                                    <label htmlFor="institution" className="text-[0.95rem] font-semibold text-[#041A3E]">
+                                        Affiliated Institution
+                                    </label>
+                                    <input
+                                        id="institution"
+                                        type="text"
+                                        value={profile.institution}
+                                        onChange={(e) => setProfile({ ...profile, institution: e.target.value })}
+                                        className="w-full bg-[#F3F4F6] text-gray-900 rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none border-transparent"
+                                    />
+                                </div>
+                                {/*Title */}
+                                <div className="flex flex-col gap-[0.5rem]">
+                                    <label htmlFor="professional-title" className="text-[0.95rem] font-semibold text-[#041A3E]">
+                                        Professional Title
+                                    </label>
+                                    <input
+                                        id="professional-title"
+                                        type="text"
+                                        value={profile.title}
+                                        placeholder="e.g., Senior Electronics Lecturer"
+                                        onChange={(e) => setProfile({ ...profile, title: e.target.value })}
+                                        className="w-full bg-[#F3F4F6] text-gray-900 rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none border-transparent"
+                                    />
+                                </div>
+                            </div>
+                            {/* Expertise Tags */}
+                            <div className="flex flex-col gap-[0.5rem]">
+                                <label htmlFor="add-tag" className="text-[0.95rem] font-semibold text-[#041A3E]">
+                                    Expertise Tags (Press Enter to add tags)
+                                </label>
+                                <div className="flex flex-wrap gap-[0.5rem] bg-[#F3F4F6] p-[0.75rem] rounded-lg items-center">
+                                    {tags.map((tag) => (
+                                        <span
+                                            key={tag}
+                                            className="inline-flex items-center gap-[0.35rem] bg-[#041A3E] text-white text-[0.85rem] px-[0.75rem] py-[0.25rem] rounded-full"
+                                        >
+                                            {tag}
+                                            <button
+                                                type="button"
+                                                onClick={() => removeTag(tag)}
+                                                aria-label={`Remove expertise tag ${tag}`}
+                                                className="hover:text-red-400 focus-visible:outline-[2px] focus-visible:outline-white rounded-full p-[0.1rem]"
+                                            >
+                                                &times;
+                                            </button>
+                                        </span>
+                                    ))}
+                                    <input
+                                        id="add-tag"
+                                        type="text"
+                                        value={newTagInput}
+                                        onChange={(e) => setNewTagInput(e.target.value)}
+                                        onKeyDown={addTag}
+                                        placeholder="Add area of expertise..."
+                                        className="flex-grow bg-transparent text-[1rem] text-gray-900 border-none outline-none focus:ring-0 p-[0.25rem]"
+                                    />
+                                </div>
+                            </div>
+                            {/* Instructor Bio */}
+                            <div className="flex flex-col gap-[0.5rem]">
+                                <label htmlFor="instructor-bio" className="text-[0.95rem] font-semibold text-[#041A3E]">
+                                    Short Instructor Bio
+                                </label>
+                                <textarea
+                                    id="instructor-bio"
+                                    rows={5}
+                                    value={profile.bio}
+                                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                                    className="w-full bg-[#F3F4F6] text-gray-900 rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring,#2563eb)] focus-visible:outline-offset-2 focus:outline-none border-transparent resize-y"
+                                />
+                            </div>
+                        </fieldset>
+                    </div>
+                )}
+            </form>
+        </div>
+    );
 }
