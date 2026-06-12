@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
 
@@ -27,8 +27,9 @@ interface ContentBlock {
     // Sandbox Block Specific
     sandboxComponents?: string[];
     savedSimulationSetup?: {
-        connections: { from: string; to: string }[];
+        connections: { from: string; fromTerminal: string; to: string; toTerminal: string }[];
         targetStates: { [key: string]: string };
+        positions?: { [key: string]: { x: number; y: number } };
     };
     // Quiz Block Specific
     quizQuestions?: QuizQuestions[];
@@ -60,7 +61,10 @@ export default function CourseCreatorStudio() {
     const [uploadingProgress, setUploadingProgress] = useState<number | null>(null);
 
     // mini circuit canvas 
-    const [selectedSourceNode, setSelectedSourceNode] = useState<string | null>(null);
+    const [selectedSourceNode, setSelectedSourceNode] = useState<{ component: string; terminal: string } | null>(null);
+    const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const [draggingComponent, setDraggingComponent] = useState<string | null>(null);
+    const canvasRef = useRef<HTMLDivElement>(null);
 
     // Modules & Content block states
     const [modules, setModules] = useState<Module[]>([
@@ -86,9 +90,14 @@ export default function CourseCreatorStudio() {
                     sandboxComponents: ["Battery", "LED", "Switch"],
                     savedSimulationSetup: {
                         connections: [
-                            { from: "Battery", to: "Switch" }
+                            { from: "Battery", fromTerminal: "positive", to: "Switch", toTerminal: "terminal-1" }
                         ],
-                        targetStates: { "Switch": "Closed", "LED": "Lit" }
+                        targetStates: { "Switch": "Closed", "LED": "Lit" },
+                        positions: {
+                            "Battery": { x: 30, y: 50 },
+                            "LED": { x: 260, y: 150 },
+                            "Switch": { x: 150, y: 50 }
+                        }
                     }
                 },
                 {
@@ -129,6 +138,29 @@ export default function CourseCreatorStudio() {
 
     // Available options for the Sandbox Component dropdown
     const availableSandboxComponents = ["Battery", "LED", "Switch", "Resistor", "Wire", "Ammeter"];
+
+    // mpouse postiion tracking
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!canvasRef.current || !selectedSourceNode) return;
+            const rect = canvasRef.current.getBoundingClientRect();
+            setMousePos({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            });
+        };
+        window.addEventListener("mousemove", handleMouseMove);
+        return () => window.removeEventListener("mousemove", handleMouseMove);
+    }, [selectedSourceNode]);
+
+    // Track canvas dragging
+    useEffect(() => {
+        const handleMouseUp = () => {
+            setDraggingComponent(null);
+        };
+        window.addEventListener("mouseup", handleMouseUp);
+        return () => window.removeEventListener("mouseup", handleMouseUp);
+    }, []);
 
     // time allocation calculation
     const calculateModuleDuration = (mod: Module) => {
@@ -180,7 +212,14 @@ export default function CourseCreatorStudio() {
             videoUrl: type === "video" ? "" : undefined,
             videoTranscript: type === "video" ? "" : undefined,
             sandboxComponents: type === "sandbox" ? ["Battery", "LED"] : undefined,
-            savedSimulationSetup: type === "sandbox" ? { connections: [], targetStates: {} } : undefined,
+            savedSimulationSetup: type === "sandbox" ? {
+                connections: [],
+                targetStates: {},
+                positions: {
+                    "Battery": { x: 30, y: 50 },
+                    "LED": { x: 260, y: 150 }
+                }
+            } : undefined,
             quizQuestions: type === "quiz" ? [] : undefined
         };
 
@@ -271,7 +310,22 @@ export default function CourseCreatorStudio() {
                 ...m,
                 blocks: m.blocks.map((b) => {
                     if (b.id === selectedBlockId && b.sandboxComponents) {
-                        return { ...b, sandboxComponents: [...b.sandboxComponents, comp] };
+                        const currentPositions = b.savedSimulationSetup?.positions || {};
+                        const nextX = 50 + (b.sandboxComponents.length * 80) % 200;
+                        const nextY = 50 + (b.sandboxComponents.length * 50) % 150;
+                        return {
+                            ...b,
+                            sandboxComponents: [...b.sandboxComponents, comp],
+                            savedSimulationSetup: {
+                                ...b.savedSimulationSetup,
+                                connections: b.savedSimulationSetup?.connections || [],
+                                targetStates: b.savedSimulationSetup?.targetStates || {},
+                                positions: {
+                                    ...currentPositions,
+                                    [comp]: { x: nextX, y: nextY }
+                                }
+                            }
+                        };
                     }
                     return b;
                 })
@@ -287,7 +341,6 @@ export default function CourseCreatorStudio() {
                 blocks: m.blocks.map((b) => {
                     if (b.id === selectedBlockId && b.sandboxComponents) {
                         const removedCompName = b.sandboxComponents[compIdx];
-                        // Remove connections containing this deleted component
                         const filteredConnections = b.savedSimulationSetup?.connections.filter(
                             (conn) => conn.from !== removedCompName && conn.to !== removedCompName
                         ) || [];
@@ -295,12 +348,16 @@ export default function CourseCreatorStudio() {
                         const filteredStates = { ...(b.savedSimulationSetup?.targetStates || {}) };
                         delete filteredStates[removedCompName];
 
+                        const filteredPositions = { ...(b.savedSimulationSetup?.positions || {}) };
+                        delete filteredPositions[removedCompName];
+
                         return {
                             ...b,
                             sandboxComponents: b.sandboxComponents.filter((_, idx) => idx !== compIdx),
                             savedSimulationSetup: {
                                 connections: filteredConnections,
-                                targetStates: filteredStates
+                                targetStates: filteredStates,
+                                positions: filteredPositions
                             }
                         };
                     }
@@ -311,44 +368,73 @@ export default function CourseCreatorStudio() {
         announce("Component removed from sandbox configuration.");
     };
 
-    const handleVisualConnectionClick = (nodeName: string) => {
-        if (!activeBlock || !activeBlock.sandboxComponents) return;
+    const handleCanvasMouseMove = (e: React.MouseEvent) => {
+        if (!draggingComponent || !canvasRef.current || !activeBlock) return;
+        const rect = canvasRef.current.getBoundingClientRect();
+        const x = Math.max(10, Math.min(rect.width - 120, e.clientX - rect.left - 50));
+        const y = Math.max(10, Math.min(rect.height - 70, e.clientY - rect.top - 20));
+
+        setModules(
+            modules.map((m) => ({
+                ...m,
+                blocks: m.blocks.map((b) => {
+                    if (b.id === selectedBlockId && b.savedSimulationSetup) {
+                        return {
+                            ...b,
+                            savedSimulationSetup: {
+                                ...b.savedSimulationSetup,
+                                positions: {
+                                    ...(b.savedSimulationSetup.positions || {}),
+                                    [draggingComponent]: { x, y }
+                                }
+                            }
+                        };
+                    }
+                    return b;
+                })
+            }))
+        );
+    };
+
+    const handleTerminalClick = (componentName: string, terminalName: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!activeBlock) return;
+
         if (selectedSourceNode === null) {
-            setSelectedSourceNode(nodeName);
-            announce(`Selected ${nodeName} source. Click another node to connect.`);
+            setSelectedSourceNode({ component: componentName, terminal: terminalName });
+            announce(`Selected terminal ${terminalName} on ${componentName}. Tap target terminal to hook wire.`);
         } else {
-            if (selectedSourceNode === nodeName) {
+            if (selectedSourceNode.component === componentName) {
+                // Cannot connect to the same component
                 setSelectedSourceNode(null);
                 return;
             }
 
             const currentConnections = activeBlock.savedSimulationSetup?.connections || [];
-            // Prevent duplicates
-            const exists = currentConnections.some(
-                c => (c.from === selectedSourceNode && c.to === nodeName) || (c.from === nodeName && c.to === selectedSourceNode)
-            );
+            const newConn = {
+                from: selectedSourceNode.component,
+                fromTerminal: selectedSourceNode.terminal,
+                to: componentName,
+                toTerminal: terminalName
+            };
 
-            let updatedConnections = [...currentConnections];
-            if (!exists) {
-                updatedConnections.push({ from: selectedSourceNode, to: nodeName });
-            }
-
+            const updatedConnections = [...currentConnections, newConn];
             const defaultStates = { ...(activeBlock.savedSimulationSetup?.targetStates || {}) };
-            if (selectedSourceNode === "Switch" || nodeName === "Switch") {
-                defaultStates["Switch"] = "Closed";
-            }
-            if (selectedSourceNode === "LED" || nodeName === "LED") {
-                defaultStates["LED"] = "Lit";
-            }
+            defaultStates["Switch"] = "Closed";
+            defaultStates["LED"] = "Lit";
 
             setModules(
                 modules.map((m) => ({
                     ...m,
                     blocks: m.blocks.map((b) => {
-                        if (b.id === selectedBlockId) {
+                        if (b.id === selectedBlockId && b.savedSimulationSetup) {
                             return {
                                 ...b,
-                                savedSimulationSetup: { connections: updatedConnections, targetStates: defaultStates }
+                                savedSimulationSetup: {
+                                    ...b.savedSimulationSetup,
+                                    connections: updatedConnections,
+                                    targetStates: defaultStates
+                                }
                             };
                         }
                         return b;
@@ -356,7 +442,7 @@ export default function CourseCreatorStudio() {
                 }))
             );
             setSelectedSourceNode(null);
-            announce(`Connected ${selectedSourceNode} to ${nodeName}.`);
+            announce(`Connected wire from ${selectedSourceNode.component} to ${componentName}.`);
         }
     };
 
@@ -365,10 +451,14 @@ export default function CourseCreatorStudio() {
             modules.map((m) => ({
                 ...m,
                 blocks: m.blocks.map((b) => {
-                    if (b.id === selectedBlockId) {
+                    if (b.id === selectedBlockId && b.savedSimulationSetup) {
                         return {
                             ...b,
-                            savedSimulationSetup: { connections: [], targetStates: {} }
+                            savedSimulationSetup: {
+                                ...b.savedSimulationSetup,
+                                connections: [],
+                                targetStates: {}
+                            }
                         };
                     }
                     return b;
@@ -376,6 +466,17 @@ export default function CourseCreatorStudio() {
             }))
         );
         announce("Connections reset.");
+    };
+
+    // fetching coordinates for the svgs
+    const getTerminalCoords = (compName: string, terminal: string) => {
+        const pos = activeBlock?.savedSimulationSetup?.positions?.[compName] || { x: 50, y: 50 };
+        // Base coordinate center of component card
+        let offset = { x: 15, y: 35 }; // left terminal default
+        if (terminal === "positive" || terminal === "terminal-2") {
+            offset = { x: 85, y: 35 }; // right terminal
+        }
+        return { x: pos.x + offset.x, y: pos.y + offset.y };
     };
 
     // quiz question config
@@ -722,8 +823,8 @@ export default function CourseCreatorStudio() {
                                             <div className="flex justify-between items-start">
                                                 <div className="flex items-center gap-[0.75rem]">
                                                     <span className={`w-[2rem] h-[2rem] rounded-lg flex items-center justify-center font-bold ${block.type === "video" ? "bg-red-100 text-red-600" :
-                                                            block.type === "quiz" ? "bg-emerald-100 text-emerald-600" :
-                                                                "bg-blue-100 text-blue-600"
+                                                        block.type === "quiz" ? "bg-emerald-100 text-emerald-600" :
+                                                            "bg-blue-100 text-blue-600"
                                                         }`}>
                                                         {block.type === "video" ? "📹" : block.type === "quiz" ? "❓" : "🧪"}
                                                     </span>
@@ -794,7 +895,7 @@ export default function CourseCreatorStudio() {
                                                         <div className="border-t border-gray-200 pt-[0.5rem] mt-[0.5rem] text-[0.75rem]">
                                                             <p className="text-emerald-700 font-semibold">✓ Correct Simulation Validation Setup Saved</p>
                                                             <p className="text-gray-500 mt-[0.15rem]">
-                                                                Connections: {block.savedSimulationSetup.connections.map(c => `${c.from} ⚡ ${c.to}`).join(", ")}
+                                                                Connections: {block.savedSimulationSetup.connections.map(c => `${c.from}.${c.fromTerminal} ⚡ ${c.to}.${c.toTerminal}`).join(", ")}
                                                             </p>
                                                         </div>
                                                     )}
@@ -820,8 +921,8 @@ export default function CourseCreatorStudio() {
                                                                     <div
                                                                         key={opt.id}
                                                                         className={`text-[0.8rem] p-[0.75rem] rounded-xl border flex flex-col gap-[0.4rem] transition-all ${opt.isCorrect
-                                                                                ? "bg-emerald-50 border-emerald-300 text-emerald-800 ring-2 ring-emerald-500/20"
-                                                                                : "bg-white border-gray-200 hover:border-gray-300"
+                                                                            ? "bg-emerald-50 border-emerald-300 text-emerald-800 ring-2 ring-emerald-500/20"
+                                                                            : "bg-white border-gray-200 hover:border-gray-300"
                                                                             }`}
                                                                     >
                                                                         <div className="flex items-center justify-between">
@@ -838,8 +939,8 @@ export default function CourseCreatorStudio() {
                                                                                     toggleQuizOptionCorrect(q.id, opt.id);
                                                                                 }}
                                                                                 className={`px-[0.5rem] py-[0.15rem] rounded text-[0.7rem] font-bold transition-all ${opt.isCorrect
-                                                                                        ? "bg-emerald-600 text-white"
-                                                                                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                                                    ? "bg-emerald-600 text-white"
+                                                                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                                                                                     }`}
                                                                             >
                                                                                 {opt.isCorrect ? "Correct ✓" : "Mark Correct"}
@@ -1072,57 +1173,119 @@ export default function CourseCreatorStudio() {
                                             <div className="space-y-[0.5rem]">
                                                 <span className="block text-[0.8rem] font-bold text-[var(--text-muted)]">Circuit Designer Validator (Visual Canvas)</span>
                                                 <p className="text-[0.7rem] text-[var(--text-muted)]">
-                                                    Tap component nodes to establish wire connections for student validation.
+                                                    Tutors: Drag elements to arrange, and click terminal pins to connect colored wires.
                                                 </p>
 
-                                                <div className="bg-[#041A3E] rounded-xl p-[1rem] relative min-h-[10rem] flex flex-wrap gap-[0.75rem] items-center justify-center border border-gray-800">
-                                                    {activeBlock.sandboxComponents && activeBlock.sandboxComponents.length > 0 ? (
-                                                        activeBlock.sandboxComponents.map((comp, idx) => {
-                                                            const isSelected = selectedSourceNode === comp;
-                                                            const isConnected = activeBlock.savedSimulationSetup?.connections.some(
-                                                                c => c.from === comp || c.to === comp
-                                                            );
-                                                            return (
-                                                                <button
-                                                                    key={idx}
-                                                                    type="button"
-                                                                    onClick={() => handleVisualConnectionClick(comp)}
-                                                                    className={`p-[0.5rem] rounded-lg border text-[0.75rem] font-bold flex flex-col items-center justify-center gap-[0.25rem] transition-all ${isSelected
-                                                                            ? "bg-[#FF6B35] border-white text-white scale-105 ring-2 ring-white"
-                                                                            : isConnected
-                                                                                ? "bg-emerald-600 border-emerald-400 text-white"
-                                                                                : "bg-slate-800 border-slate-700 text-slate-300 hover:border-gray-500"
-                                                                        }`}
-                                                                >
-                                                                    <span>🔌</span>
-                                                                    <span>{comp}</span>
-                                                                </button>
-                                                            );
-                                                        })
-                                                    ) : (
-                                                        <span className="text-[0.75rem] text-slate-500">No components assigned.</span>
-                                                    )}
+                                                <div
+                                                    ref={canvasRef}
+                                                    onMouseMove={handleCanvasMouseMove}
+                                                    className="relative h-[16rem] w-full rounded-xl bg-[#141E30] overflow-hidden border border-slate-700 shadow-inner select-none cursor-default"
+                                                    style={{
+                                                        backgroundImage: "radial-gradient(#1e293b 1.5px, transparent 0)",
+                                                        backgroundSize: "16px 16px"
+                                                    }}
+                                                >
+                                                    {/* SVG Wire Layout Connections */}
+                                                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                                        {activeBlock.savedSimulationSetup?.connections.map((conn, idx) => {
+                                                            const fromPt = getTerminalCoords(conn.from, conn.fromTerminal);
+                                                            const toPt = getTerminalCoords(conn.to, conn.toTerminal);
+                                                            const dx = toPt.x - fromPt.x;
+                                                            const dy = toPt.y - fromPt.y;
 
-                                                    {/* Connections overlay representation */}
-                                                    {activeBlock.savedSimulationSetup && activeBlock.savedSimulationSetup.connections.length > 0 && (
-                                                        <div className="absolute bottom-[0.5rem] left-[0.5rem] right-[0.5rem] bg-black/60 backdrop-blur-sm rounded p-[0.4rem] text-[0.65rem] text-slate-300 max-h-[3rem] overflow-y-auto">
-                                                            <strong>Validated wires:</strong> {activeBlock.savedSimulationSetup.connections.map(c => `${c.from}➔${c.to}`).join(", ")}
-                                                        </div>
-                                                    )}
+                                                            const pathD = `M ${fromPt.x} ${fromPt.y} C ${fromPt.x + dx * 0.25} ${fromPt.y + dy * 0.8}, ${fromPt.x + dx * 0.75} ${fromPt.y - dy * 0.2}, ${toPt.x} ${toPt.y}`;
+                                                            return (
+                                                                <path
+                                                                    key={idx}
+                                                                    d={pathD}
+                                                                    fill="none"
+                                                                    stroke="#ef4444"
+                                                                    strokeWidth="3.5"
+                                                                    strokeLinecap="round"
+                                                                    className="opacity-95"
+                                                                />
+                                                            );
+                                                        })}
+                                                        {/* Live drag wire preview rendering */}
+                                                        {selectedSourceNode && (
+                                                            (() => {
+                                                                const fromPt = getTerminalCoords(selectedSourceNode.component, selectedSourceNode.terminal);
+                                                                const dx = mousePos.x - fromPt.x;
+                                                                const dy = mousePos.y - fromPt.y;
+                                                                const pathD = `M ${fromPt.x} ${fromPt.y} C ${fromPt.x + dx * 0.25} ${fromPt.y + dy * 0.8}, ${fromPt.x + dx * 0.75} ${fromPt.y - dy * 0.2}, ${mousePos.x} ${mousePos.y}`;
+                                                                return (
+                                                                    <path
+                                                                        d={pathD}
+                                                                        fill="none"
+                                                                        stroke="#38bdf8"
+                                                                        strokeWidth="3"
+                                                                        strokeDasharray="4 4"
+                                                                        className="animate-pulse"
+                                                                    />
+                                                                );
+                                                            })()
+                                                        )}
+                                                    </svg>
+
+                                                    {/* Draggable Component Cards */}
+                                                    {activeBlock.sandboxComponents?.map((comp, idx) => {
+                                                        const pos = activeBlock.savedSimulationSetup?.positions?.[comp] || { x: 30 + idx * 80, y: 50 };
+                                                        return (
+                                                            <div
+                                                                key={idx}
+                                                                style={{ left: pos.x, top: pos.y }}
+                                                                onMouseDown={() => setDraggingComponent(comp)}
+                                                                className={`absolute w-[100px] h-[70px] bg-[#1e293b]/90 border text-slate-100 rounded-lg p-[0.35rem] flex flex-col justify-between shadow-md select-none transition-shadow z-20 ${draggingComponent === comp ? "shadow-2xl border-sky-400 cursor-grabbing" : "border-slate-600 cursor-grab hover:border-slate-400"
+                                                                    }`}
+                                                            >
+                                                                <div className="flex justify-between items-center text-[0.65rem] border-b border-slate-700/60 pb-[0.2rem]">
+                                                                    <span className="font-bold truncate w-[80%]">⚡ {comp}</span>
+                                                                </div>
+
+                                                                {/* Circular pin connectors for the blocks */}
+                                                                <div className="flex justify-between px-[0.1rem] pb-[0.2rem]">
+                                                                    <button
+                                                                        type="button"
+                                                                        onMouseDown={(e) => e.stopPropagation()}
+                                                                        onClick={(e) => handleTerminalClick(comp, comp === "Battery" ? "negative" : "terminal-1", e)}
+                                                                        className={`w-[14px] h-[14px] rounded-full border flex items-center justify-center transition-all ${selectedSourceNode?.component === comp && (selectedSourceNode.terminal === "negative" || selectedSourceNode.terminal === "terminal-1")
+                                                                                ? "bg-sky-400 border-white scale-110"
+                                                                                : "bg-amber-400 hover:bg-amber-300 border-amber-600"
+                                                                            }`}
+                                                                        title={comp === "Battery" ? "Negative (-)" : "Terminal 1"}
+                                                                    >
+                                                                        <span className="text-[7px] text-black font-bold"></span>
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onMouseDown={(e) => e.stopPropagation()}
+                                                                        onClick={(e) => handleTerminalClick(comp, comp === "Battery" ? "positive" : "terminal-2", e)}
+                                                                        className={`w-[14px] h-[14px] rounded-full border flex items-center justify-center transition-all ${selectedSourceNode?.component === comp && (selectedSourceNode.terminal === "positive" || selectedSourceNode.terminal === "terminal-2")
+                                                                                ? "bg-sky-400 border-white scale-110"
+                                                                                : "bg-red-500 hover:bg-red-400 border-red-700"
+                                                                            }`}
+                                                                        title={comp === "Battery" ? "Positive (+)" : "Terminal 2"}
+                                                                    >
+                                                                        <span className="text-[7px] text-black font-bold"></span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
 
-                                                <div className="flex gap-[0.5rem]">
+                                                <div className="flex gap-[0.5rem] pt-[0.25rem]">
                                                     <button
                                                         type="button"
                                                         onClick={clearVisualConnections}
-                                                        className="w-1/2 py-[0.4rem] border border-gray-300 text-[0.75rem] font-bold text-red-500 rounded-lg hover:bg-red-50"
+                                                        className="w-1/2 py-[0.4rem] border border-slate-700 hover:bg-slate-800 text-[0.75rem] font-bold text-red-400 rounded-lg"
                                                     >
                                                         Reset Canvas
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        onClick={() => alert("Visual simulation config locked.")}
-                                                        className="w-1/2 py-[0.4rem] bg-emerald-600 text-white text-[0.75rem] font-bold rounded-lg hover:bg-emerald-700"
+                                                        onClick={() => alert("Simulation setup validator locked successfully.")}
+                                                        className="w-1/2 py-[0.4rem] bg-[#FF6B35] text-white text-[0.75rem] font-bold rounded-lg hover:bg-[#e05825]"
                                                     >
                                                         Save Rules
                                                     </button>
