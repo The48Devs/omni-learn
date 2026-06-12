@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
+import { title } from "process";
 
 //interace types
 interface Module {
@@ -121,6 +122,25 @@ export default function CourseCreatorStudio() {
             sandboxComponents: type === "sandbox" ? ["Battery"] : undefined,
             quizQuestions: type === "quiz" ? [] : undefined
         };
-    }
+
+        setModules(
+            modules.map((m) => {
+                if (m.id === activeModule.id) {
+                    return { ...m, blocks: [...m.blocks, newBlock] };
+                }
+                return m;
+            })
+        );
+        setSelectedBlockId(newBlock.id);
+        announce(`Added a new ${type} block to ${activeModule.title}.`);
+    };
+    const updateBlockTitle = (newTitle: string) => {
+        setModules(
+            modules.map((m) => ({
+                ...m,
+                blocks: m.blocks.map((b) => (b.id === selectedBlockId ? { ...b, title: newTitle } : b))
+            }))
+        );
+    };
 
 }
