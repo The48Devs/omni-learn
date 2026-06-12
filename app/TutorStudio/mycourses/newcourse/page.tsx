@@ -89,4 +89,11 @@ export default function CourseCreatorStudio() {
         }
     ]);
 
+    //selections
+    const [selectedModuleId, setSelectedModuleId] = useState<string>("mod-1");
+    const [selectedBlockId, setSelectedBlockId] = useState<string | null>("block-2");
+
+    const activeModule = modules.find((m) => m.id === selectedModuleId) || modules[0];
+    const activeBlock = activeModule?.blocks.find((b) => b.id === selectedBlockId) || null;
+
 }
