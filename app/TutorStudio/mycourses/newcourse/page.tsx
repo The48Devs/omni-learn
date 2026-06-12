@@ -428,7 +428,139 @@ export default function CourseCreatorStudio() {
                 )}
             </main>
 
+            {/*Right properties bar*/}
+            <aside
+                className="w-full lg:w-[25%] bg-[var(--bg-secondary,#FFFFFF)] border-t lg:border-t-0 lg:border-l border-[var(--border-color,#E5E7EB)] flex flex-col"
+                aria-label="Configuration Settings Inspector"
+            >
+                <div className="bg-[#041A3E] text-white p-[1.25rem] flex items-center gap-[0.75rem]">
+                    <span>⚙️</span>
+                    <h2 className="text-[1.1rem] font-bold">
+                        {currentView === "course-overview" ? "Course Settings" : "Block Settings"}
+                    </h2>
+                </div>
+                <div className="p-[1.5rem] flex-1 flex flex-col gap-[1.5rem]">
+                    {currentView === "course-overview" ? (
+                        <>
+                            <div className="space-y-[0.4rem]">
+                                <label htmlFor="course-title-inp" className="block text-[0.85rem] font-bold text-[var(--text-muted)]">
+                                    Course Title
+                                </label>
+                                <input
+                                    id="course-title-inp"
+                                    type="text"
+                                    value={courseTitle}
+                                    onChange={(e) => setCourseTitle(e.target.value)}
+                                    className="w-full p-[0.75rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.95rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none"
+                                    placeholder="Enter Course title"
+                                />
+                            </div>
+                            <div className="space-y-[0.4rem]">
+                                <label htmlFor="course-desc-inp" className="block text-[0.85rem] font-bold text-[var(--text-muted)]">
+                                    Description
+                                </label>
+                                <textarea
+                                    id="course-desc-inp"
+                                    rows={3}
+                                    value={courseDescription}
+                                    onChange={(e) => setCourseDescription(e.target.value)}
+                                    className="w-full p-[0.75rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.95rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none"
+                                    placeholder="Enter course description"
+                                />
+                            </div>
+                            <div className="space-y-[0.4rem]">
+                                <label htmlFor="course-subj-sel" className="block text-[0.85rem] font-bold text-[var(--text-muted)]">
+                                    Subject
+                                </label>
+                                <select
+                                    id="course-subj-sel"
+                                    value={courseSubject}
+                                    onChange={(e) => setCourseSubject(e.target.value)}
+                                    className="w-full p-[0.75rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.95rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none"
+                                >
+                                    <option value="Physics">Physics</option>
+                                    <option value="Chemistry">Chemistry</option>
+                                    <option value="Biology">Biology</option>
+                                    <option value="Mathematics">Mathematics</option>
+                                </select>
+                            </div>
+                            <button
+                                disabled
+                                className="w-full mt-auto py-[0.75rem] bg-gray-100 text-gray-400 font-bold rounded-lg cursor-not-allowed text-center text-[0.95rem]"
+                            >
+                                View Course Analytics
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            {activeBlock ? (
+                                <>
+                                    <div className="space-y-[0.4rem]">
+                                        <label htmlFor="block-title-inp" className="block text-[0.85rem] font-bold text-[var(--text-muted)]">
+                                            Block Title
+                                        </label>
+                                        <input
+                                            id="block-title-inp"
+                                            type="text"
+                                            value={activeBlock.title}
+                                            onChange={(e) => updateBlockTitle(e.target.value)}
+                                            className="w-full p-[0.75rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.95rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none"
+                                        />
+                                    </div>
+                                    {activeBlock.type === "sandbox" && (
+                                        <div className="space-y-[0.75rem]">
+                                            <span className="block text-[0.85rem] font-bold text-[var(--text-muted)]">Initial Components</span>
+                                            <div className="flex flex-col gap-[0.5rem]">
+                                                {activeBlock.sandboxComponents?.map((comp, idx) => (
+                                                    <div key={idx} className="flex justify-between items-center bg-[var(--bg-primary)] p-[0.5rem] rounded-lg border border-[var(--border-color)] text-[0.85rem]">
+                                                        <span className="font-semibold">🔌 {comp}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-[0.5rem] pt-[0.5rem]">
+                                                <button
+                                                    onClick={() => addSandboxComponent("Battery")}
+                                                    className="py-[0.4rem] bg-white border border-[var(--border-color)] hover:bg-gray-50 rounded-lg text-[0.75rem] font-bold text-[var(--text-main)]"
+                                                >
+                                                    + Battery
+                                                </button>
+                                                <button
+                                                    onClick={() => addSandboxComponent("LED")}
+                                                    className="py-[0.4rem] bg-white border border-[var(--border-color)] hover:bg-gray-50 rounded-lg text-[0.75rem] font-bold text-[var(--text-main)]"
+                                                >
+                                                    + LED
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {activeBlock.type === "quiz" && (
+                                        <div className="space-y-[0.75rem]">
+                                            <span className="block text-[0.85rem] font-bold text-[var(--text-muted)]">Questions Summary</span>
+                                            <p className="text-[0.8rem] text-[var(--text-muted)]">
+                                                {activeBlock.quizQuestions?.length || 0} questions configured in this block.
+                                            </p>
+                                            <button
+                                                onClick={addQuizQuestion}
+                                                className="w-full py-[0.5rem] bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 font-bold rounded-lg text-center text-[0.85rem]"
+                                            >
+                                                Create New Question
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="py-[4rem] text-center text-gray-400">
+                                    <span className="block text-[2rem]">👈</span>
+                                    <p className="mt-[0.5rem] font-semibold">Select a Block</p>
+                                    <p className="text-[0.75rem]">Select a block on the center canvas to configure its settings.</p>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            </aside>
         </div>
 
-    )
+    );
 }
