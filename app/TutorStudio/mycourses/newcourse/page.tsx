@@ -66,6 +66,12 @@ export default function CourseCreatorStudio() {
     const [draggingComponent, setDraggingComponent] = useState<string | null>(null);
     const canvasRef = useRef<HTMLDivElement>(null);
 
+    // Canvas Zoom & Camera Pan states
+    const [zoomScale, setZoomScale] = useState<number>(1.0);
+    const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const [isPanning, setIsPanning] = useState<boolean>(false);
+    const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+
     // Modules & Content block states
     const [modules, setModules] = useState<Module[]>([
         {
@@ -94,9 +100,9 @@ export default function CourseCreatorStudio() {
                         ],
                         targetStates: { "Switch": "Closed", "LED": "Lit" },
                         positions: {
-                            "Battery": { x: 30, y: 50 },
-                            "LED": { x: 260, y: 150 },
-                            "Switch": { x: 150, y: 50 }
+                            "Battery": { x: 150, y: 150 },
+                            "LED": { x: 450, y: 300 },
+                            "Switch": { x: 300, y: 150 }
                         }
                     }
                 },
@@ -139,24 +145,26 @@ export default function CourseCreatorStudio() {
     // Available options for the Sandbox Component dropdown
     const availableSandboxComponents = ["Battery", "LED", "Switch", "Resistor", "Wire", "Ammeter"];
 
-    // mpouse postiion tracking
+    // Track mouse position on the canvas for dynamic wire rendering
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!canvasRef.current || !selectedSourceNode) return;
             const rect = canvasRef.current.getBoundingClientRect();
+            // Compensate mousePos calculation for scale & pan values
             setMousePos({
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
+                x: (e.clientX - rect.left - panOffset.x) / zoomScale,
+                y: (e.clientY - rect.top - panOffset.y) / zoomScale
             });
         };
         window.addEventListener("mousemove", handleMouseMove);
         return () => window.removeEventListener("mousemove", handleMouseMove);
-    }, [selectedSourceNode]);
+    }, [selectedSourceNode, zoomScale, panOffset]);
 
     // Track canvas dragging
     useEffect(() => {
         const handleMouseUp = () => {
             setDraggingComponent(null);
+            setIsPanning(false);
         };
         window.addEventListener("mouseup", handleMouseUp);
         return () => window.removeEventListener("mouseup", handleMouseUp);
@@ -216,8 +224,8 @@ export default function CourseCreatorStudio() {
                 connections: [],
                 targetStates: {},
                 positions: {
-                    "Battery": { x: 30, y: 50 },
-                    "LED": { x: 260, y: 150 }
+                    "Battery": { x: 150, y: 150 },
+                    "LED": { x: 450, y: 300 }
                 }
             } : undefined,
             quizQuestions: type === "quiz" ? [] : undefined
@@ -311,8 +319,9 @@ export default function CourseCreatorStudio() {
                 blocks: m.blocks.map((b) => {
                     if (b.id === selectedBlockId && b.sandboxComponents) {
                         const currentPositions = b.savedSimulationSetup?.positions || {};
-                        const nextX = 50 + (b.sandboxComponents.length * 80) % 200;
-                        const nextY = 50 + (b.sandboxComponents.length * 50) % 150;
+                        // Position components offset within standard canvas bounds
+                        const nextX = 150 + (b.sandboxComponents.length * 90) % 400;
+                        const nextY = 150 + (b.sandboxComponents.length * 60) % 300;
                         return {
                             ...b,
                             sandboxComponents: [...b.sandboxComponents, comp],
@@ -369,31 +378,54 @@ export default function CourseCreatorStudio() {
     };
 
     const handleCanvasMouseMove = (e: React.MouseEvent) => {
-        if (!draggingComponent || !canvasRef.current || !activeBlock) return;
-        const rect = canvasRef.current.getBoundingClientRect();
-        const x = Math.max(10, Math.min(rect.width - 120, e.clientX - rect.left - 50));
-        const y = Math.max(10, Math.min(rect.height - 70, e.clientY - rect.top - 20));
+        if (!activeBlock || !canvasRef.current) return;
 
-        setModules(
-            modules.map((m) => ({
-                ...m,
-                blocks: m.blocks.map((b) => {
-                    if (b.id === selectedBlockId && b.savedSimulationSetup) {
-                        return {
-                            ...b,
-                            savedSimulationSetup: {
-                                ...b.savedSimulationSetup,
-                                positions: {
-                                    ...(b.savedSimulationSetup.positions || {}),
-                                    [draggingComponent]: { x, y }
+        // Handle dragging/moving of sandbox components
+        if (draggingComponent) {
+            const rect = canvasRef.current.getBoundingClientRect();
+            // Scale and pan adjustments
+            const x = Math.max(10, Math.min(1800, (e.clientX - rect.left - panOffset.x) / zoomScale - 50));
+            const y = Math.max(10, Math.min(1800, (e.clientY - rect.top - panOffset.y) / zoomScale - 35));
+
+            setModules(
+                modules.map((m) => ({
+                    ...m,
+                    blocks: m.blocks.map((b) => {
+                        if (b.id === selectedBlockId && b.savedSimulationSetup) {
+                            return {
+                                ...b,
+                                savedSimulationSetup: {
+                                    ...b.savedSimulationSetup,
+                                    positions: {
+                                        ...(b.savedSimulationSetup.positions || {}),
+                                        [draggingComponent]: { x, y }
+                                    }
                                 }
-                            }
-                        };
-                    }
-                    return b;
-                })
-            }))
-        );
+                            };
+                        }
+                        return b;
+                    })
+                }))
+            );
+        }
+        // Handle panning camera drag
+        else if (isPanning) {
+            setPanOffset({
+                x: e.clientX - panStart.x,
+                y: e.clientY - panStart.y
+            });
+        }
+    };
+
+    const handleCanvasMouseDown = (e: React.MouseEvent) => {
+        // Panning the viewport
+        if (e.button === 1 || e.shiftKey) {
+            setIsPanning(true);
+            setPanStart({
+                x: e.clientX - panOffset.x,
+                y: e.clientY - panOffset.y
+            });
+        }
     };
 
     const handleTerminalClick = (componentName: string, terminalName: string, e: React.MouseEvent) => {
@@ -405,7 +437,6 @@ export default function CourseCreatorStudio() {
             announce(`Selected terminal ${terminalName} on ${componentName}. Tap target terminal to hook wire.`);
         } else {
             if (selectedSourceNode.component === componentName) {
-                // Cannot connect to the same component
                 setSelectedSourceNode(null);
                 return;
             }
@@ -470,13 +501,34 @@ export default function CourseCreatorStudio() {
 
     // fetching coordinates for the svgs
     const getTerminalCoords = (compName: string, terminal: string) => {
-        const pos = activeBlock?.savedSimulationSetup?.positions?.[compName] || { x: 50, y: 50 };
-        // Base coordinate center of component card
-        let offset = { x: 15, y: 35 }; // left terminal default
+        const pos = activeBlock?.savedSimulationSetup?.positions?.[compName] || { x: 150, y: 150 };
+        let offset = { x: 15, y: 35 };
         if (terminal === "positive" || terminal === "terminal-2") {
-            offset = { x: 85, y: 35 }; // right terminal
+            offset = { x: 85, y: 35 };
         }
         return { x: pos.x + offset.x, y: pos.y + offset.y };
+    };
+
+    // Zoom handlers
+    const zoomIn = () => setZoomScale(prev => Math.min(2.0, prev + 0.15));
+    const zoomOut = () => setZoomScale(prev => Math.max(0.5, prev - 0.15));
+    const resetCamera = () => {
+        setZoomScale(1.0);
+        setPanOffset({ x: 0, y: 0 });
+        announce("Camera viewpoint reset.");
+    };
+
+    // Directional pan shifts
+    const panViewport = (dir: "up" | "down" | "left" | "right") => {
+        const amt = 80;
+        setPanOffset(prev => {
+            switch (dir) {
+                case "up": return { ...prev, y: prev.y + amt };
+                case "down": return { ...prev, y: prev.y - amt };
+                case "left": return { ...prev, x: prev.x + amt };
+                case "right": return { ...prev, x: prev.x - amt };
+            }
+        });
     };
 
     // quiz question config
@@ -1173,105 +1225,165 @@ export default function CourseCreatorStudio() {
                                             <div className="space-y-[0.5rem]">
                                                 <span className="block text-[0.8rem] font-bold text-[var(--text-muted)]">Circuit Designer Validator (Visual Canvas)</span>
                                                 <p className="text-[0.7rem] text-[var(--text-muted)]">
-                                                    Tutors: Drag elements to arrange, and click terminal pins to connect colored wires.
+                                                    Tutors: Drag elements to arrange, and click terminal pins to connect colored wires. Shift+Drag to pan camera viewport.
                                                 </p>
 
+                                                {/* Infinite Scrolling Layout Wrapper with Zoom & Pan */}
                                                 <div
                                                     ref={canvasRef}
                                                     onMouseMove={handleCanvasMouseMove}
-                                                    className="relative h-[16rem] w-full rounded-xl bg-[#141E30] overflow-hidden border border-slate-700 shadow-inner select-none cursor-default"
+                                                    onMouseDown={handleCanvasMouseDown}
+                                                    className="relative h-[20rem] w-full rounded-xl bg-[#141E30] overflow-hidden border border-slate-700 shadow-inner select-none cursor-default"
                                                     style={{
                                                         backgroundImage: "radial-gradient(#1e293b 1.5px, transparent 0)",
                                                         backgroundSize: "16px 16px"
                                                     }}
                                                 >
-                                                    {/* SVG Wire Layout Connections */}
-                                                    <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                                                        {activeBlock.savedSimulationSetup?.connections.map((conn, idx) => {
-                                                            const fromPt = getTerminalCoords(conn.from, conn.fromTerminal);
-                                                            const toPt = getTerminalCoords(conn.to, conn.toTerminal);
-                                                            const dx = toPt.x - fromPt.x;
-                                                            const dy = toPt.y - fromPt.y;
+                                                    {/* Viewport Transform Layer */}
+                                                    <div
+                                                        style={{
+                                                            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                                                            transformOrigin: "0 0",
+                                                            width: "2000px",
+                                                            height: "2000px",
+                                                            position: "absolute"
+                                                        }}
+                                                    >
+                                                        {/* SVG Wire Layout Connections */}
+                                                        <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                                            {activeBlock.savedSimulationSetup?.connections.map((conn, idx) => {
+                                                                const fromPt = getTerminalCoords(conn.from, conn.fromTerminal);
+                                                                const toPt = getTerminalCoords(conn.to, conn.toTerminal);
+                                                                const dx = toPt.x - fromPt.x;
+                                                                const dy = toPt.y - fromPt.y;
 
-                                                            const pathD = `M ${fromPt.x} ${fromPt.y} C ${fromPt.x + dx * 0.25} ${fromPt.y + dy * 0.8}, ${fromPt.x + dx * 0.75} ${fromPt.y - dy * 0.2}, ${toPt.x} ${toPt.y}`;
-                                                            return (
-                                                                <path
-                                                                    key={idx}
-                                                                    d={pathD}
-                                                                    fill="none"
-                                                                    stroke="#ef4444"
-                                                                    strokeWidth="3.5"
-                                                                    strokeLinecap="round"
-                                                                    className="opacity-95"
-                                                                />
-                                                            );
-                                                        })}
-                                                        {/* Live drag wire preview rendering */}
-                                                        {selectedSourceNode && (
-                                                            (() => {
-                                                                const fromPt = getTerminalCoords(selectedSourceNode.component, selectedSourceNode.terminal);
-                                                                const dx = mousePos.x - fromPt.x;
-                                                                const dy = mousePos.y - fromPt.y;
-                                                                const pathD = `M ${fromPt.x} ${fromPt.y} C ${fromPt.x + dx * 0.25} ${fromPt.y + dy * 0.8}, ${fromPt.x + dx * 0.75} ${fromPt.y - dy * 0.2}, ${mousePos.x} ${mousePos.y}`;
+                                                                const pathD = `M ${fromPt.x} ${fromPt.y} C ${fromPt.x + dx * 0.25} ${fromPt.y + dy * 0.8}, ${fromPt.x + dx * 0.75} ${fromPt.y - dy * 0.2}, ${toPt.x} ${toPt.y}`;
                                                                 return (
                                                                     <path
+                                                                        key={idx}
                                                                         d={pathD}
                                                                         fill="none"
-                                                                        stroke="#38bdf8"
-                                                                        strokeWidth="3"
-                                                                        strokeDasharray="4 4"
-                                                                        className="animate-pulse"
+                                                                        stroke="#ef4444"
+                                                                        strokeWidth="3.5"
+                                                                        strokeLinecap="round"
+                                                                        className="opacity-95"
                                                                     />
                                                                 );
-                                                            })()
-                                                        )}
-                                                    </svg>
+                                                            })}
+                                                            {/* Live drag wire preview rendering */}
+                                                            {selectedSourceNode && (
+                                                                (() => {
+                                                                    const fromPt = getTerminalCoords(selectedSourceNode.component, selectedSourceNode.terminal);
+                                                                    const dx = mousePos.x - fromPt.x;
+                                                                    const dy = mousePos.y - fromPt.y;
+                                                                    const pathD = `M ${fromPt.x} ${fromPt.y} C ${fromPt.x + dx * 0.25} ${fromPt.y + dy * 0.8}, ${fromPt.x + dx * 0.75} ${fromPt.y - dy * 0.2}, ${mousePos.x} ${mousePos.y}`;
+                                                                    return (
+                                                                        <path
+                                                                            d={pathD}
+                                                                            fill="none"
+                                                                            stroke="#38bdf8"
+                                                                            strokeWidth="3"
+                                                                            strokeDasharray="4 4"
+                                                                            className="animate-pulse"
+                                                                        />
+                                                                    );
+                                                                })()
+                                                            )}
+                                                        </svg>
 
-                                                    {/* Draggable Component Cards */}
-                                                    {activeBlock.sandboxComponents?.map((comp, idx) => {
-                                                        const pos = activeBlock.savedSimulationSetup?.positions?.[comp] || { x: 30 + idx * 80, y: 50 };
-                                                        return (
-                                                            <div
-                                                                key={idx}
-                                                                style={{ left: pos.x, top: pos.y }}
-                                                                onMouseDown={() => setDraggingComponent(comp)}
-                                                                className={`absolute w-[100px] h-[70px] bg-[#1e293b]/90 border text-slate-100 rounded-lg p-[0.35rem] flex flex-col justify-between shadow-md select-none transition-shadow z-20 ${draggingComponent === comp ? "shadow-2xl border-sky-400 cursor-grabbing" : "border-slate-600 cursor-grab hover:border-slate-400"
-                                                                    }`}
-                                                            >
-                                                                <div className="flex justify-between items-center text-[0.65rem] border-b border-slate-700/60 pb-[0.2rem]">
-                                                                    <span className="font-bold truncate w-[80%]">⚡ {comp}</span>
-                                                                </div>
+                                                        {/* Draggable Component Cards */}
+                                                        {activeBlock.sandboxComponents?.map((comp, idx) => {
+                                                            const pos = activeBlock.savedSimulationSetup?.positions?.[comp] || { x: 150 + idx * 120, y: 150 };
+                                                            return (
+                                                                <div
+                                                                    key={idx}
+                                                                    style={{ left: pos.x, top: pos.y }}
+                                                                    onMouseDown={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setDraggingComponent(comp);
+                                                                    }}
+                                                                    className={`absolute w-[100px] h-[70px] bg-[#1e293b]/90 border text-slate-100 rounded-lg p-[0.35rem] flex flex-col justify-between shadow-md select-none transition-shadow z-20 ${draggingComponent === comp ? "shadow-2xl border-sky-400 cursor-grabbing" : "border-slate-600 cursor-grab hover:border-slate-400"
+                                                                        }`}
+                                                                >
+                                                                    <div className="flex justify-between items-center text-[0.65rem] border-b border-slate-700/60 pb-[0.2rem]">
+                                                                        <span className="font-bold truncate w-[80%]">⚡ {comp}</span>
+                                                                    </div>
 
-                                                                {/* Circular pin connectors for the blocks */}
-                                                                <div className="flex justify-between px-[0.1rem] pb-[0.2rem]">
-                                                                    <button
-                                                                        type="button"
-                                                                        onMouseDown={(e) => e.stopPropagation()}
-                                                                        onClick={(e) => handleTerminalClick(comp, comp === "Battery" ? "negative" : "terminal-1", e)}
-                                                                        className={`w-[14px] h-[14px] rounded-full border flex items-center justify-center transition-all ${selectedSourceNode?.component === comp && (selectedSourceNode.terminal === "negative" || selectedSourceNode.terminal === "terminal-1")
+                                                                    {/* Circular pin connectors for the blocks */}
+                                                                    <div className="flex justify-between px-[0.1rem] pb-[0.2rem]">
+                                                                        <button
+                                                                            type="button"
+                                                                            onMouseDown={(e) => e.stopPropagation()}
+                                                                            onClick={(e) => handleTerminalClick(comp, comp === "Battery" ? "negative" : "terminal-1", e)}
+                                                                            className={`w-[14px] h-[14px] rounded-full border flex items-center justify-center transition-all ${selectedSourceNode?.component === comp && (selectedSourceNode.terminal === "negative" || selectedSourceNode.terminal === "terminal-1")
                                                                                 ? "bg-sky-400 border-white scale-110"
                                                                                 : "bg-amber-400 hover:bg-amber-300 border-amber-600"
-                                                                            }`}
-                                                                        title={comp === "Battery" ? "Negative (-)" : "Terminal 1"}
-                                                                    >
-                                                                        <span className="text-[7px] text-black font-bold"></span>
-                                                                    </button>
-                                                                    <button
-                                                                        type="button"
-                                                                        onMouseDown={(e) => e.stopPropagation()}
-                                                                        onClick={(e) => handleTerminalClick(comp, comp === "Battery" ? "positive" : "terminal-2", e)}
-                                                                        className={`w-[14px] h-[14px] rounded-full border flex items-center justify-center transition-all ${selectedSourceNode?.component === comp && (selectedSourceNode.terminal === "positive" || selectedSourceNode.terminal === "terminal-2")
+                                                                                }`}
+                                                                            title={comp === "Battery" ? "Negative (-)" : "Terminal 1"}
+                                                                        >
+                                                                            <span className="text-[7px] text-black font-bold"></span>
+                                                                        </button>
+                                                                        <button
+                                                                            type="button"
+                                                                            onMouseDown={(e) => e.stopPropagation()}
+                                                                            onClick={(e) => handleTerminalClick(comp, comp === "Battery" ? "positive" : "terminal-2", e)}
+                                                                            className={`w-[14px] h-[14px] rounded-full border flex items-center justify-center transition-all ${selectedSourceNode?.component === comp && (selectedSourceNode.terminal === "positive" || selectedSourceNode.terminal === "terminal-2")
                                                                                 ? "bg-sky-400 border-white scale-110"
                                                                                 : "bg-red-500 hover:bg-red-400 border-red-700"
-                                                                            }`}
-                                                                        title={comp === "Battery" ? "Positive (+)" : "Terminal 2"}
-                                                                    >
-                                                                        <span className="text-[7px] text-black font-bold"></span>
-                                                                    </button>
+                                                                                }`}
+                                                                            title={comp === "Battery" ? "Positive (+)" : "Terminal 2"}
+                                                                        >
+                                                                            <span className="text-[7px] text-black font-bold"></span>
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        );
-                                                    })}
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    {/* Zoom & scale view changing options*/}
+                                                    <div className="absolute bottom-[0.5rem] right-[0.5rem] bg-[#0b1329]/95 border border-slate-700/60 rounded-xl p-[0.4rem] flex items-center gap-[0.4rem] z-30 shadow-md">
+                                                        <button
+                                                            type="button"
+                                                            onClick={zoomIn}
+                                                            className="w-[1.6rem] h-[1.6rem] rounded bg-slate-800 text-white text-xs font-bold hover:bg-slate-700"
+                                                            title="Zoom In"
+                                                        >
+                                                            ＋
+                                                        </button>
+                                                        <span className="text-[0.65rem] font-bold text-slate-300 w-[2.2rem] text-center">
+                                                            {Math.round(zoomScale * 100)}%
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={zoomOut}
+                                                            className="w-[1.6rem] h-[1.6rem] rounded bg-slate-800 text-white text-xs font-bold hover:bg-slate-700"
+                                                            title="Zoom Out"
+                                                        >
+                                                            －
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={resetCamera}
+                                                            className="w-[1.6rem] h-[1.6rem] rounded bg-slate-800 text-white text-[0.6rem] font-bold hover:bg-slate-700"
+                                                            title="Reset Camera Viewport"
+                                                        >
+                                                            🏠
+                                                        </button>
+                                                    </div>
+
+                                                    {/*camera navigation presets */}
+                                                    <div className="absolute top-[0.5rem] right-[0.5rem] bg-[#0b1329]/95 border border-slate-700/60 rounded-xl p-[0.35rem] grid grid-cols-3 gap-[0.15rem] z-30 shadow-md">
+                                                        <div></div>
+                                                        <button type="button" onClick={() => panViewport("up")} className="w-[1.2rem] h-[1.2rem] bg-slate-800 text-white text-[0.5rem] rounded hover:bg-slate-700">▲</button>
+                                                        <div></div>
+                                                        <button type="button" onClick={() => panViewport("left")} className="w-[1.2rem] h-[1.2rem] bg-slate-800 text-white text-[0.5rem] rounded hover:bg-slate-700">◀</button>
+                                                        <div></div>
+                                                        <button type="button" onClick={() => panViewport("right")} className="w-[1.2rem] h-[1.2rem] bg-slate-800 text-white text-[0.5rem] rounded hover:bg-slate-700">▶</button>
+                                                        <div></div>
+                                                        <button type="button" onClick={() => panViewport("down")} className="w-[1.2rem] h-[1.2rem] bg-slate-800 text-white text-[0.5rem] rounded hover:bg-slate-700">▼</button>
+                                                        <div></div>
+                                                    </div>
                                                 </div>
 
                                                 <div className="flex gap-[0.5rem] pt-[0.25rem]">
