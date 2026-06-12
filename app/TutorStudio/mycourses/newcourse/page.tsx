@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
 
-// --- INTERFACE TYPES ---
+// interface types
 interface Module {
     id: string;
     index: number;
@@ -19,10 +19,11 @@ interface ContentBlock {
     id: string;
     type: BlockType;
     title: string;
-    duration?: string;
+    durationMinutes: number;
     // Video Block Specific
     videoUrl?: string;
     videoTranscript?: string;
+    videoFileName?: string; // Uploaded video file name
     // Sandbox Block Specific
     sandboxComponents?: string[];
     savedSimulationSetup?: {
@@ -54,6 +55,13 @@ export default function CourseCreatorStudio() {
     const [draggedModuleIdx, setDraggedModuleIdx] = useState<number | null>(null);
     const [draggedBlockIdx, setDraggedBlockIdx] = useState<number | null>(null);
 
+    // File Upload states
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploadingProgress, setUploadingProgress] = useState<number | null>(null);
+
+    // mini circuit canvas 
+    const [selectedSourceNode, setSelectedSourceNode] = useState<string | null>(null);
+
     // Modules & Content block states
     const [modules, setModules] = useState<Module[]>([
         {
@@ -66,7 +74,7 @@ export default function CourseCreatorStudio() {
                     id: "block-1",
                     type: "video",
                     title: "Video Lesson: Introduction to Electronics",
-                    duration: "12 mins",
+                    durationMinutes: 12,
                     videoUrl: "https://example.com/electricity-intro.mp4",
                     videoTranscript: "Welcome to electrical engineering! Today we cover standard circuit diagrams..."
                 },
@@ -74,11 +82,11 @@ export default function CourseCreatorStudio() {
                     id: "block-2",
                     type: "sandbox",
                     title: "Sandbox: Understanding Current Electricity",
+                    durationMinutes: 10,
                     sandboxComponents: ["Battery", "LED", "Switch"],
                     savedSimulationSetup: {
                         connections: [
-                            { from: "Battery", to: "Switch" },
-                            { from: "Switch", to: "LED" }
+                            { from: "Battery", to: "Switch" }
                         ],
                         targetStates: { "Switch": "Closed", "LED": "Lit" }
                     }
@@ -87,6 +95,7 @@ export default function CourseCreatorStudio() {
                     id: "block-3",
                     type: "quiz",
                     title: "Current Electricity Quiz",
+                    durationMinutes: 8,
                     quizQuestions: [
                         {
                             id: "q-1",
@@ -121,6 +130,12 @@ export default function CourseCreatorStudio() {
     // Available options for the Sandbox Component dropdown
     const availableSandboxComponents = ["Battery", "LED", "Switch", "Resistor", "Wire", "Ammeter"];
 
+    // time allocation calculation
+    const calculateModuleDuration = (mod: Module) => {
+        const totalMinutes = mod.blocks.reduce((total, block) => total + (block.durationMinutes || 0), 0);
+        return totalMinutes > 0 ? `${totalMinutes} minutes` : "Empty";
+    };
+
     // module handlers
     const handleAddModule = () => {
         const newIndex = modules.length + 1;
@@ -148,14 +163,20 @@ export default function CourseCreatorStudio() {
         announce("Module deleted successfully.");
     };
 
-    // content block handlerss
+    const handleUpdateModuleTitle = (modId: string, newTitle: string) => {
+        setModules(
+            modules.map((m) => (m.id === modId ? { ...m, title: newTitle } : m))
+        );
+    };
+
+    // -content block handlers
     const handleAddBlock = (type: BlockType) => {
         if (!activeModule) return;
         const newBlock: ContentBlock = {
             id: `block-${Date.now()}`,
             type,
             title: `New ${type.charAt(0).toUpperCase() + type.slice(1)} Block`,
-            duration: type === "video" ? "10 mins" : undefined,
+            durationMinutes: 10,
             videoUrl: type === "video" ? "" : undefined,
             videoTranscript: type === "video" ? "" : undefined,
             sandboxComponents: type === "sandbox" ? ["Battery", "LED"] : undefined,
@@ -172,7 +193,7 @@ export default function CourseCreatorStudio() {
             })
         );
         setSelectedBlockId(newBlock.id);
-        announce(`Added a new ${type} block to ${activeModule.title}.`);
+        announce(`Added a new ${type} block with a 10-minute duration to ${activeModule.title}.`);
     };
 
     const handleDeleteBlock = (blockId: string, e: React.MouseEvent) => {
@@ -200,8 +221,17 @@ export default function CourseCreatorStudio() {
         );
     };
 
-    // video block config
-    const updateVideoSettings = (field: "videoUrl" | "videoTranscript", value: string) => {
+    const updateBlockDuration = (minutes: number) => {
+        setModules(
+            modules.map((m) => ({
+                ...m,
+                blocks: m.blocks.map((b) => (b.id === selectedBlockId ? { ...b, durationMinutes: minutes } : b))
+            }))
+        );
+    };
+
+    // video block handlers
+    const updateVideoSettings = (field: "videoUrl" | "videoTranscript" | "videoFileName", value: string) => {
         setModules(
             modules.map((m) => ({
                 ...m,
@@ -210,14 +240,37 @@ export default function CourseCreatorStudio() {
         );
     };
 
-    // sandbox config
+    // file upload simulations
+    const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingProgress(10);
+        announce("Uploading video file...");
+
+        // Simulate upload progress
+        const timer = setInterval(() => {
+            setUploadingProgress((prev) => {
+                if (prev === null) return null;
+                if (prev >= 100) {
+                    clearInterval(timer);
+                    updateVideoSettings("videoFileName", file.name);
+                    updateVideoSettings("videoUrl", `/uploaded-videos/${file.name}`);
+                    announce("Video upload complete.");
+                    return null;
+                }
+                return prev + 30;
+            });
+        }, 400);
+    };
+
+    // -sandbox config
     const addSandboxComponent = (comp: string) => {
         setModules(
             modules.map((m) => ({
                 ...m,
                 blocks: m.blocks.map((b) => {
                     if (b.id === selectedBlockId && b.sandboxComponents) {
-                        // prevent duplicates
                         return { ...b, sandboxComponents: [...b.sandboxComponents, comp] };
                     }
                     return b;
@@ -233,9 +286,22 @@ export default function CourseCreatorStudio() {
                 ...m,
                 blocks: m.blocks.map((b) => {
                     if (b.id === selectedBlockId && b.sandboxComponents) {
+                        const removedCompName = b.sandboxComponents[compIdx];
+                        // Remove connections containing this deleted component
+                        const filteredConnections = b.savedSimulationSetup?.connections.filter(
+                            (conn) => conn.from !== removedCompName && conn.to !== removedCompName
+                        ) || [];
+
+                        const filteredStates = { ...(b.savedSimulationSetup?.targetStates || {}) };
+                        delete filteredStates[removedCompName];
+
                         return {
                             ...b,
-                            sandboxComponents: b.sandboxComponents.filter((_, idx) => idx !== compIdx)
+                            sandboxComponents: b.sandboxComponents.filter((_, idx) => idx !== compIdx),
+                            savedSimulationSetup: {
+                                connections: filteredConnections,
+                                targetStates: filteredStates
+                            }
                         };
                     }
                     return b;
@@ -245,7 +311,56 @@ export default function CourseCreatorStudio() {
         announce("Component removed from sandbox configuration.");
     };
 
-    const saveSimulationState = (connections: { from: string; to: string }[], states: { [key: string]: string }) => {
+    const handleVisualConnectionClick = (nodeName: string) => {
+        if (!activeBlock || !activeBlock.sandboxComponents) return;
+        if (selectedSourceNode === null) {
+            setSelectedSourceNode(nodeName);
+            announce(`Selected ${nodeName} source. Click another node to connect.`);
+        } else {
+            if (selectedSourceNode === nodeName) {
+                setSelectedSourceNode(null);
+                return;
+            }
+
+            const currentConnections = activeBlock.savedSimulationSetup?.connections || [];
+            // Prevent duplicates
+            const exists = currentConnections.some(
+                c => (c.from === selectedSourceNode && c.to === nodeName) || (c.from === nodeName && c.to === selectedSourceNode)
+            );
+
+            let updatedConnections = [...currentConnections];
+            if (!exists) {
+                updatedConnections.push({ from: selectedSourceNode, to: nodeName });
+            }
+
+            const defaultStates = { ...(activeBlock.savedSimulationSetup?.targetStates || {}) };
+            if (selectedSourceNode === "Switch" || nodeName === "Switch") {
+                defaultStates["Switch"] = "Closed";
+            }
+            if (selectedSourceNode === "LED" || nodeName === "LED") {
+                defaultStates["LED"] = "Lit";
+            }
+
+            setModules(
+                modules.map((m) => ({
+                    ...m,
+                    blocks: m.blocks.map((b) => {
+                        if (b.id === selectedBlockId) {
+                            return {
+                                ...b,
+                                savedSimulationSetup: { connections: updatedConnections, targetStates: defaultStates }
+                            };
+                        }
+                        return b;
+                    })
+                }))
+            );
+            setSelectedSourceNode(null);
+            announce(`Connected ${selectedSourceNode} to ${nodeName}.`);
+        }
+    };
+
+    const clearVisualConnections = () => {
         setModules(
             modules.map((m) => ({
                 ...m,
@@ -253,17 +368,17 @@ export default function CourseCreatorStudio() {
                     if (b.id === selectedBlockId) {
                         return {
                             ...b,
-                            savedSimulationSetup: { connections, targetStates: states }
+                            savedSimulationSetup: { connections: [], targetStates: {} }
                         };
                     }
                     return b;
                 })
             }))
         );
-        announce("Simulation validation layout saved successfully.");
+        announce("Connections reset.");
     };
 
-    // quiz ques config
+    // quiz question config
     const addQuizQuestion = () => {
         setModules(
             modules.map((m) => ({
@@ -360,7 +475,7 @@ export default function CourseCreatorStudio() {
         );
     };
 
-    // drag & drop / swapping logics
+    // drag and drop logic
     const handleModuleDragStart = (idx: number) => {
         setDraggedModuleIdx(idx);
     };
@@ -371,7 +486,6 @@ export default function CourseCreatorStudio() {
         const [draggedItem] = reordered.splice(draggedModuleIdx, 1);
         reordered.splice(targetIdx, 0, draggedItem);
 
-        // order recalculation
         const adjusted = reordered.map((mod, idx) => ({ ...mod, index: idx + 1 }));
         setModules(adjusted);
         setDraggedModuleIdx(null);
@@ -398,7 +512,7 @@ export default function CourseCreatorStudio() {
     return (
         <div className="w-full min-h-screen bg-[var(--bg-primary,#F9FAFB)] text-[var(--text-main,#041A3E)] flex flex-col lg:flex-row transition-colors duration-200">
 
-            {/* left bar */}
+            {/* left options bar */}
             <aside
                 className="w-full lg:w-[20%] bg-[var(--bg-secondary,#FFFFFF)] border-b lg:border-b-0 lg:border-r border-[var(--border-color,#E5E7EB)] p-[1.5rem] flex flex-col gap-[1.5rem]"
                 aria-label="Studio Toolbox"
@@ -509,11 +623,21 @@ export default function CourseCreatorStudio() {
                                         <div className="space-y-[0.5rem] flex-1">
                                             <div className="flex items-center gap-[0.75rem]">
                                                 <span className="text-[0.9rem] font-bold text-[#FF6B35]">Module {mod.index}</span>
+                                                {/* module time display*/}
                                                 <span className="text-[0.75rem] font-semibold bg-[var(--bg-primary)] px-[0.6rem] py-[0.15rem] rounded-full border border-[var(--border-color)]">
-                                                    🕒 {mod.duration}
+                                                    🕒 {calculateModuleDuration(mod)}
                                                 </span>
                                             </div>
-                                            <h3 className="text-[1.2rem] font-bold text-[var(--text-main)]">{mod.title}</h3>
+
+                                            {/* module rename */}
+                                            <input
+                                                type="text"
+                                                value={mod.title}
+                                                onChange={(e) => handleUpdateModuleTitle(mod.id, e.target.value)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="text-[1.2rem] font-bold text-[var(--text-main)] bg-transparent border-b border-transparent hover:border-gray-300 focus:border-[#FF6B35] focus:outline-none w-full max-w-[80%]"
+                                                aria-label={`Rename Module ${mod.index}`}
+                                            />
                                         </div>
 
                                         <div className="flex items-center gap-[0.75rem] opacity-70 group-hover:opacity-100 transition-opacity">
@@ -604,7 +728,7 @@ export default function CourseCreatorStudio() {
                                                         {block.type === "video" ? "📹" : block.type === "quiz" ? "❓" : "🧪"}
                                                     </span>
                                                     <div>
-                                                        <span className="text-[0.75rem] font-bold text-[var(--text-muted)] uppercase tracking-wider">{block.type} component</span>
+                                                        <span className="text-[0.75rem] font-bold text-[var(--text-muted)] uppercase tracking-wider">{block.type} component ({block.durationMinutes} min)</span>
                                                         <h3 className="text-[1.1rem] font-bold text-[var(--text-main)]">{block.title}</h3>
                                                     </div>
                                                 </div>
@@ -628,8 +752,14 @@ export default function CourseCreatorStudio() {
                                                         </div>
                                                         <div>
                                                             <p className="text-[0.9rem] font-bold text-[var(--text-main)]">Video Player Block</p>
-                                                            {block.videoUrl ? (
-                                                                <p className="text-[0.75rem] text-emerald-600 font-semibold truncate max-w-[20rem]">📹 Linked: {block.videoUrl}</p>
+                                                            {block.videoFileName ? (
+                                                                <p className="text-[0.75rem] text-emerald-600 font-semibold truncate max-w-[20rem]">
+                                                                    📁 File: {block.videoFileName}
+                                                                </p>
+                                                            ) : block.videoUrl ? (
+                                                                <p className="text-[0.75rem] text-emerald-600 font-semibold truncate max-w-[20rem]">
+                                                                    🔗 URL: {block.videoUrl}
+                                                                </p>
                                                             ) : (
                                                                 <p className="text-[0.75rem] text-amber-600 font-medium">⚠️ No video file/URL linked yet.</p>
                                                             )}
@@ -637,7 +767,7 @@ export default function CourseCreatorStudio() {
                                                     </div>
                                                     {block.videoTranscript && (
                                                         <div className="border-t border-gray-200 pt-[0.5rem] mt-[0.25rem]">
-                                                            <span className="block text-[0.75rem] font-bold text-[var(--text-muted)]">Active Lesson Transcript Snippet:</span>
+                                                            <span className="block text-[0.75rem] font-bold text-[var(--text-muted)]">Active Lesson Transcript:</span>
                                                             <p className="text-[0.75rem] text-[var(--text-main)] italic line-clamp-2 mt-[0.15rem]">
                                                                 "{block.videoTranscript}"
                                                             </p>
@@ -660,9 +790,12 @@ export default function CourseCreatorStudio() {
                                                             <span className="text-[0.75rem] text-amber-600">No components assigned yet. Add one in Block Settings.</span>
                                                         )}
                                                     </div>
-                                                    {block.savedSimulationSetup && Object.keys(block.savedSimulationSetup.targetStates).length > 0 && (
-                                                        <div className="border-t border-gray-200 pt-[0.5rem] mt-[0.5rem]">
-                                                            <p className="text-[0.75rem] text-emerald-700 font-semibold">✓ Correct Simulation Validation Setup Saved</p>
+                                                    {block.savedSimulationSetup && block.savedSimulationSetup.connections.length > 0 && (
+                                                        <div className="border-t border-gray-200 pt-[0.5rem] mt-[0.5rem] text-[0.75rem]">
+                                                            <p className="text-emerald-700 font-semibold">✓ Correct Simulation Validation Setup Saved</p>
+                                                            <p className="text-gray-500 mt-[0.15rem]">
+                                                                Connections: {block.savedSimulationSetup.connections.map(c => `${c.from} ⚡ ${c.to}`).join(", ")}
+                                                            </p>
                                                         </div>
                                                     )}
                                                 </div>
@@ -673,12 +806,12 @@ export default function CourseCreatorStudio() {
                                                     {block.quizQuestions?.map((q, idx) => (
                                                         <div key={q.id} className="space-y-[0.75rem] border-b border-gray-200 pb-[1.25rem] last:border-b-0 last:pb-0">
                                                             <div className="flex justify-between items-center">
-                                                                <label className="text-[0.9rem] font-bold text-[var(--text-main)]">
+                                                                <label className="text-[0.9rem] font-bold text-[var(--text-main)] w-full">
                                                                     {idx + 1}. <input
                                                                         type="text"
                                                                         value={q.question}
                                                                         onChange={(e) => updateQuizText(q.id, e.target.value)}
-                                                                        className="bg-transparent border-b border-dashed border-gray-300 focus:border-[#FF6B35] focus:outline-none font-bold"
+                                                                        className="bg-transparent border-b border-dashed border-gray-300 focus:border-[#FF6B35] focus:outline-none font-bold w-[90%]"
                                                                     />
                                                                 </label>
                                                             </div>
@@ -738,7 +871,7 @@ export default function CourseCreatorStudio() {
                 )}
             </main>
 
-            {/* properties inspector */}
+            {/* properties inspector*/}
             <aside
                 className="w-full lg:w-[25%] bg-[var(--bg-secondary,#FFFFFF)] border-t lg:border-t-0 lg:border-l border-[var(--border-color,#E5E7EB)] flex flex-col"
                 aria-label="Configuration Settings Inspector"
@@ -822,14 +955,66 @@ export default function CourseCreatorStudio() {
                                         />
                                     </div>
 
-                                    {/* video block config */}
+                                    {/* time allocation for blocks */}
+                                    <div className="space-y-[0.4rem]">
+                                        <label htmlFor="block-duration-inp" className="block text-[0.85rem] font-bold text-[var(--text-muted)]">
+                                            Time Allocation (Minutes)
+                                        </label>
+                                        <input
+                                            id="block-duration-inp"
+                                            type="number"
+                                            min={1}
+                                            value={activeBlock.durationMinutes || 0}
+                                            onChange={(e) => updateBlockDuration(parseInt(e.target.value) || 0)}
+                                            className="w-full p-[0.75rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.95rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none"
+                                        />
+                                    </div>
+
+                                    {/* video block file upload */}
                                     {activeBlock.type === "video" && (
                                         <div className="space-y-[1rem] border-t border-gray-100 pt-[1rem]">
                                             <h3 className="text-[0.9rem] font-bold text-[var(--text-main)]">Video Settings</h3>
 
+                                            {/* drag / click  upload box */}
+                                            <div className="space-y-[0.4rem]">
+                                                <span className="block text-[0.8rem] font-semibold text-[var(--text-muted)]">Video File</span>
+                                                <input
+                                                    type="file"
+                                                    accept="video/*"
+                                                    ref={fileInputRef}
+                                                    onChange={handleVideoFileUpload}
+                                                    className="hidden"
+                                                />
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    className="w-full border-2 border-dashed border-gray-300 hover:border-[#FF6B35] bg-gray-50 rounded-xl p-[1rem] flex flex-col items-center justify-center text-center cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                >
+                                                    <span className="text-[1.5rem]">📤</span>
+                                                    <span className="text-[0.8rem] font-bold text-[var(--text-main)] mt-[0.25rem]">
+                                                        {activeBlock.videoFileName ? "Change Uploaded Video" : "Drag or Click to Upload Video"}
+                                                    </span>
+                                                    {activeBlock.videoFileName && (
+                                                        <span className="text-[0.7rem] text-emerald-600 font-semibold mt-[0.15rem]">
+                                                            {activeBlock.videoFileName}
+                                                        </span>
+                                                    )}
+                                                </button>
+
+                                                {uploadingProgress !== null && (
+                                                    <div className="w-full bg-gray-200 rounded-full h-[6px] mt-[0.5rem] overflow-hidden">
+                                                        <div
+                                                            className="bg-[#FF6B35] h-[6px] rounded-full transition-all duration-300"
+                                                            style={{ width: `${uploadingProgress}%` }}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+
                                             <div className="space-y-[0.4rem]">
                                                 <label htmlFor="video-url-inp" className="block text-[0.8rem] font-semibold text-[var(--text-muted)]">
-                                                    Upload / Video File URL
+                                                    Or Link External Video URL
                                                 </label>
                                                 <input
                                                     id="video-url-inp"
@@ -837,7 +1022,7 @@ export default function CourseCreatorStudio() {
                                                     value={activeBlock.videoUrl || ""}
                                                     onChange={(e) => updateVideoSettings("videoUrl", e.target.value)}
                                                     className="w-full p-[0.6rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.85rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none"
-                                                    placeholder="e.g. /videos/lesson1.mp4"
+                                                    placeholder="e.g. https://domain.com/lecture.mp4"
                                                 />
                                             </div>
 
@@ -854,28 +1039,24 @@ export default function CourseCreatorStudio() {
                                                     placeholder="Type or paste video subtitles/transcript for WCAG compliance..."
                                                 />
                                             </div>
-
-                                            <div className="p-[0.75rem] bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-[0.75rem]">
-                                                <strong>WCAG AA/AAA Rule:</strong> Providing a synchronized transcript is necessary for hard-of-hearing learners to follow interactive media lessons.
-                                            </div>
                                         </div>
                                     )}
 
-                                    {/* sandbx block config */}
+                                    {/* mini circuit builder */}
                                     {activeBlock.type === "sandbox" && (
                                         <div className="space-y-[1.25rem] border-t border-gray-100 pt-[1rem]">
-                                            <h3 className="text-[0.9rem] font-bold text-[var(--text-main)]">Sandbox Settings</h3>
+                                            <h3 className="text-[0.9rem] font-bold text-[var(--text-main)]">Sandbox Workspace</h3>
 
                                             <div className="space-y-[0.5rem]">
                                                 <label htmlFor="comp-select" className="block text-[0.8rem] font-semibold text-[var(--text-muted)]">
-                                                    Add Component to Workspace:
+                                                    Assign Component:
                                                 </label>
                                                 <select
                                                     id="comp-select"
                                                     onChange={(e) => {
                                                         if (e.target.value) {
                                                             addSandboxComponent(e.target.value);
-                                                            e.target.value = ""; // reset
+                                                            e.target.value = "";
                                                         }
                                                     }}
                                                     className="w-full p-[0.6rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.85rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none"
@@ -887,8 +1068,70 @@ export default function CourseCreatorStudio() {
                                                 </select>
                                             </div>
 
+                                            {/* circuit canvas */}
+                                            <div className="space-y-[0.5rem]">
+                                                <span className="block text-[0.8rem] font-bold text-[var(--text-muted)]">Circuit Designer Validator (Visual Canvas)</span>
+                                                <p className="text-[0.7rem] text-[var(--text-muted)]">
+                                                    Tap component nodes to establish wire connections for student validation.
+                                                </p>
+
+                                                <div className="bg-[#041A3E] rounded-xl p-[1rem] relative min-h-[10rem] flex flex-wrap gap-[0.75rem] items-center justify-center border border-gray-800">
+                                                    {activeBlock.sandboxComponents && activeBlock.sandboxComponents.length > 0 ? (
+                                                        activeBlock.sandboxComponents.map((comp, idx) => {
+                                                            const isSelected = selectedSourceNode === comp;
+                                                            const isConnected = activeBlock.savedSimulationSetup?.connections.some(
+                                                                c => c.from === comp || c.to === comp
+                                                            );
+                                                            return (
+                                                                <button
+                                                                    key={idx}
+                                                                    type="button"
+                                                                    onClick={() => handleVisualConnectionClick(comp)}
+                                                                    className={`p-[0.5rem] rounded-lg border text-[0.75rem] font-bold flex flex-col items-center justify-center gap-[0.25rem] transition-all ${isSelected
+                                                                            ? "bg-[#FF6B35] border-white text-white scale-105 ring-2 ring-white"
+                                                                            : isConnected
+                                                                                ? "bg-emerald-600 border-emerald-400 text-white"
+                                                                                : "bg-slate-800 border-slate-700 text-slate-300 hover:border-gray-500"
+                                                                        }`}
+                                                                >
+                                                                    <span>🔌</span>
+                                                                    <span>{comp}</span>
+                                                                </button>
+                                                            );
+                                                        })
+                                                    ) : (
+                                                        <span className="text-[0.75rem] text-slate-500">No components assigned.</span>
+                                                    )}
+
+                                                    {/* Connections overlay representation */}
+                                                    {activeBlock.savedSimulationSetup && activeBlock.savedSimulationSetup.connections.length > 0 && (
+                                                        <div className="absolute bottom-[0.5rem] left-[0.5rem] right-[0.5rem] bg-black/60 backdrop-blur-sm rounded p-[0.4rem] text-[0.65rem] text-slate-300 max-h-[3rem] overflow-y-auto">
+                                                            <strong>Validated wires:</strong> {activeBlock.savedSimulationSetup.connections.map(c => `${c.from}➔${c.to}`).join(", ")}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex gap-[0.5rem]">
+                                                    <button
+                                                        type="button"
+                                                        onClick={clearVisualConnections}
+                                                        className="w-1/2 py-[0.4rem] border border-gray-300 text-[0.75rem] font-bold text-red-500 rounded-lg hover:bg-red-50"
+                                                    >
+                                                        Reset Canvas
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => alert("Visual simulation config locked.")}
+                                                        className="w-1/2 py-[0.4rem] bg-emerald-600 text-white text-[0.75rem] font-bold rounded-lg hover:bg-emerald-700"
+                                                    >
+                                                        Save Rules
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Text Layout deletion */}
                                             <div className="space-y-[0.4rem]">
-                                                <span className="block text-[0.8rem] font-bold text-[var(--text-muted)]">Current Sandbox Layout</span>
+                                                <span className="block text-[0.8rem] font-bold text-[var(--text-muted)]">Assigned Components List</span>
                                                 <ul className="space-y-[0.4rem]">
                                                     {activeBlock.sandboxComponents?.map((comp, idx) => (
                                                         <li key={idx} className="flex justify-between items-center bg-[var(--bg-primary)] p-[0.4rem] px-[0.75rem] rounded-lg border border-[var(--border-color)] text-[0.8rem]">
@@ -896,77 +1139,12 @@ export default function CourseCreatorStudio() {
                                                             <button
                                                                 onClick={() => deleteSandboxComponent(idx)}
                                                                 className="text-red-500 hover:text-red-700 font-bold"
-                                                                aria-label={`Remove ${comp}`}
                                                             >
                                                                 ✕ Remove
                                                             </button>
                                                         </li>
                                                     ))}
                                                 </ul>
-                                            </div>
-
-                                            {/* simulation validations etup */}
-                                            <div className="border-t border-gray-200 pt-[1rem] mt-[1rem] space-y-[0.75rem]">
-                                                <h4 className="text-[0.85rem] font-bold text-[var(--text-main)]">Simulation Correct Setup Validator</h4>
-                                                <p className="text-[0.75rem] text-[var(--text-muted)]">
-                                                    Tutors: Simulate the target correct setup here. Students must match this exact state pattern to complete the lab.
-                                                </p>
-
-                                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-[0.75rem] space-y-[0.5rem]">
-                                                    <span className="block text-[0.75rem] font-bold text-gray-500 uppercase tracking-wider">Device Connection Validation</span>
-                                                    <div className="space-y-[0.25rem] text-[0.75rem]">
-                                                        <div className="flex justify-between items-center text-gray-600">
-                                                            <span>Battery Connects To:</span>
-                                                            <select
-                                                                className="bg-white border text-[0.7rem] rounded p-[0.1rem]"
-                                                                onChange={(e) => {
-                                                                    if (e.target.value) {
-                                                                        saveSimulationState(
-                                                                            [{ from: "Battery", to: e.target.value }],
-                                                                            { ...activeBlock.savedSimulationSetup?.targetStates, "Switch": "Closed", "LED": "Lit" }
-                                                                        );
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <option value="">-- Choose Target Connection --</option>
-                                                                {activeBlock.sandboxComponents?.filter(c => c !== "Battery").map(c => (
-                                                                    <option key={c} value={c}>{c}</option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
-                                                        <div className="flex justify-between items-center text-gray-600">
-                                                            <span>Switch Setup State:</span>
-                                                            <select
-                                                                className="bg-white border text-[0.7rem] rounded p-[0.1rem]"
-                                                                onChange={(e) => {
-                                                                    if (e.target.value) {
-                                                                        saveSimulationState(
-                                                                            activeBlock.savedSimulationSetup?.connections || [],
-                                                                            { ...activeBlock.savedSimulationSetup?.targetStates, "Switch": e.target.value }
-                                                                        );
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <option value="Closed">Closed (On)</option>
-                                                                <option value="Open">Open (Off)</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        saveSimulationState(
-                                                            [{ from: "Battery", to: "Switch" }, { from: "Switch", to: "LED" }],
-                                                            { "Switch": "Closed", "LED": "Lit" }
-                                                        );
-                                                        alert("Simulation validation blueprint successfully saved.");
-                                                    }}
-                                                    className="w-full py-[0.4rem] bg-[#FF6B35] text-white hover:bg-[#e05825] font-bold text-[0.8rem] rounded-lg transition-colors text-center"
-                                                >
-                                                    Save Correct Simulation Pattern
-                                                </button>
                                             </div>
                                         </div>
                                     )}
@@ -976,9 +1154,6 @@ export default function CourseCreatorStudio() {
                                             <span className="block text-[0.85rem] font-bold text-[var(--text-muted)]">Questions Config Summary</span>
                                             <p className="text-[0.8rem] text-[var(--text-muted)]">
                                                 {activeBlock.quizQuestions?.length || 0} questions are configured.
-                                            </p>
-                                            <p className="text-[0.75rem] text-[var(--text-muted)] italic">
-                                                Configure correct options and question text directly on the cards on the main builder canvas.
                                             </p>
                                         </div>
                                     )}
