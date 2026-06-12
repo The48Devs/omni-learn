@@ -111,4 +111,16 @@ export default function CourseCreatorStudio() {
         announce(`Created module ${newIndex}:${newMod.title}`);
     };
 
+    const handleAddBlock = (type: BlockType) => {
+        if (!activeModule) return;
+        const newBlock: ContentBlock = {
+            id: `block-${Date.now()}`,
+            type,
+            title: `New ${type.charAt(0).toUpperCase() + type.slice(1)} Block`,
+            duration: type === "video" ? "10 mins" : undefined,
+            sandboxComponents: type === "sandbox" ? ["Battery"] : undefined,
+            quizQuestions: type === "quiz" ? [] : undefined
+        };
+    }
+
 }
