@@ -96,4 +96,19 @@ export default function CourseCreatorStudio() {
     const activeModule = modules.find((m) => m.id === selectedModuleId) || modules[0];
     const activeBlock = activeModule?.blocks.find((b) => b.id === selectedBlockId) || null;
 
+    //handlers
+    const handleAddModule = () => {
+        const newIndex = modules.length + 1;
+        const newMod: Module = {
+            id: `mod-${Date.now()}`,
+            index: newIndex,
+            title: `New Module ${newIndex}`,
+            duration: "15 minutes",
+            blocks: []
+        };
+        setModules([...modules, newMod]);
+        setSelectedModuleId(newMod.id);
+        announce(`Created module ${newIndex}:${newMod.title}`);
+    };
+
 }
