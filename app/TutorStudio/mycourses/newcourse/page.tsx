@@ -28,3 +28,17 @@ interface QuizQuestions {
     question: string;
     options: { text: string; isCorrect: boolean }[];
 }
+
+export default function CourseCreatorStudio() {
+    const { announce } = useAccessibility();
+
+
+    //switching functionality between the two view modes
+    const [currentView, setCurrentView] = useState<"course-overview" | "edit-module">("course-overview");
+
+    //course metadata
+    const [courseTitle, setCourseTitle] = useState("Introduction to Current Electricity");
+    const [courseDescription, setCourseDescription] = useState("Learn the fundamentals of electrical currents, conductors, insulators, and circuit design.");
+    const [courseSubject, setCourseSubject] = useState("Physics");
+
+}
