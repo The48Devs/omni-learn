@@ -254,16 +254,73 @@ export default function CourseCreatorStudio() {
             </aside>
 
             {/* Center canvas*/}
-            <main className="w-full lg:w-[55%] p-[2rem] overflow-y-auto max-h-screen flex flex-col gap-[2rem0">
+            <main className="w-full lg:w-[55%] p-[2rem] overflow-y-auto max-h-screen flex flex-col gap-[2rem]">
                 {currentView === "course-overview" ? (
                     <>
                         <div className="flex justify-between items-start">
                             <div>
-                                <h1 className="text-[2rem0 font-bold text-[var(--text-main)]"> Create New Course
-                                </h1></div></div></>
-                ) : (<div></div>)}
+                                <h1 className="text-[2rem] font-bold text-[var(--text-main)]">Create New Course</h1>
+                                <p className="text-[1rem] text-[var(--text-muted)] mt-[0.25rem]">Outline the modules below</p>
+                            </div>
+                            <Link
+                                href="/TutorStudio/mycourses"
+                                className="px-4 py-2 border border-[var(--border-color)] hover:bg-gray-100 rounded-xl text-xs font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                            >
+                                Cancel & Exit
+                            </Link>
+                        </div>
+                        <div className="flex flex-col gap-[1.25rem]" role="list" aria-label="Course Modules Stack">
+                            {modules.map((mod) => {
+                                const isActive = mod.id === selectedModuleId;
+                                return (
+                                    <div
+                                        key={mod.id}
+                                        onClick={() => setSelectedModuleId(mod.id)}
+                                        className={`bg-[var(--bg-secondary)] p-[1.5rem] rounded-xl shadow-sm border-2 cursor-pointer transition-all flex justify-between items-center group focus-within:outline focus-within:outline-3 focus-within:outline-[var(--focus-ring,#FF6B35)] focus-within:outline-offset-2 ${isActive ? "border-[#FF6B35]" : "border-transparent hover:border-gray-200"
+                                            }`}
+                                        role="listitem"
+                                    >
+                                        <div className="space-y-[0.5rem] flex-1">
+                                            <div className="flex items-center gap-[0.75rem]">
+                                                <span className="text-[0.9rem] font-bold text-[#FF6B35]">Module {mod.index}</span>
+                                                <span className="text-[0.75rem] font-semibold bg-[var(--bg-primary)] px-[0.6rem] py-[0.15rem] rounded-full border border-[var(--border-color)]">
+                                                    🕒 {mod.duration}
+                                                </span>
+                                            </div>
+                                            <h3 className="ext-[1.2rem] font-bold text-[var(--text-main)]">{mod.title}</h3>
+                                        </div>
+                                        <div className="flex items-center gap-[0.75rem] opacity-70 group-hover:opacity-100 transition-opacity">
+                                            <button onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedBlockId(mod.id);
+                                                setCurrentView("edit-module");
+                                                announce(`Editing content block for module: ${mod.title}`);
+                                            }} className="p-[0.5rem] bg-[var(--bg-primary)] border border-[var(--border-color)] hover:bg-[#FF6B35]/15 rounded-lg text-[var(--text-main)] hover:text-[#FF6B35] font-bold text-[0.85rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-1">
+                                                ✏️ Edit Blocks
+                                            </button>
+                                            <span className="cursor-grab select-none p-1 text-gray-400">::</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+
+                        </div>
+
+                        <button
+                            onClick={handleAddModule}
+                            className="w-full py-[2rem] border-2 border-dashed border-gray-300 hover:border-[#FF6B35] rounded-xl flex flex-col justify-center items-center gap-[0.5rem] text-[var(--text-muted)] hover:text-[#FF6B35] transition-all bg-[var(--bg-secondary)] focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                            aria-label="Add new Module to Course">
+                            <span className="text-[1.5rem">+</span>
+                            <span className="font-semibold text-[0.95rem]">Drag or Click to Add Module</span>
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        {/*Content block builder*/}
+
+                    </>)}
             </main>
-        </div>
+        </div >
     )
 }
 
