@@ -317,10 +317,118 @@ export default function CourseCreatorStudio() {
                 ) : (
                     <>
                         {/*Content block builder*/}
-
-                    </>)}
+                        <div className="flex items-center gap-[1rem]">
+                            <button
+                                onClick={() => setCurrentView("course-overview")}
+                                className="px-3 py-1.5 bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:bg-gray-50 rounded-lg text-[0.85rem] font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-1"
+                                aria-label="Back to Course Modules overview"
+                            >
+                                &larr; Overview
+                            </button>
+                            <div>
+                                <h1 className="text-[1.8rem] font-bold text-[var(--text-main)]">Edit Module</h1>
+                                <p className="text-[0.95rem] text-[var(--text-muted)]">
+                                    Editing Module {activeModule.index}: {activeModule.title}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-[1.5rem]" role="list" aria-label="Block Builders Canvas">
+                            {activeModule.blocks.length === 0 ? (
+                                <div className="py-[3rem] bg-[var(--bg-secondary)] border border-dashed rounded-xl flex flex-col items-center justify-center text-[var(--text-muted)] gap-[0.5rem]">
+                                    <span className="text-[2rem]">📦</span>
+                                    <p className="font-semibold">No content blocks created yet.</p>
+                                    <p className="text-[0.8rem]">Use the Left Blocks panel to add elements.</p>
+                                </div>
+                            ) : (
+                                activeModule.blocks.map((block) => {
+                                    const isSelected = block.id === selectedBlockId;
+                                    return (
+                                        <div
+                                            key={block.id}
+                                            onClick={() => setSelectedBlockId(block.id)}
+                                            className={`bg-[var(--bg-secondary)] rounded-xl border-2 p-[1.5rem] relative cursor-pointer transition-all flex flex-col gap-[1rem] focus-within:outline focus-within:outline-3 focus-within:outline-[var(--focus-ring,#FF6B35)] focus-within:outline-offset-2 ${isSelected ? "border-[#FF6B35]" : "border-transparent hover:border-gray-200"
+                                                }`}
+                                            role="listitem"
+                                        >
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex items-center gap-[0.75rem]">
+                                                    <span className={`w-[2rem] h-[2rem] rounded-lg flex items-center justify-center font-bold ${block.type === "video" ? "bg-red-100 text-red-600" :
+                                                        block.type === "quiz" ? "bg-emerald-100 text-emerald-600" :
+                                                            "bg-blue-100 text-blue-600"
+                                                        }`}>
+                                                        {block.type === "video" ? "📹" : block.type === "quiz" ? "❓" : "🧪"}
+                                                    </span>
+                                                    <div>
+                                                        <span className="text-[0.75rem] font-bold text-[var(--text-muted)] uppercase tracking-wider">{block.type} component</span>
+                                                        <h3 className="text-[1.1rem] font-bold text-[var(--text-main)]">{block.title}</h3>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {block.type === "video" && (
+                                                <div className="flex gap-[1rem] bg-gray-50 border border-gray-100 p-[0.75rem] rounded-lg items-center">
+                                                    <div className="relative w-[6rem] h-[3.5rem] bg-black rounded flex items-center justify-center text-white text-[0.8rem]">
+                                                        ▶️
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[0.9rem] font-bold text-[var(--text-main)]">Video Lesson Playback</p>
+                                                        <p className="text-[0.75rem] text-[var(--text-muted)]">Includes dynamic accessibility caption track syncing.</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {block.type === "sandbox" && (
+                                                <div className="border border-gray-100 bg-gray-50 p-[1rem] rounded-lg">
+                                                    <p className="text-[0.8rem] font-bold text-[var(--text-main)] mb-[0.5rem]">Active Workspace Components:</p>
+                                                    <div className="flex flex-wrap gap-[0.5rem]">
+                                                        {block.sandboxComponents?.map((comp, idx) => (
+                                                            <span key={idx} className="bg-blue-100 border border-blue-200 text-blue-800 text-[0.75rem] font-semibold px-[0.6rem] py-[0.2rem] rounded-md">
+                                                                ⚡ {comp}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {block.type === "quiz" && (
+                                                <div className="border border-gray-100 bg-gray-50 p-[1.25rem] rounded-lg flex flex-col gap-[1rem]">
+                                                    {block.quizQuestions?.map((q, idx) => (
+                                                        <div key={q.id} className="space-y-[0.5rem] border-b border-gray-200 pb-[1.25rem] last:border-b-0 last:pb-0">
+                                                            <p className="text-[0.9rem] font-bold text-[var(--text-main)]">{idx + 1}. {q.question}</p>
+                                                            <div className="grid grid-cols-2 gap-[0.5rem]">
+                                                                {q.options.map((opt, oIdx) => (
+                                                                    <div
+                                                                        key={oIdx}
+                                                                        className={`text-[0.8rem] p-[0.4rem] rounded border font-semibold flex justify-between ${opt.isCorrect
+                                                                            ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                                                                            : "bg-orange-50 border-orange-200 text-orange-800"
+                                                                            }`}
+                                                                    >
+                                                                        <span>{opt.text}</span>
+                                                                        <span>{opt.isCorrect ? "✓" : "✗"}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            addQuizQuestion();
+                                                        }}
+                                                        className="self-center py-[0.4rem] px-[1rem] bg-white border border-[var(--border-color)] hover:bg-[#F3F4F6] text-[var(--text-main)] font-semibold text-[0.8rem] rounded-lg flex items-center gap-[0.4rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                    >
+                                                        ➕ Add Question Option
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </>
+                )}
             </main>
-        </div >
+
+        </div>
+
     )
 }
-
