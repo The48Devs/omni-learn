@@ -143,4 +143,41 @@ export default function CourseCreatorStudio() {
         );
     };
 
+    const addSandboxComponent = (comp: string) => {
+        setModules(
+            modules.map((m) => ({
+                ...m,
+                blocks: m.blocks.map((b) => {
+                    if (b.id === selectedBlockId && b.sandboxComponents) {
+                        return { ...b, sandboxComponents: { ...b.sandboxComponents, comp } };
+                    }
+                    return b;
+                })
+            }))
+        );
+        announce(`Added component ${comp} to sandbox`);
+    };
+
+    const addQuizQuestion = () => {
+        setModules(
+            modules.map((m) => ({
+                ...m,
+                blocks: m.blocks.map((b) => {
+                    if (b.id === selectedBlockId && b.quizQuestions) {
+                        const newQ: quizQuestions = {
+                            id: `q-${Date.now()}`,
+                            question: "Click to edit question text",
+                            options: [
+                                { text: "Option A (Correct)", isCorrect: true },
+                                { text: "Option B", isCorrect: false }
+                            ]
+                        };
+                        return { ...b, quizQuestions: [...b.quizQuestions, newQ] };
+                    }
+                    return b;
+                })
+            }))
+        );
+        announce("Added new question to quiz block.");
+    };
 }
