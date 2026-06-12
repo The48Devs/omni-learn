@@ -180,4 +180,90 @@ export default function CourseCreatorStudio() {
         );
         announce("Added new question to quiz block.");
     };
+
+    return (
+        <div className="w-full min-h-screen bg-[var(--bg-primary,#F9FAFB)] text-[var(--text-main,#041A3E)] flex flex-col lg:flex-row transition-colors duration-200">
+            {/*Too pallete - left */}
+            <aside
+                className="w-full lg:w-[20%] bg-[var(--bg-secondary,#FFFFFF)] border-b lg:border-b-0 lg:border-r border-[var(--border-color,#E5E7EB)] p-[1.5rem] flex flex-col gap-[1.5rem]"
+                aria-label="Studio Toolbox">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-[1.2rem] font-bold text-[var(--text-main)]"> Blocks Pallette</h2>
+                </div>
+                {currentView === "course-overview" ? (
+                    <div className="flex flex-col gap-[1rem] opacity-60">
+                        <p className="text-[0.85rem] text-[var(--text-muted,#6B7280)] leading-relaxed">
+                            Select a module from the center canvas and click <strong>"Edit Blocks"</strong> to begin adding content blocks.
+                        </p>
+                        <div className="p-[1rem] bg-gray-50 border border-dashed rounded-xl flex items-center gap-[0.75rem] text-gray-400">
+                            <span>📹</span> <span className="font-semibold text-[0.9rem]">Video Lesson</span>
+                        </div>
+                        <div className="p-[1rem] bg-gray-50 border border-dashed rounded-xl flex items-center gap-[0.75rem] text-gray-400">
+                            <span>🧪</span> <span className="font-semibold text-[0.9rem]">Sandbox Simulation</span>
+                        </div>
+                        <div className="p-[1rem] bg-gray-50 border border-dashed rounded-xl flex items-center gap-[0.75rem] text-gray-400">
+                            <span>❓</span> <span className="font-semibold text-[0.9rem]">Quiz Block</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex flex-col gap-[1rem]">
+                        <p className="text-[0.85rem] text-[var(--text-muted,#6B7280)] leading-relaxed">
+                            Select block type to add:
+                        </p>
+                        <button
+                            onClick={() => handleAddBlock("video")}
+                            className="w-full p-[1rem] bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-red-400 rounded-xl flex items-center gap-[0.75rem] text-left transition-all hover:-translate-y-[1px] hover:shadow-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                        >
+                            <div className="w-[2.2rem] h-[2.2rem] rounded-lg bg-red-100 flex items-center justify-center text-red-600 font-bold">📹</div>
+                            <div>
+                                <span className="block font-semibold text-[0.95rem]">Video Lesson</span>
+                                <span className="text-[0.75rem] text-[var(--text-muted)]">Upload or embed MP4</span>
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => handleAddBlock("sandbox")}
+                            className="w-full p-[1rem] bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-blue-400 rounded-xl flex items-center gap-[0.75rem] text-left transition-all hover:-translate-y-[1px] hover:shadow-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                        >
+                            <div className="w-[2.2rem] h-[2.2rem] rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 font-bold">🧪</div>
+                            <div>
+                                <span className="block font-semibold text-[0.95rem]">Sandbox Lab</span>
+                                <span className="text-[0.75rem] text-[var(--text-muted)]">2D workspace workbench</span>
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => handleAddBlock("quiz")}
+                            className="w-full p-[1rem] bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-emerald-400 rounded-xl flex items-center gap-[0.75rem] text-left transition-all hover:-translate-y-[1px] hover:shadow-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                        >
+                            <div className="w-[2.2rem] h-[2.2rem] rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold">❓</div>
+                            <div>
+                                <span className="block font-semibold text-[0.95rem]">Quiz Block</span>
+                                <span className="text-[0.75rem] text-[var(--text-muted)]">Configurable questions</span>
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => {
+                                setCurrentView("course-overview");
+                                announce("Switched back to Course Outline overview.");
+                            }}
+                            className="mt-[2rem] w-full py-[0.75rem] border border-[var(--text-main)] hover:bg-[var(--text-main)] hover:text-white transition-colors duration-150 font-bold rounded-xl text-center text-[0.9rem] focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                        >
+                            &larr; Back to Outline
+                        </button>
+                    </div>
+                )}
+            </aside>
+
+            {/* Center canvas*/}
+            <main className="w-full lg:w-[55%] p-[2rem] overflow-y-auto max-h-screen flex flex-col gap-[2rem0">
+                {currentView === "course-overview" ? (
+                    <>
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h1 className="text-[2rem0 font-bold text-[var(--text-main)]"> Create New Course
+                                </h1></div></div></>
+                ) : (<div></div>)}
+            </main>
+        </div>
+    )
 }
+
