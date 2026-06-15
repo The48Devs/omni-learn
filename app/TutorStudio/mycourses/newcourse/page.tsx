@@ -1084,12 +1084,13 @@ export default function CourseCreatorStudio() {
                                 </select>
                             </div>
 
-                            <button
-                                disabled
-                                className="w-full mt-auto py-[0.75rem] bg-gray-100 text-gray-400 font-bold rounded-lg cursor-not-allowed text-center text-[0.95rem]"
+                            <Link
+                                href="/TutorStudio/courses/course-1/analytics"
+                                className="w-full mt-auto py-[0.75rem] bg-[#0b1b3d] dark:bg-[var(--button-primary)] text-white hover:opacity-90 font-bold rounded-lg text-center text-[0.95rem] transition-all block focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
                             >
                                 View Course Analytics
-                            </button>
+                            </Link>
+
                         </>
                     ) : (
                         <>
