@@ -20,7 +20,8 @@ interface Student {
 }
 
 //course data scope by the ID
-const MOCK_COURSES_DATA: Record<string,
+const MOCK_COURSES_DATA: Record<
+    string,
     {
         title: string;
         completionRate: string;
@@ -108,5 +109,26 @@ const MOCK_COURSES_DATA: Record<string,
         ],
     },
 };
+
+export default function CourseAnalyticsPage({ params }: PageProps) {
+    const resolvedParams = use(params);
+    const courseId = resolvedParams?.id || "default";
+
+    //resolve course data
+    const courseData = MOCK_COURSES_DATA[courseId] || MOCK_COURSES_DATA.default;
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const [filterStatus, setFilterStatus] = useState<"All" | "Excelling" | "On Track" | "At Risk">("All");
+
+    const filteredStudents = courseData.students.filter((student) => {
+        const matchesSearch =
+            student.name.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase()) ||
+            student.email.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase());
+        const matchesFilter = filterStatus === "All" || student.status === filterStatus;
+        return matchesSearch && matchesFilter;
+    });
+
+
+}
 
 
