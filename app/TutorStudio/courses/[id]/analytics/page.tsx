@@ -167,7 +167,23 @@ export default function CourseAnalyticsPage({ params }: PageProps) {
                     + Bulk Action
                 </button>
             </div>
+            {/*Scoped course performance */}
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1.5rem]" aria-label="Course stats summary">
+                {/*Competition rate*/}
+                <div className="bg-[var(--bg-primary)] border-t-[4px] border-[var(--success-accent)] p-[1.5rem] rounded-[0.75rem] border border-[var(--border-color)] flex flex-col items-center justify-center text-center space-y-[1rem]">
+                    <span className="text-[0.6875rem] font-bold tracking-widest text-[var(--text-muted)] uppercase">Completion Rate</span>
+                    <div className="w-[3.5rem] h-[3.5rem] rounded-full bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center shadow-inner">
+                        <svg className="w-[1.5rem] h-[1.5rem] text-[var(--success-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <span className="text-[1.875rem] font-extrabold text-[var(--text-main)]">{courseData.completionRate}</span>
+                    <span className="text-[0.75rem] font-semibold text-emerald-600 dark:text-emerald-400">↗ {courseData.completionTrend} vs last week</span>
+                </div>
+
+            </section>
         </div>
+
 
     )
 
