@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState, use } from "react";
-import Link from "next/link";
 
-interface PageProps {
-    params: Promise<{ id: string }> | { id: string };
-}
+import React, { useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 //student data 
 interface Student {
@@ -110,9 +108,9 @@ const MOCK_COURSES_DATA: Record<
     },
 };
 
-export default function CourseAnalyticsPage({ params }: PageProps) {
-    const resolvedParams = use(params);
-    const courseId = resolvedParams?.id || "default";
+export default function CourseAnalyticsPage() {
+    const params = useParams();
+    const courseId = (params?.id as string) || "default";
 
     //resolve course data
     const courseData = MOCK_COURSES_DATA[courseId] || MOCK_COURSES_DATA.default;
