@@ -150,7 +150,23 @@ export default function CourseAnalyticsPage({ params }: PageProps) {
                 </div>
 
             </div>
-
+            {/* Action Buttons */}
+            <div className="flex items-center gap-[0.75rem]">
+                <button
+                    onClick={() => alert("Exporting Scoped Course Report...")}
+                    className="px-[1.25rem] py-[0.75rem] rounded-[0.75rem] border border-[var(--border-color)] bg-[var(--bg-primary)] text-[0.75rem] font-bold text-[var(--text-main)] hover:bg-[var(--bg-secondary)] transition-all cursor-pointer focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color)] focus-visible:outline-offset-2"
+                    aria-label="Export analytics report as PDF or CSV"
+                >
+                    📥 Export Report
+                </button>
+                <button
+                    onClick={() => alert("Opening Bulk Actions Menu...")}
+                    className="px-[1.25rem] py-[0.75rem] rounded-[0.75rem] bg-[#FF6B35] hover:bg-[#e0521f] text-white text-[0.75rem] font-bold transition-all cursor-pointer focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color)] focus-visible:outline-offset-2"
+                    aria-label="Perform bulk action on selected students"
+                >
+                    + Bulk Action
+                </button>
+            </div>
         </div>
 
     )
