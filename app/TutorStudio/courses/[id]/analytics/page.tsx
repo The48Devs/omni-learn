@@ -199,6 +199,123 @@ export default function CourseAnalyticsPage({ params }: PageProps) {
                         </button>
                     </div>
 
+                    {/* trend line graphic */}
+                    <div className="w-full h-[14rem] flex items-end" aria-hidden="true">
+                        <svg className="w-full h-full" viewBox="0 0 700 200" preserveAspectRatio="none">
+                            <line x1="50" y1="20" x2="680" y2="20" stroke="var(--border-color)" strokeOpacity="0.4" />
+                            <line x1="50" y1="60" x2="680" y2="60" stroke="var(--border-color)" strokeOpacity="0.4" />
+                            <line x1="50" y1="100" x2="680" y2="100" stroke="var(--border-color)" strokeOpacity="0.4" />
+                            <line x1="50" y1="140" x2="680" y2="140" stroke="var(--border-color)" strokeOpacity="0.4" />
+                            <line x1="50" y1="180" x2="680" y2="180" stroke="var(--border-color)" strokeOpacity="0.8" />
+
+                            {/* Spline gradient */}
+                            <path
+                                d="M 50 180 Q 150 140 250 80 T 450 120 T 650 40 L 680 40 L 680 180 Z"
+                                fill="url(#sandboxGradient)"
+                                opacity="0.15"
+                            />
+                            {/* Spline Line */}
+                            <path
+                                d="M 50 180 Q 150 140 250 80 T 450 120 T 650 40"
+                                fill="none"
+                                stroke="#3b82f6"
+                                strokeWidth="3.5"
+                                strokeLinecap="round"
+                            />
+                            <defs>
+                                <linearGradient id="sandboxGradient" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#3b82f6" />
+                                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    {/* X-Axis Labels */}
+                    <div className="flex justify-between pl-[2.5rem] pr-[1rem] pt-[1rem] text-[0.75rem] font-semibold text-[var(--text-muted)]" aria-hidden="true">
+                        {courseData.sandboxData.map((d) => (
+                            <span key={d.day}>{d.day}</span>
+                        ))}
+                    </div>
+                    {/* accessbility fall backs table*/}
+                    <div className="sr-only">
+                        <h4 id="sandbox-fallback-caption">Daily Sandbox Simulator Interaction Counts</h4>
+                        <table aria-describedby="sandbox-fallback-caption">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Day</th>
+                                    <th scope="col">Interactions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {courseData.sandboxData.map((d) => (
+                                    <tr key={d.day}>
+                                        <td>{d.day}</td>
+                                        <td>{d.interactions}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* Daily Course Engagement */}
+                    <div className="bg-[var(--bg-primary)] rounded-[1.25rem] border border-[var(--border-color)] p-[1.5rem] shadow-xs">
+                        <div className="flex justify-between items-center mb-[1.5rem]">
+                            <div>
+                                <h3 className="text-[1.125rem] font-bold text-[var(--text-main)]">Daily Course Engagement</h3>
+                                <p className="text-[0.75rem] text-[var(--text-muted)]">Active minutes recorded on curriculum pages</p>
+                            </div>
+                            <button
+                                onClick={() => alert("Course analytics configurations...")}
+                                className="text-[var(--text-muted)] hover:text-[var(--text-main)] p-[0.25rem] rounded-[0.25rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color)]"
+                                aria-label="Course engagement actions menu"
+                            >
+                                •••
+                            </button>
+                        </div>
+                        {/* Bar Chart Graphic */}
+                        <div className="w-full h-[14rem] flex items-end" aria-hidden="true">
+                            <svg className="w-full h-full" viewBox="0 0 700 200" preserveAspectRatio="none">
+                                <line x1="50" y1="20" x2="680" y2="20" stroke="var(--border-color)" strokeOpacity="0.4" />
+                                <line x1="50" y1="60" x2="680" y2="60" stroke="var(--border-color)" strokeOpacity="0.4" />
+                                <line x1="50" y1="100" x2="680" y2="100" stroke="var(--border-color)" strokeOpacity="0.4" />
+                                <line x1="50" y1="140" x2="680" y2="140" stroke="var(--border-color)" strokeOpacity="0.4" />
+                                <line x1="50" y1="180" x2="680" y2="180" stroke="var(--border-color)" strokeOpacity="0.8" />
+
+                                <rect x="75" y="60" width="28" height="120" rx="6" fill="#128a9b" />
+                                <rect x="175" y="90" width="28" height="90" rx="6" fill="#128a9b" />
+                                <rect x="275" y="40" width="28" height="140" rx="6" fill="#128a9b" />
+                                <rect x="375" y="110" width="28" height="70" rx="6" fill="#128a9b" />
+                                <rect x="475" y="70" width="28" height="110" rx="6" fill="#128a9b" />
+                                <rect x="575" y="140" width="28" height="40" rx="6" fill="#128a9b" />
+                                <rect x="640" y="50" width="28" height="130" rx="6" fill="#128a9b" />
+                            </svg>
+                        </div>
+                        {/*X-Axis Labels */}
+                        <div className="flex justify-between pl-[2.5rem] pr-[1rem] pt-[1rem] text-[0.75rem] font-semibold text-[var(--text-muted)]" aria-hidden="true">
+                            {courseData.engagementData.map((d) => (
+                                <span key={d.day}>{d.day}</span>
+                            ))}
+                        </div>
+                        {/* accessibility fall back table */}
+                        <div className="sr-only">
+                            <h4 id="engagement-fallback-caption">Daily Active Minutes Records</h4>
+                            <table aria-describedby="engagement-fallback-caption">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Day</th>
+                                        <th scope="col">Active Minutes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {courseData.engagementData.map((d) => (
+                                        <tr key={d.day}>
+                                            <td>{d.day}</td>
+                                            <td>{d.activeMinutes}m</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
