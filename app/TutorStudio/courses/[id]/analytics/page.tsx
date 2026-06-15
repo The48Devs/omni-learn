@@ -318,6 +318,160 @@ export default function CourseAnalyticsPage({ params }: PageProps) {
                     </div>
                 </div>
             </section>
+
+            {/* Enrolled student table components*/}
+            <section aria-labelledby="student-roster-title" className="bg-[var(--bg-primary)] rounded-[1.25rem] border border-[var(--border-color)] overflow-hidden shadow-xs">
+                <div className="p-[1.5rem] border-b border-[var(--border-color)] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-[1rem]">
+                    <div>
+                        <h3 id="student-roster-title" className="text-[1.25rem] font-bold text-[var(--text-main)]">
+                            Student Engagement
+                        </h3>
+                        <p className="text-[0.75rem] text-[var(--text-muted)] mt-[0.25rem]">
+                            Real-time learning metrics and activity status for students enrolled in this course.
+                        </p>
+                    </div>
+                    {/* Search and Filters */}
+                    <div className="flex items-center gap-[0.75rem] flex-wrap">
+                        <input
+                            type="text"
+                            placeholder="Search student..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="px-[0.875rem] py-[0.375rem] text-[0.75rem] rounded-[0.5rem] border border-[var(--border-color)] bg-[var(--bg-secondary)] text-[var(--text-main)] outline-none focus:border-[var(--focus-ring-color)] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color)]"
+                            aria-label="Search students by name or email"
+                        />
+                        <div className="flex items-center gap-[0.5rem] text-[0.75rem]">
+                            <span className="font-bold text-[var(--text-muted)] uppercase tracking-wider text-[0.625rem]">Filter:</span>
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value as any)}
+                                className="bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] rounded-[0.5rem] px-[0.625rem] py-[0.375rem] font-semibold cursor-pointer outline-none focus:border-[var(--focus-ring-color)] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color)]"
+                                aria-label="Filter roster by status"
+                            >
+                                <option value="All">All Students</option>
+                                <option value="Excelling">Excelling</option>
+                                <option value="On Track">On Track</option>
+                                <option value="At Risk">At Risk</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                {/* Data Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-[var(--bg-secondary)] text-[0.625rem] font-bold text-[var(--text-muted)] uppercase tracking-wider border-b border-[var(--border-color)]">
+                                <th className="py-[1rem] px-[1.5rem]" scope="col">Student Name</th>
+                                <th className="py-[1rem] px-[1.5rem]" scope="col">Course Progress</th>
+                                <th className="py-[1rem] px-[1.5rem]" scope="col">Last Active</th>
+                                <th className="py-[1rem] px-[1.5rem]" scope="col">Avg. Score</th>
+                                <th className="py-[1rem] px-[1.5rem]" scope="col">Status</th>
+                                <th className="py-[1rem] px-[1.5rem] text-right" scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[var(--border-color)] text-[0.875rem] text-[var(--text-main)]">
+                            {filteredStudents.map((student, idx) => (
+                                <tr key={idx} className="hover:bg-slate-50/10 transition-colors">
+                                    {/* Name and avatar info*/}
+                                    <td className="py-[1rem] px-[1.5rem] flex items-center gap-[0.75rem]">
+                                        <div
+                                            className={`w-[2rem] h-[2rem] rounded-full ${student.avatarColor} flex items-center justify-center font-bold text-[0.75rem] shadow-xs`}
+                                            aria-hidden="true"
+                                        >
+                                            {student.initials}
+                                        </div>
+                                        <div>
+                                            <span className="font-semibold block">{student.name}</span>
+                                            <span className="text-[0.75rem] text-[var(--text-muted)] block">{student.email}</span>
+                                        </div>
+                                    </td>
+                                    {/* Progressive Bar */}
+                                    <td className="py-[1rem] px-[1.5rem]">
+                                        <div className="flex items-center gap-[0.75rem] max-w-[9.375rem]">
+                                            <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-[0.5rem] overflow-hidden shadow-inner">
+                                                <div
+                                                    className={`h-full rounded-full ${student.status === "Excelling"
+                                                        ? "bg-teal-500"
+                                                        : student.status === "At Risk"
+                                                            ? "bg-rose-500"
+                                                            : "bg-orange-500"
+                                                        }`}
+                                                    style={{ width: `${student.progress}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-[0.75rem] font-bold text-[var(--text-muted)]">
+                                                {student.progress}%
+                                            </span>
+                                        </div>
+                                    </td>
+                                    {/* Last Active Timestamp */}
+                                    <td className="py-[1rem] px-[1.5rem] text-[0.75rem] font-medium text-[var(--text-muted)]">
+                                        {student.lastActive}
+                                    </td>
+                                    {/* Avg Score */}
+                                    <td className="py-[1rem] px-[1.5rem] font-extrabold">
+                                        {student.avgScore}%
+                                    </td>
+                                    {/* Status Pills */}
+                                    <td className="py-[1rem] px-[1.5rem]">
+                                        <span
+                                            className={`px-[0.75rem] py-[0.25rem] rounded-full text-[0.75rem] font-bold tracking-wide border ${student.status === "Excelling"
+                                                ? "bg-teal-50 dark:bg-teal-950/20 border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-400"
+                                                : student.status === "At Risk"
+                                                    ? "bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400"
+                                                    : "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-400"
+                                                }`}
+                                        >
+                                            {student.status}
+                                        </span>
+                                    </td>
+                                    {/* Actions ellipses */}
+                                    <td className="py-[1rem] px-[1.5rem] text-right">
+                                        <button
+                                            onClick={() => alert(`Context actions for ${student.name}`)}
+                                            className="text-[var(--text-muted)] hover:text-[var(--text-main)] p-[0.25rem] rounded-[0.25rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color)] cursor-pointer"
+                                            aria-label={`More actions for ${student.name}`}
+                                        >
+                                            •••
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    {filteredStudents.length === 0 && (
+                        <div className="text-center py-[2.5rem] text-[0.75rem] font-semibold text-[var(--text-muted)]">
+                            No students match the criteria.
+                        </div>
+                    )}
+                </div>
+                {/* Footer Summary of Table */}
+                <div className="p-[1rem] border-t border-[var(--border-color)] flex flex-wrap gap-[1rem] items-center justify-between text-[0.75rem] font-semibold text-[var(--text-muted)] bg-[var(--bg-secondary)]">
+                    <span>
+                        Showing {filteredStudents.length} of {courseData.students.length} students
+                    </span>
+                    <div className="flex gap-[1.5rem] items-center flex-wrap">
+                        <div className="flex items-center gap-[0.5rem]">
+                            <span className="text-[0.6875rem] text-[var(--text-muted)] uppercase tracking-wider">Avg. Completion:</span>
+                            <span className="font-extrabold text-[var(--text-main)]">76.4%</span>
+                            <span className="text-[0.625rem] px-[0.375rem] py-[0.125rem] rounded-[0.25rem] bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 font-bold">
+                                +12%
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-[0.5rem]">
+                            <span className="text-[0.6875rem] text-[var(--text-muted)] uppercase tracking-wider">At Risk:</span>
+                            <span className="font-extrabold text-[var(--text-main)]">{courseData.strugglingRate}</span>
+                            <span className="text-[0.625rem] px-[0.375rem] py-[0.125rem] rounded-[0.25rem] bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 font-bold">
+                                3 Alert
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-[0.5rem]">
+                            <span className="text-[0.6875rem] text-[var(--text-muted)] uppercase tracking-wider">Active Now:</span>
+                            <span className="font-extrabold text-[var(--text-main)]">148</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
 
 
