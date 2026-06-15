@@ -127,8 +127,33 @@ export default function CourseAnalyticsPage({ params }: PageProps) {
         const matchesFilter = filterStatus === "All" || student.status === filterStatus;
         return matchesSearch && matchesFilter;
     });
+    return (
+        <div className="space-y-[2.5rem] p-[2rem] bg-[var(--bg-primary)] text-[var(--text-main)] min-h-screen">
+            {/* Context Header */}
+            <div className="flex flex-col gap-[1rem]">
+                <Link
+                    href="/TutorStudio/mycourses"
+                    className="inline-flex items-center text-[0.875rem] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color)] focus-visible:outline-offset-2 rounded-[0.25rem] w-fit"
+                    aria-label="Back to My Courses dashboard"
+                >
+                    ← Back to My Courses
+                </Link>
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-[1.5rem]">
+                    <div className="max-w-[42.5rem]">
+                        <h1 className="text-[2rem] font-extrabold tracking-tight text-[#041A3E] dark:text-[var(--text-main)]">
+                            Course Analytics: {courseData.title}
+                        </h1>
+                        <p className="text-[0.875rem] text-[var(--text-muted)] mt-[0.375rem] leading-relaxed">
+                            Detailed student engagement, progress tracking, and sandbox performance metrics for this course.
+                        </p>
+                    </div>
+                </div>
 
+            </div>
+
+        </div>
+
+    )
 
 }
-
 
