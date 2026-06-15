@@ -180,7 +180,26 @@ export default function CourseAnalyticsPage({ params }: PageProps) {
                     <span className="text-[1.875rem] font-extrabold text-[var(--text-main)]">{courseData.completionRate}</span>
                     <span className="text-[0.75rem] font-semibold text-emerald-600 dark:text-emerald-400">↗ {courseData.completionTrend} vs last week</span>
                 </div>
+            </section>
+            {/* Course specifics*/}
+            <section className="space-y-[1.5rem]" aria-label="Visual analytics graphs">
+                {/* Daily Sandbox Engagement */}
+                <div className="bg-[var(--bg-primary)] rounded-[1.25rem] border border-[var(--border-color)] p-[1.5rem] shadow-xs">
+                    <div className="flex justify-between items-center mb-[1.5rem]">
+                        <div>
+                            <h3 className="text-[1.125rem] font-bold text-[var(--text-main)]">Daily Sandbox Engagement</h3>
+                            <p className="text-[0.75rem] text-[var(--text-muted)]">Simulator interactions triggered per day</p>
+                        </div>
+                        <button
+                            onClick={() => alert("Sandbox configurations...")}
+                            className="text-[var(--text-muted)] hover:text-[var(--text-main)] p-[0.25rem] rounded-[0.25rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color)]"
+                            aria-label="Sandbox engagement actions menu"
+                        >
+                            •••
+                        </button>
+                    </div>
 
+                </div>
             </section>
         </div>
 
