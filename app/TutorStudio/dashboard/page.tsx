@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
+import Link from "next/link";
 
 interface Course {
     id: string;
