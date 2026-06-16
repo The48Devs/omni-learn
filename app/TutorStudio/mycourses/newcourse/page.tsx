@@ -10,7 +10,7 @@ interface StorylineNode {
     speakerName: string;
     speakerAvatarUrl: string;
     dialogueText: string;
-    choice: { id: string; text: string }[];
+    choices: { id: string; text: string }[];
 }
 
 interface Module {
@@ -279,7 +279,7 @@ export default function CourseCreatorStudio() {
                 }
             } : undefined,
             //sandbox extensions
-            labnotes: type === "sandbox" ? "" : undefined,
+            labNotes: type === "sandbox" ? "" : undefined,
             objectives: type === "sandbox" ? [] : undefined,
             quizQuestions: type === "quiz" ? [] : undefined,
 
