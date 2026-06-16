@@ -125,5 +125,44 @@ export default function MyCoursesPage() {
         announce(`Filtered courses by ${label}`);
     };
 
-
+    return (
+        <div className="space-y-[2.5rem]">
+            {/* Title & Filter Options */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[1rem] pb-[1rem] border-b border-[var(--border-color)]">
+                <div>
+                    <h1 className="text-[1.8rem] font-extrabold text-[var(--text-main)] tracking-tight">
+                        My Courses
+                    </h1>
+                    <p className="text-[0.88rem] text-[var(--text-muted)] mt-[0.15rem]">
+                        Track your progress and continue learning.
+                    </p>
+                </div>
+                {/* filter buttons*/}
+                <div role="tablist" aria-label="Filter courses list" className="flex items-center gap-[0.5rem] self-start sm:self-auto">
+                    {[
+                        { id: "all", label: "All Courses" },
+                        { id: "in-progress", label: "In Progress" },
+                        { id: "completed", label: "Completed" },
+                    ].map((tab) => {
+                        const isActive = filter === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                role="tab"
+                                aria-selected={isActive}
+                                type="button"
+                                onClick={() => handleFilterChange(tab.id as typeof filter, tab.label)}
+                                className={`px-[1rem] py-[0.45rem] rounded-full text-[0.78rem] font-bold transition-all focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 ${isActive
+                                    ? "bg-[var(--text-main)] text-[var(--bg-primary)] border border-[var(--border-color)] shadow-xs"
+                                    : "bg-[var(--bg-tertiary)] text-[var(--text-muted)] hover:bg-[var(--border-color)] hover:text-[var(--text-main)]"
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
 }
