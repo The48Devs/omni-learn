@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
 
 // interface types
-interface StorylineModule {
+interface StorylineNode {
     id: string;
     speakerName: string;
     speakerAvatarUrl: string;
@@ -31,7 +31,7 @@ interface ContentBlock {
     // Video Block Specific
     videoUrl?: string;
     videoTranscript?: string;
-    videoFileName?: string; // Uploaded video file name
+    videoFileName?: string;
     // Sandbox Block Specific
     sandboxComponents?: string[];
     savedSimulationSetup?: {
@@ -39,12 +39,15 @@ interface ContentBlock {
         targetStates: { [key: string]: string };
         positions?: { [key: string]: { x: number; y: number } };
     };
-
-    //sandbox lab notes & objectives
-    labnotes?: string;
+    // sandbox lab notes & objectives extensions
+    labNotes?: string;
     objectives?: string[];
     // Quiz Block Specific
     quizQuestions?: QuizQuestions[];
+    // storyline block specific
+    storylineTitle?: string;
+    storylineIntro?: string;
+    storylineNodes?: StorylineNode[];
 }
 
 interface QuizQuestions {
@@ -240,7 +243,15 @@ export default function CourseCreatorStudio() {
                     "LED": { x: 450, y: 300 }
                 }
             } : undefined,
-            quizQuestions: type === "quiz" ? [] : undefined
+            //sandbox extensions
+            labnotes: type === "sandbox" ? "" : undefined,
+            objectives: type === "sandbox" ? [] : undefined,
+            quizQuestions: type === "quiz" ? [] : undefined,
+
+            //storyline block seedss
+            storylineTitle: type === "storyline" ? "Untitled Scene" : undefined,
+            storylineIntro: type === "storyline" ? "" : undefined,
+            storylineNodes: type === "storyline" ? [] : undefined,
         };
 
         setModules(
