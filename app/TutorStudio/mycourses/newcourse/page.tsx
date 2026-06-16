@@ -983,28 +983,28 @@ export default function CourseCreatorStudio() {
                                             </div>
 
                                             {block.type === "video" && (
-                                                <div className="flex flex-col gap-[0.75rem] bg-gray-50 border border-gray-100 p-[1rem] rounded-lg">
+                                                <div className="flex flex-col gap-[0.75rem] bg-[var(--bg-primary)] border border-[var(--border-color)] p-[1rem] rounded-lg">
                                                     <div className="flex gap-[1rem] items-center">
-                                                        <div className="relative w-[6rem] h-[3.5rem] bg-black rounded flex items-center justify-center text-white text-[0.8rem]">
+                                                        <div className="relative w-[6rem] h-[3.5rem] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded flex items-center justify-center text-[var(--text-main)] text-[0.8rem]">
                                                             ▶️
                                                         </div>
                                                         <div>
                                                             <p className="text-[0.9rem] font-bold text-[var(--text-main)]">Video Player Block</p>
                                                             {block.videoFileName ? (
-                                                                <p className="text-[0.75rem] text-emerald-600 font-semibold truncate max-w-[20rem]">
+                                                                <p className="text-[0.75rem] text-[var(--success-accent)] font-semibold truncate max-w-[20rem]">
                                                                     📁 File: {block.videoFileName}
                                                                 </p>
                                                             ) : block.videoUrl ? (
-                                                                <p className="text-[0.75rem] text-emerald-600 font-semibold truncate max-w-[20rem]">
+                                                                <p className="text-[0.75rem] text-[var(--success-accent)] font-semibold truncate max-w-[20rem]">
                                                                     🔗 URL: {block.videoUrl}
                                                                 </p>
                                                             ) : (
-                                                                <p className="text-[0.75rem] text-amber-600 font-medium">⚠️ No video file/URL linked yet.</p>
+                                                                <p className="text-[0.75rem] text-[#ff6b35] font-medium">⚠️ No video file/URL linked yet.</p>
                                                             )}
                                                         </div>
                                                     </div>
                                                     {block.videoTranscript && (
-                                                        <div className="border-t border-gray-200 pt-[0.5rem] mt-[0.25rem]">
+                                                        <div className="border-t border-[var(--border-color)] pt-[0.5rem] mt-[0.25rem]">
                                                             <span className="block text-[0.75rem] font-bold text-[var(--text-muted)]">Active Lesson Transcript:</span>
                                                             <p className="text-[0.75rem] text-[var(--text-main)] italic line-clamp-2 mt-[0.15rem]">
                                                                 "{block.videoTranscript}"
@@ -1012,44 +1012,44 @@ export default function CourseCreatorStudio() {
                                                         </div>
                                                     )}
                                                 </div>
+
                                             )}
 
                                             {block.type === "sandbox" && (
-                                                <div className="border border-gray-100 bg-gray-50 p-[1rem] rounded-lg">
+                                                <div className="border border-[var(--border-color)] bg-[var(--bg-primary)] p-[1rem] rounded-lg">
                                                     <p className="text-[0.8rem] font-bold text-[var(--text-main)] mb-[0.5rem]">Assigned Workspace Components:</p>
                                                     <div className="flex flex-wrap gap-[0.5rem] mb-[0.5rem]">
                                                         {block.sandboxComponents && block.sandboxComponents.length > 0 ? (
                                                             block.sandboxComponents.map((comp, idx) => (
-                                                                <span key={idx} className="bg-blue-100 border border-blue-200 text-blue-800 text-[0.75rem] font-semibold px-[0.6rem] py-[0.2rem] rounded-md flex items-center gap-[0.4rem]">
+                                                                <span key={idx} className="bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-main)] text-[0.75rem] font-semibold px-[0.6rem] py-[0.2rem] rounded-md flex items-center gap-[0.4rem]">
                                                                     ⚡ {comp}
                                                                 </span>
                                                             ))
                                                         ) : (
-                                                            <span className="text-[0.75rem] text-amber-600">No components assigned yet. Add one in Block Settings.</span>
+                                                            <span className="text-[0.75rem] text-[#ff6b35]">No components assigned yet. Add one in Block Settings.</span>
                                                         )}
                                                     </div>
                                                     {block.savedSimulationSetup && block.savedSimulationSetup.connections.length > 0 && (
-                                                        <div className="border-t border-gray-200 pt-[0.5rem] mt-[0.5rem] text-[0.75rem]">
-                                                            <p className="text-emerald-700 font-semibold">✓ Correct Simulation Validation Setup Saved</p>
-                                                            <p className="text-gray-500 mt-[0.15rem]">
+                                                        <div className="border-t border-[var(--border-color)] pt-[0.5rem] mt-[0.5rem] text-[0.75rem]">
+                                                            <p className="text-[var(--success-accent)] font-semibold">✓ Correct Simulation Validation Setup Saved</p>
+                                                            <p className="text-[var(--text-muted)] mt-[0.15rem]">
                                                                 Connections: {block.savedSimulationSetup.connections.map(c => `${c.from}.${c.fromTerminal} ⚡ ${c.to}.${c.toTerminal}`).join(", ")}
                                                             </p>
                                                         </div>
                                                     )}
-
                                                     {/* lab notes*/}
                                                     {block.labNotes && (
-                                                        <div className="mt-[0.75rem] bg-sky-50 border border-sky-200 rounded-lg p-[0.75rem] flex flex-col gap-[0.4rem]">
+                                                        <div className="mt-[0.75rem] bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg p-[0.75rem] flex flex-col gap-[0.4rem]">
                                                             <div className="flex items-center gap-[0.5rem]">
                                                                 <div
-                                                                    className="w-[1.4rem] h-[1.4rem] rounded-full bg-sky-400 flex items-center justify-center text-white text-[0.65rem] font-extrabold shrink-0"
+                                                                    className="w-[1.4rem] h-[1.4rem] rounded-full bg-[var(--text-main)] text-[var(--bg-primary)] flex items-center justify-center text-[0.65rem] font-extrabold shrink-0"
                                                                     aria-hidden="true"
                                                                 >
                                                                     i
                                                                 </div>
-                                                                <span className="text-[0.75rem] font-bold text-sky-800 uppercase tracking-wide">Lab Notes Preview</span>
+                                                                <span className="text-[0.75rem] font-bold text-[var(--text-main)] uppercase tracking-wide">Lab Notes Preview</span>
                                                             </div>
-                                                            <p className="text-[0.75rem] text-sky-700 leading-relaxed line-clamp-3 font-mono">
+                                                            <p className="text-[0.75rem] text-[var(--text-muted)] leading-relaxed line-clamp-3 font-mono">
                                                                 {block.labNotes}
                                                             </p>
                                                         </div>
@@ -1089,16 +1089,16 @@ export default function CourseCreatorStudio() {
 
 
                                             {block.type === "quiz" && (
-                                                <div className="border border-gray-100 bg-gray-50 p-[1.25rem] rounded-lg flex flex-col gap-[1rem]">
+                                                <div className="border border-[var(--border-color)] bg-[var(--bg-primary)] p-[1.25rem] rounded-lg flex flex-col gap-[1rem]">
                                                     {block.quizQuestions?.map((q, idx) => (
-                                                        <div key={q.id} className="space-y-[0.75rem] border-b border-gray-200 pb-[1.25rem] last:border-b-0 last:pb-0">
+                                                        <div key={q.id} className="space-y-[0.75rem] border-b border-[var(--border-color)] pb-[1.25rem] last:border-b-0 last:pb-0">
                                                             <div className="flex justify-between items-center">
                                                                 <label className="text-[0.9rem] font-bold text-[var(--text-main)] w-full">
                                                                     {idx + 1}. <input
                                                                         type="text"
                                                                         value={q.question}
                                                                         onChange={(e) => updateQuizText(q.id, e.target.value)}
-                                                                        className="bg-transparent border-b border-dashed border-gray-300 focus:border-[#FF6B35] focus:outline-none font-bold w-[90%]"
+                                                                        className="bg-transparent border-b border-dashed border-[var(--border-color)] focus:border-[#FF6B35] focus:outline-none font-bold w-[90%] text-[var(--text-main)]"
                                                                     />
                                                                 </label>
                                                             </div>
@@ -1107,8 +1107,8 @@ export default function CourseCreatorStudio() {
                                                                     <div
                                                                         key={opt.id}
                                                                         className={`text-[0.8rem] p-[0.75rem] rounded-xl border flex flex-col gap-[0.4rem] transition-all ${opt.isCorrect
-                                                                            ? "bg-emerald-50 border-emerald-300 text-emerald-800 ring-2 ring-emerald-500/20"
-                                                                            : "bg-white border-gray-200 hover:border-gray-300"
+                                                                            ? "bg-[var(--success-accent)]/10 border-[var(--success-accent)] text-[var(--text-main)] ring-2 ring-[var(--success-accent)]/20"
+                                                                            : "bg-[var(--bg-primary)] border-[var(--border-color)] text-[var(--text-main)] hover:border-[var(--text-muted)]"
                                                                             }`}
                                                                     >
                                                                         <div className="flex items-center justify-between">
@@ -1125,8 +1125,8 @@ export default function CourseCreatorStudio() {
                                                                                     toggleQuizOptionCorrect(q.id, opt.id);
                                                                                 }}
                                                                                 className={`px-[0.5rem] py-[0.15rem] rounded text-[0.7rem] font-bold transition-all ${opt.isCorrect
-                                                                                    ? "bg-emerald-600 text-white"
-                                                                                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                                                                    ? "bg-[var(--success-accent)] text-[var(--bg-primary)]"
+                                                                                    : "bg-[var(--bg-tertiary)] text-[var(--text-muted)] hover:bg-[var(--border-color)] hover:text-[var(--text-main)]"
                                                                                     }`}
                                                                             >
                                                                                 {opt.isCorrect ? "Correct ✓" : "Mark Correct"}
@@ -1142,14 +1142,14 @@ export default function CourseCreatorStudio() {
                                                             e.stopPropagation();
                                                             addQuizQuestion();
                                                         }}
-                                                        className="self-center py-[0.5rem] px-[1.25rem] bg-white border border-[var(--border-color)] hover:bg-[#F3F4F6] text-[var(--text-main)] font-semibold text-[0.85rem] rounded-xl flex items-center gap-[0.4rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                        className="self-center py-[0.5rem] px-[1.25rem] bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:bg-[var(--bg-tertiary)] text-[var(--text-main)] font-semibold text-[0.85rem] rounded-xl flex items-center gap-[0.4rem] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
                                                     >
                                                         ➕ Add Question (4 Choices)
                                                     </button>
                                                 </div>
                                             )}
                                             {block.type === "storyline" && (
-                                                <div className="border border-orange-200 bg-orange-50/60 p-[1rem] rounded-lg flex flex-col gap-[0.75rem]">
+                                                <div className="border border-[var(--border-color)] bg-[var(--bg-secondary)] p-[1rem] rounded-lg flex flex-col gap-[0.75rem]">
                                                     {/* Header bar */}
                                                     <div className="flex items-center gap-[0.6rem]">
                                                         <div
@@ -1333,7 +1333,7 @@ export default function CourseCreatorStudio() {
                                                 <button
                                                     type="button"
                                                     onClick={() => fileInputRef.current?.click()}
-                                                    className="w-full border-2 border-dashed border-gray-300 hover:border-[#FF6B35] bg-gray-50 rounded-xl p-[1rem] flex flex-col items-center justify-center text-center cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                    className="w-full border-2 border-dashed border-[var(--border-color)] hover:border-[#FF6B35] bg-[var(--bg-secondary)] rounded-xl p-[1rem] flex flex-col items-center justify-center text-center cursor-pointer transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
                                                 >
                                                     <span className="text-[1.5rem]">📤</span>
                                                     <span className="text-[0.8rem] font-bold text-[var(--text-main)] mt-[0.25rem]">
