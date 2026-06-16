@@ -1060,6 +1060,62 @@ export default function CourseCreatorStudio() {
                                                     </button>
                                                 </div>
                                             )}
+                                            {block.type === "storyline" && (
+                                                <div className="border border-orange-200 bg-orange-50/60 p-[1rem] rounded-lg flex flex-col gap-[0.75rem]">
+                                                    {/* Header bar */}
+                                                    <div className="flex items-center gap-[0.6rem]">
+                                                        <div
+                                                            className="w-[1.8rem] h-[1.8rem] rounded-md bg-orange-500 flex items-center justify-center shrink-0"
+                                                            aria-hidden="true"
+                                                        >
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                                <rect x="2" y="3" width="7" height="5" rx="1" />
+                                                                <rect x="15" y="3" width="7" height="5" rx="1" />
+                                                                <rect x="8" y="16" width="8" height="5" rx="1" />
+                                                                <line x1="5.5" y1="8" x2="12" y2="16" />
+                                                                <line x1="18.5" y1="8" x2="12" y2="16" />
+                                                            </svg>
+                                                        </div>
+                                                        <span className="text-[0.7rem] font-extrabold text-orange-700 uppercase tracking-wider">
+                                                            Interactive Storyline
+                                                        </span>
+                                                    </div>
+                                                    {/* Main title display */}
+                                                    <p className="text-[1.05rem] font-extrabold text-[var(--text-main)] uppercase tracking-wide leading-snug">
+                                                        {block.storylineTitle || "Untitled Scene"}
+                                                    </p>
+
+                                                    {block.storylineIntro ? (
+                                                        <p className="text-[0.8rem] text-[var(--text-muted)] leading-relaxed line-clamp-3 italic">
+                                                            {block.storylineIntro}
+                                                        </p>
+                                                    ) : (
+                                                        <p className="text-[0.75rem] text-orange-400 font-medium">
+                                                            ✏️ No scene intro written yet — configure in Block Settings.
+                                                        </p>
+                                                    )}
+
+                                                    <div className="flex items-center justify-between mt-[0.25rem]">
+                                                        <div className="flex items-center gap-[0.4rem] text-[0.75rem] text-[var(--text-muted)]">
+                                                            <span>⏱</span>
+                                                            <span className="font-semibold">{block.durationMinutes} min</span>
+                                                            {block.storylineNodes && block.storylineNodes.length > 0 && (
+                                                                <span className="ml-[0.4rem] bg-orange-100 text-orange-700 border border-orange-200 px-[0.5rem] py-[0.1rem] rounded-full text-[0.7rem] font-bold">
+                                                                    {block.storylineNodes.length} node{block.storylineNodes.length !== 1 ? "s" : ""}
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        <div
+                                                            className="px-[0.75rem] py-[0.3rem] bg-orange-500 text-white text-[0.7rem] font-bold rounded-lg opacity-50 cursor-not-allowed select-none"
+                                                            aria-hidden="true"
+                                                            title="Placeholder — playable by students"
+                                                        >
+                                                            ▶ Start
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })
