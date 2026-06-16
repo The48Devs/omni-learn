@@ -997,7 +997,7 @@ export default function CourseCreatorStudio() {
                                                         </div>
                                                     )}
 
-                                                    {/* 🆕 Lab Notes Preview sub-card */}
+                                                    {/* lab notes*/}
                                                     {block.labNotes && (
                                                         <div className="mt-[0.75rem] bg-sky-50 border border-sky-200 rounded-lg p-[0.75rem] flex flex-col gap-[0.4rem]">
                                                             <div className="flex items-center gap-[0.5rem]">
@@ -1015,7 +1015,7 @@ export default function CourseCreatorStudio() {
                                                         </div>
                                                     )}
 
-                                                    {/* 🆕 Current Objectives checklist */}
+                                                    {/* objectives checklist*/}
                                                     {block.objectives && block.objectives.length > 0 && (
                                                         <div className="mt-[0.5rem] flex flex-col gap-[0.35rem]">
                                                             <span className="text-[0.7rem] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">
