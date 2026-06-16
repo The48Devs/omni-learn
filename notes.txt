@@ -1,0 +1,26 @@
+Gamification logic
+
+Organization -> Course(s)
+
+Activity completion Point Criteria, (Total 30pts)
+    Accuracy [%/10]
+    Speed [time allocated % (100 -> 0) /10]
+    B4 Deadline (If any) [10]
+    
+Levels,
+    Each organization has a seperate level per student
+    1/4 of all points gained and rounded upto 5 get added as xp
+    level xp req goes up by +50% every level and rounded upto 5
+    Lvl(0) = 5xp
+    
+Streak,
+    Streak is universal
+    1 activity per day for the streak to be counted.
+    a update streak function needs to be called at the completion of every activity. (Different criteria for different Activities)
+    The last streak date for the student is compared against the current date to check if the streak has been counted or the day.
+    If a day is missed the streak is reset to 0.
+
+leaderboards, (Streak only shows students that are part of the organization/Course)
+        Organization[Level/Streak]
+        Course[Points(Activities are combined)/Streak]
+        Activity[Points + completion time]
