@@ -115,7 +115,15 @@ export default function MyCoursesPage() {
         },
     ];
 
-
+    // filter logic for courses
+    const filteredCourses = coursesData.filter((c) => {
+        if (filter === "all") return true;
+        return c.status === filter;
+    });
+    const handleFilterChange = (newFilter: typeof filter, label: string) => {
+        setFilter(newFilter);
+        announce(`Filtered courses by ${label}`);
+    };
 
 
 }
