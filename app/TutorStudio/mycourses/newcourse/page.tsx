@@ -1885,7 +1885,7 @@ export default function CourseCreatorStudio() {
                                                                 </span>
 
                                                                 {node.choices.map((choice, choiceIdx) => (
-                                                                    <div key={choice.id} className="flex items-center gap-[0.4rem]">
+                                                                    <div key={choice.id} className="border border-[var(--border-color)] bg-[var(--bg-secondary)] rounded-lg p-[0.6rem] space-y-[0.5rem] relative">
                                                                         <span className="text-[0.7rem] font-bold text-orange-500 shrink-0 w-[3.5rem]">
                                                                             Choice {choiceIdx + 1}:
                                                                         </span>
@@ -1942,6 +1942,91 @@ export default function CourseCreatorStudio() {
                                                                         >
                                                                             ✕
                                                                         </button>
+
+                                                                        {/* Target nodes & sync points*/}
+                                                                        <div className="grid grid-cols-2 gap-[0.4rem]">
+                                                                            {/* Target Node Dropdown */}
+                                                                            <div className="space-y-[0.2rem]">
+                                                                                <label
+                                                                                    htmlFor={`choice-target-${choice.id}`}
+                                                                                    className="block text-[0.65rem] font-semibold text-[var(--text-muted)]"
+                                                                                >
+                                                                                    🎯 Target Node
+                                                                                </label>
+                                                                                <select
+                                                                                    id={`choice-target-${choice.id}`}
+                                                                                    value={choice.targetNodeId || ""}
+                                                                                    onChange={(e) =>
+                                                                                        setModules(modules.map((m) => ({
+                                                                                            ...m,
+                                                                                            blocks: m.blocks.map((b) =>
+                                                                                                b.id === selectedBlockId
+                                                                                                    ? {
+                                                                                                        ...b,
+                                                                                                        storylineNodes: b.storylineNodes?.map((n, ni) =>
+                                                                                                            ni === nodeIdx
+                                                                                                                ? {
+                                                                                                                    ...n,
+                                                                                                                    choices: n.choices.map((c, ci) =>
+                                                                                                                        ci === choiceIdx ? { ...c, targetNodeId: e.target.value } : c
+                                                                                                                    )
+                                                                                                                }
+                                                                                                                : n
+                                                                                                        )
+                                                                                                    }
+                                                                                                    : b
+                                                                                            )
+                                                                                        })))
+                                                                                    }
+                                                                                    className="w-full p-[0.35rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.75rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                                                >
+                                                                                    <option value="">🛑 End Storyline Scene</option>
+                                                                                    {(activeBlock.storylineNodes || []).map((targetNode, targetIdx) => (
+                                                                                        <option key={targetNode.id} value={targetNode.id}>
+                                                                                            Node {targetIdx + 1}: {targetNode.dialogueText ? (targetNode.dialogueText.substring(0, 20) + (targetNode.dialogueText.length > 20 ? "..." : "")) : "(Empty Dialogue)"}
+                                                                                        </option>
+                                                                                    ))}
+                                                                                </select>
+                                                                            </div>
+                                                                            {/* Sync Points */}
+                                                                            <div className="space-y-[0.2rem]">
+                                                                                <label
+                                                                                    htmlFor={`choice-sync-${choice.id}`}
+                                                                                    className="block text-[0.65rem] font-semibold text-[var(--text-muted)]"
+                                                                                >
+                                                                                    ⚡ Sync Points
+                                                                                </label>
+                                                                                <input
+                                                                                    id={`choice-sync-${choice.id}`}
+                                                                                    type="number"
+                                                                                    value={choice.syncPointsModifier ?? 0}
+                                                                                    onChange={(e) => {
+                                                                                        const val = parseInt(e.target.value, 10);
+                                                                                        setModules(modules.map((m) => ({
+                                                                                            ...m,
+                                                                                            blocks: m.blocks.map((b) =>
+                                                                                                b.id === selectedBlockId
+                                                                                                    ? {
+                                                                                                        ...b,
+                                                                                                        storylineNodes: b.storylineNodes?.map((n, ni) =>
+                                                                                                            ni === nodeIdx
+                                                                                                                ? {
+                                                                                                                    ...n,
+                                                                                                                    choices: n.choices.map((c, ci) =>
+                                                                                                                        ci === choiceIdx ? { ...c, syncPointsModifier: isNaN(val) ? 0 : val } : c
+                                                                                                                    )
+                                                                                                                }
+                                                                                                                : n
+                                                                                                        )
+                                                                                                    }
+                                                                                                    : b
+                                                                                            )
+                                                                                        })))
+                                                                                    }}
+                                                                                    className="w-full p-[0.35rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.75rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                                                />
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                 ))}
 
