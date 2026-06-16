@@ -101,7 +101,7 @@ export default function StudentDashboard() {
 
     const handlePrevCarousel = () => {
         if (carouselIndex > 0) {
-            setCarouselIndex((prev) => prev + 1);
+            setCarouselIndex((prev) => prev - 1);
             announce("Showing Previous recommended courses")
         }
     }
