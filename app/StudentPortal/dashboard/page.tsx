@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useAuth } from "@/app/components/AuthCOntext";
 import RequireAuth from "@/app/components/RequireAuth";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
+import { transform } from "next/dist/build/swc";
 
 interface ContinueLearningCourse {
     id: string;
@@ -97,6 +98,13 @@ export default function StudentDashboard() {
             announce("Showing next recommended courses");
         }
     };
+
+    const handlePrevCarousel = () => {
+        if (carouselIndex > 0) {
+            setCarouselIndex((prev) => prev + 1);
+            announce("Showing Previous recommended courses")
+        }
+    }
     return (
         <div className="space-y-[2rem]">
             {/*Viewport header*/}
@@ -240,6 +248,86 @@ export default function StudentDashboard() {
                 </div>
             </section >
 
+            {/* Recommended courses*/}
+            <section aria-labelledby="recommended-courses-heading" className="space-y-[1rem]">
+                <div className="flex items-center justify-between">
+                    <h2 id="recommended-courses-heading" className="text-[1.2rem] font-extrabold text-[#0b1b3d]">
+                        Recommended Courses
+                    </h2>
+                    <div className="flex items-center gap-[0.4rem]">
+                        <button
+                            type="button"
+                            onClick={handlePrevCarousel}
+                            disabled={carouselIndex === 0}
+                            className={`w-[2rem] h-[2rem] rounded-full border border-gray-200 bg-white flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex === 0
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:bg-[#ff6b35] hover:text-white"
+                                }`}
+                            aria-label="Previous recommended courses page"
+                        >
+                            &lt;
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleNextCarousel}
+                            disabled={carouselIndex >= recommendedCourses.length - 1}
+                            className={`w-[2rem] h-[2rem] rounded-full border border-gray-200 bg-white flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex >= recommendedCourses.length - 1
+                                ? "opacity-40 cursor-not-allowed"
+                                : "hover:bg-[#ff6b35] hover:text-white"
+                                }`}
+                            aria-label="Next recommended courses page"
+                        >
+                            &gt;
+                        </button>
+                    </div>
+                </div>
+                <div className="overflow-hidden">
+                    <div
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1.2rem] transition-transform duration-300 ease-out"
+                        style={{ transform: `translateX(-${carouselIndex * 5}%)` }}
+                    >
+                        {recommendedCourses.map((course) => {
+                            const badgeStyles = {
+                                SCIENCE: "bg-blue-100 text-blue-800",
+                                DESIGN: "bg-pink-100 text-pink-800",
+                                TECH: "bg-purple-100 text-purple-800",
+                                ROBOTICS: "bg-emerald-100 text-emerald-800",
+                            }[course.category];
+                            return (
+                                <div
+                                    key={course.id}
+                                    className="bg-white border border-[#e2e8f0] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group focus-within:ring-3 focus-within:ring-[#2563eb]"
+                                >
+                                    <div
+                                        className={`w-full h-[6.5rem] bg-gradient-to-br ${course.bgGradient} relative flex items-center justify-center text-white/10 text-[2.5rem] font-bold select-none`}
+                                    >
+                                        {course.category}
+                                    </div>
+                                    <div className="p-[1rem] space-y-[0.5rem]">
+                                        <span className={`inline-block px-[0.5rem] py-[0.15rem] rounded-md text-[0.62rem] font-extrabold tracking-wider ${badgeStyles}`}>
+                                            {course.category}
+                                        </span>
+                                        <h3 className="text-[0.85rem] font-extrabold text-[#0b1b3d] leading-snug min-h-[2.4rem] group-hover:text-[#ff6b35] transition-colors">
+                                            <a
+                                                href={`#course-${course.id}`}
+                                                className="focus:outline-none"
+                                            >
+                                                {course.title}
+                                            </a>
+                                        </h3>
+                                        <div className="flex justify-between items-center text-[0.72rem] font-bold pt-[0.4rem] border-t border-gray-50 text-gray-500">
+                                            <span className="flex items-center gap-[0.2rem] text-amber-500">
+                                                ⭐ {course.rating.toFixed(1)}
+                                            </span>
+                                            <span>{course.lessonsCount} Lessons</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
         </div >
     )
 }
