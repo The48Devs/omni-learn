@@ -157,13 +157,12 @@ export default function TutorDashboardContent() {
                                 {/* Footer */}
                                 <div className="p-[1.25rem] bg-[var(--bg-secondary)] flex justify-between items-center mt-auto border-t border-[var(--border-color)]">
                                     <div className="space-y-[0.25rem]">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleCourseClick(course.title)}
+                                        <Link
+                                            href={`/TutorStudio/courses/${course.id}/analytics`}
                                             className="text-[0.85rem] font-semibold text-[var(--text-main)] hover:underline block text-left focus-visible:outline-[2px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-1 rounded"
                                         >
                                             View analytics
-                                        </button>
+                                        </Link>
                                         {course.accessibilityCompliant && (
                                             <span className="inline-block text-[0.75rem] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-[0.5rem] py-[0.1rem] rounded">
                                                 WCAG Compliant
@@ -171,11 +170,10 @@ export default function TutorDashboardContent() {
                                         )}
                                     </div>
 
-                                    {/* arrow button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleCourseClick(course.title)}
-                                        aria-label={`Open ${course.title} settings`}
+                                    {/* Link arrow button */}
+                                    <Link
+                                        href={`/TutorStudio/courses/${course.id}/analytics`}
+                                        aria-label={`Open ${course.title} analytics`}
                                         className="w-[2.5rem] h-[2.5rem] rounded-full bg-[#FF6B35] text-white flex items-center justify-center shadow hover:bg-[#e05825] transition-colors duration-200 focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
                                     >
                                         <svg
@@ -185,8 +183,9 @@ export default function TutorDashboardContent() {
                                         >
                                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                                         </svg>
-                                    </button>
+                                    </Link>
                                 </div>
+
                             </article>
                         </li>
                     ))}
