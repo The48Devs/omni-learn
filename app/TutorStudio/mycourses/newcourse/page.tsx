@@ -56,6 +56,41 @@ interface QuizQuestions {
     options: { id: string; text: string; isCorrect: boolean }[];
 }
 
+function ObjectiveInputRow({ onAdd }: { onAdd: (text: string) => void }) {
+    const [value, setValue] = React.useState("");
+    return (
+        <div className="flex gap-[0.4rem]">
+            <input
+                type="text"
+                id="new-objective-inp"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter" && value.trim()) {
+                        e.preventDefault();
+                        onAdd(value.trim());
+                        setValue("");
+                    }
+                }}
+                placeholder="e.g. Identify which components are conductors"
+                className="flex-1 p-[0.5rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.8rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                aria-label="New lesson objective text"
+            />
+            <button
+                type="button"
+                onClick={() => {
+                    if (value.trim()) { onAdd(value.trim()); setValue(""); }
+                }}
+                className="shrink-0 px-[0.6rem] py-[0.5rem] bg-[#0b1b3d] hover:bg-[#FF6B35] text-white font-bold text-[0.75rem] rounded-lg transition-colors focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                aria-label="Add new objective item to the list"
+            >
+                + Add Objective Item
+            </button>
+        </div>
+    );
+}
+
+
 export default function CourseCreatorStudio() {
     const { announce } = useAccessibility();
 
@@ -1572,6 +1607,79 @@ export default function CourseCreatorStudio() {
                                                     ))}
                                                 </ul>
                                             </div>
+
+                                            {/* labb notes config */}
+                                            <div className="space-y-[0.5rem] border-t border-[var(--border-color)] pt-[1rem]">
+                                                <h4 className="text-[0.85rem] font-bold text-[var(--text-main)]">Configure Lab Notes</h4>
+                                                <p className="text-[0.72rem] text-[var(--text-muted)] leading-relaxed">
+                                                    Write scientific reminders or math formulas (e.g. <code className="bg-[var(--bg-tertiary)] px-[0.3rem] rounded text-[0.7rem]">V = I · R</code>) for students.
+                                                </p>
+                                                <textarea
+                                                    id="sandbox-lab-notes-inp"
+                                                    rows={4}
+                                                    value={activeBlock.labNotes || ""}
+                                                    onChange={(e) =>
+                                                        setModules(modules.map((m) => ({
+                                                            ...m,
+                                                            blocks: m.blocks.map((b) =>
+                                                                b.id === selectedBlockId ? { ...b, labNotes: e.target.value } : b
+                                                            )
+                                                        })))
+                                                    }
+                                                    placeholder={"Ohm's Law: V = I · R\nPower: P = V · I\n\nRemember: Current flows from high to low potential..."}
+                                                    className="w-full p-[0.6rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.8rem] text-[var(--text-main)] font-mono focus:ring-2 focus:ring-[#FF6B35] focus:outline-none resize-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                    aria-label="Lab notes content for students"
+                                                />
+                                            </div>
+
+                                            {/*  Objectives list */}
+                                            <div className="space-y-[0.5rem] border-t border-[var(--border-color)] pt-[1rem]">
+                                                <h4 className="text-[0.85rem] font-bold text-[var(--text-main)]">Configure Lesson Objectives</h4>
+
+                                                {/* Dynamic objectives list */}
+                                                {activeBlock.objectives && activeBlock.objectives.length > 0 && (
+                                                    <ul className="space-y-[0.3rem]" aria-label="Current lesson objectives">
+                                                        {activeBlock.objectives.map((obj, i) => (
+                                                            <li key={i} className="flex items-center justify-between bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg px-[0.6rem] py-[0.4rem] text-[0.78rem]">
+                                                                <span className="text-[var(--text-main)] font-medium flex-1 mr-[0.5rem]">{obj}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        setModules(modules.map((m) => ({
+                                                                            ...m,
+                                                                            blocks: m.blocks.map((b) =>
+                                                                                b.id === selectedBlockId
+                                                                                    ? { ...b, objectives: b.objectives?.filter((_, idx) => idx !== i) }
+                                                                                    : b
+                                                                            )
+                                                                        })))
+                                                                    }
+                                                                    className="text-red-400 hover:text-red-600 font-bold text-[0.7rem] shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                                    aria-label={`Remove objective: ${obj}`}
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                )}
+
+                                                {/* Input + Add button */}
+                                                <ObjectiveInputRow
+                                                    onAdd={(text) => {
+                                                        setModules(modules.map((m) => ({
+                                                            ...m,
+                                                            blocks: m.blocks.map((b) =>
+                                                                b.id === selectedBlockId
+                                                                    ? { ...b, objectives: [...(b.objectives || []), text] }
+                                                                    : b
+                                                            )
+                                                        })));
+                                                        announce(`Added objective: ${text}`);
+                                                    }}
+                                                />
+                                            </div>
+
                                         </div>
                                     )}
 
