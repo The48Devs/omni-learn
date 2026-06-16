@@ -1604,7 +1604,7 @@ export default function CourseCreatorStudio() {
                                                             <span className="font-semibold text-[var(--text-main)]">⚡ {comp}</span>
                                                             <button
                                                                 onClick={() => deleteSandboxComponent(idx)}
-                                                                className="text-red-500 hover:text-red-700 font-bold"
+                                                                className="text-[var(--error-accent,#ef4444)] hover:opacity-85 font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
                                                             >
                                                                 ✕ Remove
                                                             </button>
@@ -1659,7 +1659,7 @@ export default function CourseCreatorStudio() {
                                                                             )
                                                                         })))
                                                                     }
-                                                                    className="text-red-400 hover:text-red-600 font-bold text-[0.7rem] shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                                    className="text-[var(--error-accent,#ef4444)] hover:opacity-85 font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
                                                                     aria-label={`Remove objective: ${obj}`}
                                                                 >
                                                                     ✕
@@ -1775,7 +1775,7 @@ export default function CourseCreatorStudio() {
                                                                             )
                                                                         })))
                                                                     }
-                                                                    className="text-[0.7rem] text-red-500 hover:text-red-700 font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                                    className="text-[var(--error-accent,#ef4444)] hover:opacity-85 font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
                                                                     aria-label={`Delete dialogue node ${nodeIdx + 1}`}
                                                                 >
                                                                     ✕ Remove
@@ -1937,7 +1937,7 @@ export default function CourseCreatorStudio() {
                                                                                     )
                                                                                 })))
                                                                             }
-                                                                            className="text-red-400 hover:text-red-600 text-[0.75rem] font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                                            className="text-[var(--error-accent,#ef4444)] hover:opacity-85 font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
                                                                             aria-label={`Remove choice ${choiceIdx + 1} from node ${nodeIdx + 1}`}
                                                                         >
                                                                             ✕
