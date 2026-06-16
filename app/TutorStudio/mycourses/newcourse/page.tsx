@@ -711,6 +711,10 @@ export default function CourseCreatorStudio() {
                         <div className="p-[1rem] bg-gray-50 border border-dashed rounded-xl flex items-center gap-[0.75rem] text-gray-400">
                             <span>❓</span> <span className="font-semibold text-[0.9rem]">Quiz Block</span>
                         </div>
+                        <div className="p-[1rem] bg-gray-50 border border-dashed rounded-xl flex items-center gap-[0.75rem] text-gray-400">
+                            <span>📖</span>
+                            <span className="font-semibold text-[0.9rem]">Interactive Storyline</span>
+                        </div>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-[1rem]">
