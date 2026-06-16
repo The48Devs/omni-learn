@@ -5,6 +5,14 @@ import Link from "next/link";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
 
 // interface types
+interface StorylineModule {
+    id: string;
+    speakerName: string;
+    speakerAvatarUrl: string;
+    dialogueText: string;
+    choice: { id: string; text: string }[];
+}
+
 interface Module {
     id: string;
     index: number;
@@ -13,7 +21,7 @@ interface Module {
     blocks: ContentBlock[];
 }
 
-type BlockType = "video" | "sandbox" | "quiz";
+type BlockType = "video" | "sandbox" | "quiz" | "storyline";
 
 interface ContentBlock {
     id: string;
@@ -31,6 +39,10 @@ interface ContentBlock {
         targetStates: { [key: string]: string };
         positions?: { [key: string]: { x: number; y: number } };
     };
+
+    //sandbox lab notes & objectives
+    labnotes?: string;
+    objectives?: string[];
     // Quiz Block Specific
     quizQuestions?: QuizQuestions[];
 }
