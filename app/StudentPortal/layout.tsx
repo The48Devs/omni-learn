@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../components/AuthCOntext";
@@ -16,7 +16,6 @@ export default function StudentPortalLayout({
     const { announce } = useAccessibility();
     const pathname = usePathname();
 
-    // Nav links helper
     const navItems = [
         { href: "/StudentPortal/dashboard", label: "Dashboard", icon: "⊞" },
         { href: "/StudentPortal/mycourses", label: "My Courses", icon: "📖" },
@@ -27,18 +26,21 @@ export default function StudentPortalLayout({
 
     return (
         <RequireAuth role="student">
-            <div className="min-h-screen bg-[#f8fafc] text-[#0f2942] flex flex-col md:flex-row font-sans">
-                {/*Skip to content*/}
-                <a href="#student-main-content"
-                    className="sr-only focus:not-sr-only focus:absolute focus:top-[1rem] focus:left-[1rem] focus:z-50 focus:px-[1.5rem] focus:py-[0.8rem] focus:bg-[#ff6b35] focus:text-white focus:font-bold focus:rounded-xl focus:outline focus:outline-3 focus:outline-offset-2">
+            <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-main)] flex flex-col md:flex-row font-sans">
+                {/* Skip to Main Content Link */}
+                <a
+                    href="#student-main-content"
+                    className="sr-only focus:not-sr-only focus:absolute focus:top-[1rem] focus:left-[1rem] focus:z-50 focus:px-[1.5rem] focus:py-[0.8rem] focus:bg-[#ff6b35] focus:text-white focus:font-bold focus:rounded-xl focus:outline focus:outline-3 focus:outline-offset-2"
+                >
                     Skip to Main Content
                 </a>
-                {/* Student portal side ball container*/}
-                <aside className="w-full md:w-[18rem] bg-white border-r border-[#e2e8f0] flex flex-col justify-between p-[1.5rem] shrink-0">
+
+                {/* Left Navigation Panel */}
+                <aside className="w-full md:w-[18rem] bg-[var(--bg-primary)] border-r border-[var(--border-color)] flex flex-col justify-between p-[1.5rem] shrink-0">
                     <div className="space-y-[2rem]">
-                        {/*Branding space*/}
+                        {/* Branding space */}
                         <div className="flex items-center gap-[0.75rem]">
-                            <div className="w-[3rem] h-[3rem] rounded-full bg-[#0b1b3d] flex items-center justify-center text-white shrink-0">
+                            <div className="w-[3rem] h-[3rem] rounded-full bg-[var(--button-primary,var(--text-main))] flex items-center justify-center text-[var(--bg-primary)] shrink-0">
                                 <svg
                                     className="w-[1.6rem] h-[1.6rem]"
                                     fill="currentColor"
@@ -51,32 +53,33 @@ export default function StudentPortalLayout({
                                 </svg>
                             </div>
                             <div>
-                                <span className="block text-[0.72rem] font-bold text-gray-500 uppercase tracking-widest">
+                                <span className="block text-[1.15rem] font-extrabold tracking-tight text-[var(--text-main)]">
                                     OmniLearn
                                 </span>
-                                <span className="block text-[0.72rem] font-bold text-gray-500 uppercase tracking-widest">
+                                <span className="block text-[0.72rem] font-bold text-[var(--text-muted)] uppercase tracking-widest">
                                     Student Portal
                                 </span>
                             </div>
                         </div>
-                        {/* Nav list grouping*/}
-                        <nav ariia-label="Student Portal navigation">
+
+                        {/* Navigation Options */}
+                        <nav aria-label="Student Portal navigation">
                             <ul className="space-y-[0.74rem]">
-                                {navItems.map((items) => {
-                                    const isActive = pathname === items.href;
+                                {navItems.map((item) => {
+                                    const isActive = pathname === item.href;
                                     return (
-                                        <li key={items.href}>
+                                        <li key={item.href}>
                                             <Link
-                                                href={items.href}
-                                                onClick={() => announce(`Navigating to ${items.label}`)}
-                                                className={`w-full flex items-center gap-[0.75rem] px-[1rem] py-[0.7rem] rounded-xl text-[0.88rem] font-bold transition-all text-left block focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#2563eb] focus-visible:outline-offset-2 ${isActive
-                                                    ? "bg-[#0b1b3d] text-white shadow-md shadow-slate-200"
-                                                    : "text-gray-600 hover:bg-gray-50 hover:text-[#0b1b3d]"
+                                                href={item.href}
+                                                onClick={() => announce(`Navigating to ${item.label}`)}
+                                                className={`w-full flex items-center gap-[0.75rem] px-[1rem] py-[0.7rem] rounded-xl text-[0.88rem] font-bold transition-all text-left block focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 ${isActive
+                                                        ? "bg-[var(--button-primary,var(--text-main))] text-[var(--bg-primary)] shadow-md"
+                                                        : "text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-main)]"
                                                     }`}
                                                 aria-current={isActive ? "page" : undefined}
                                             >
-                                                <span className="text-[1.1rem] opacity-90 leading-none">{items.icon}</span>
-                                                <span>{items.label}</span>
+                                                <span className="text-[1.1rem] opacity-90 leading-none">{item.icon}</span>
+                                                <span>{item.label}</span>
                                             </Link>
                                         </li>
                                     );
@@ -84,12 +87,14 @@ export default function StudentPortalLayout({
                             </ul>
                         </nav>
                     </div>
+
                     <div className="mt-[2rem] space-y-[1.5rem]">
-                        {/*util anchors*/}
-                        <div className="border-t border-[#e2e8f0] pt-[1rem] space-y-[0.4rem]">
+                        {/* Utility actions footnote */}
+                        <div className="border-t border-[var(--border-color)] pt-[1rem] space-y-[0.4rem]">
                             <button
                                 type="button"
-                                className="w-full flex items-center gap-[0.75rem] px-[1rem] py-[0.5rem] rounded-lg text-[0.82rem] font-semibold text-gray-500 hover:text-[#0b1b3d] hover:bg-gray-50 text-left focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#2563eb]">
+                                className="w-full flex items-center gap-[0.75rem] px-[1rem] py-[0.5rem] rounded-lg text-[0.82rem] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] hover:bg-[var(--bg-tertiary)] text-left focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)]"
+                            >
                                 <span aria-hidden="true">❓</span>
                                 <span>Support</span>
                             </button>
@@ -99,14 +104,16 @@ export default function StudentPortalLayout({
                                     logout();
                                     announce("You have logged out");
                                 }}
-                                className="w-full flex items-center gap-[0.75rem] px-[1rem] py-[0.5rem] rounded-lg text-[0.82rem] font-semibold text-red-500 hover:bg-red-50 text-left focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#2563eb]">
+                                className="w-full flex items-center gap-[0.75rem] px-[1rem] py-[0.5rem] rounded-lg text-[0.82rem] font-semibold text-[var(--error-accent,#ef4444)] hover:bg-[var(--bg-tertiary)] text-left focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)]"
+                            >
                                 <span aria-hidden="true">↪</span>
                                 <span>Logout</span>
                             </button>
                         </div>
                     </div>
                 </aside>
-                {/*scrollable content*/}
+
+                {/* Right Scrollable Main Frame */}
                 <main id="student-main-content" className="flex-1 p-[1.5rem] md:p-[2.5rem] space-y-[2rem] overflow-y-auto">
                     {children}
                 </main>
