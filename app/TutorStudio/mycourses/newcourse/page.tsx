@@ -1961,7 +1961,12 @@ export default function CourseCreatorStudio() {
                                                                                                     ...n,
                                                                                                     choices: [
                                                                                                         ...n.choices,
-                                                                                                        { id: `choice-${Date.now()}`, text: "" }
+                                                                                                        {
+                                                                                                            id: `choice-${Date.now()}`,
+                                                                                                            text: "",
+                                                                                                            targetNodeId: "",
+                                                                                                            syncPointsModifier: 0
+                                                                                                        }
                                                                                                     ]
                                                                                                 }
                                                                                                 : n
