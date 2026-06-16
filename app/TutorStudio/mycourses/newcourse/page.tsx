@@ -1583,6 +1583,324 @@ export default function CourseCreatorStudio() {
                                             </p>
                                         </div>
                                     )}
+
+                                    {/* Storyline block settings*/}
+                                    {activeBlock.type === "storyline" && (
+                                        <div className="space-y-[1.5rem] border-t border-[var(--border-color)] pt-[1rem]">
+                                            <h3 className="text-[0.9rem] font-bold text-[var(--text-main)]">Storyline Settings</h3>
+
+                                            {/* Section Title */}
+                                            <div className="space-y-[0.4rem]">
+                                                <label htmlFor="storyline-title-inp" className="block text-[0.8rem] font-semibold text-[var(--text-muted)]">
+                                                    Storyline Section Title
+                                                </label>
+                                                <input
+                                                    id="storyline-title-inp"
+                                                    type="text"
+                                                    value={activeBlock.storylineTitle || ""}
+                                                    onChange={(e) =>
+                                                        setModules(modules.map((m) => ({
+                                                            ...m,
+                                                            blocks: m.blocks.map((b) =>
+                                                                b.id === selectedBlockId ? { ...b, storylineTitle: e.target.value } : b
+                                                            )
+                                                        })))
+                                                    }
+                                                    placeholder="e.g. Fall of the Roman Empire"
+                                                    className="w-full p-[0.6rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.85rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                />
+                                            </div>
+
+                                            {/* Global Scene Intro */}
+                                            <div className="space-y-[0.4rem]">
+                                                <label htmlFor="storyline-intro-inp" className="block text-[0.8rem] font-semibold text-[var(--text-muted)]">
+                                                    Global Scene Intro
+                                                </label>
+                                                <textarea
+                                                    id="storyline-intro-inp"
+                                                    rows={3}
+                                                    value={activeBlock.storylineIntro || ""}
+                                                    onChange={(e) =>
+                                                        setModules(modules.map((m) => ({
+                                                            ...m,
+                                                            blocks: m.blocks.map((b) =>
+                                                                b.id === selectedBlockId ? { ...b, storylineIntro: e.target.value } : b
+                                                            )
+                                                        })))
+                                                    }
+                                                    placeholder="Set the stage — describe the opening scene context for this storyline..."
+                                                    className="w-full p-[0.6rem] bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[0.85rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none resize-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                />
+                                            </div>
+
+                                            {/* Dialogue Node Stack */}
+                                            <div className="space-y-[0.75rem]">
+                                                <span className="block text-[0.8rem] font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                                                    Dialogue Nodes ({activeBlock.storylineNodes?.length || 0})
+                                                </span>
+
+                                                {activeBlock.storylineNodes && activeBlock.storylineNodes.length > 0 ? (
+                                                    activeBlock.storylineNodes.map((node, nodeIdx) => (
+                                                        <div
+                                                            key={node.id}
+                                                            className="border border-[var(--border-color)] bg-[var(--bg-primary)] rounded-xl p-[0.85rem] flex flex-col gap-[0.65rem]"
+                                                        >
+                                                            {/* Node Header */}
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[0.72rem] font-extrabold text-orange-600 uppercase tracking-wide">
+                                                                    Node {nodeIdx + 1}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        setModules(modules.map((m) => ({
+                                                                            ...m,
+                                                                            blocks: m.blocks.map((b) =>
+                                                                                b.id === selectedBlockId
+                                                                                    ? { ...b, storylineNodes: b.storylineNodes?.filter((_, i) => i !== nodeIdx) }
+                                                                                    : b
+                                                                            )
+                                                                        })))
+                                                                    }
+                                                                    className="text-[0.7rem] text-red-500 hover:text-red-700 font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                                    aria-label={`Delete dialogue node ${nodeIdx + 1}`}
+                                                                >
+                                                                    ✕ Remove
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Speaker avatar */}
+                                                            <div className="space-y-[0.3rem]">
+                                                                <label
+                                                                    htmlFor={`node-avatar-${node.id}`}
+                                                                    className="block text-[0.75rem] font-semibold text-[var(--text-muted)]"
+                                                                >
+                                                                    Speaker Avatar URL
+                                                                </label>
+                                                                <input
+                                                                    id={`node-avatar-${node.id}`}
+                                                                    type="text"
+                                                                    value={node.speakerAvatarUrl}
+                                                                    onChange={(e) =>
+                                                                        setModules(modules.map((m) => ({
+                                                                            ...m,
+                                                                            blocks: m.blocks.map((b) =>
+                                                                                b.id === selectedBlockId
+                                                                                    ? {
+                                                                                        ...b,
+                                                                                        storylineNodes: b.storylineNodes?.map((n, i) =>
+                                                                                            i === nodeIdx ? { ...n, speakerAvatarUrl: e.target.value } : n
+                                                                                        )
+                                                                                    }
+                                                                                    : b
+                                                                            )
+                                                                        })))
+                                                                    }
+                                                                    placeholder="https://... or /avatars/character.png"
+                                                                    className="w-full p-[0.5rem] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[0.8rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                                />
+                                                            </div>
+
+                                                            {/* Speaker Name */}
+                                                            <div className="space-y-[0.3rem]">
+                                                                <label
+                                                                    htmlFor={`node-name-${node.id}`}
+                                                                    className="block text-[0.75rem] font-semibold text-[var(--text-muted)]"
+                                                                >
+                                                                    Character Profile
+                                                                </label>
+                                                                <input
+                                                                    id={`node-name-${node.id}`}
+                                                                    type="text"
+                                                                    value={node.speakerName}
+                                                                    onChange={(e) =>
+                                                                        setModules(modules.map((m) => ({
+                                                                            ...m,
+                                                                            blocks: m.blocks.map((b) =>
+                                                                                b.id === selectedBlockId
+                                                                                    ? {
+                                                                                        ...b,
+                                                                                        storylineNodes: b.storylineNodes?.map((n, i) =>
+                                                                                            i === nodeIdx ? { ...n, speakerName: e.target.value } : n
+                                                                                        )
+                                                                                    }
+                                                                                    : b
+                                                                            )
+                                                                        })))
+                                                                    }
+                                                                    placeholder="e.g. Senator Gracchus"
+                                                                    className="w-full p-[0.5rem] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[0.8rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                                />
+                                                            </div>
+
+                                                            {/* Dialogue text */}
+                                                            <div className="space-y-[0.3rem]">
+                                                                <label
+                                                                    htmlFor={`node-dialogue-${node.id}`}
+                                                                    className="block text-[0.75rem] font-semibold text-[var(--text-muted)]"
+                                                                >
+                                                                    Character Dialogue
+                                                                </label>
+                                                                <textarea
+                                                                    id={`node-dialogue-${node.id}`}
+                                                                    rows={3}
+                                                                    value={node.dialogueText}
+                                                                    onChange={(e) =>
+                                                                        setModules(modules.map((m) => ({
+                                                                            ...m,
+                                                                            blocks: m.blocks.map((b) =>
+                                                                                b.id === selectedBlockId
+                                                                                    ? {
+                                                                                        ...b,
+                                                                                        storylineNodes: b.storylineNodes?.map((n, i) =>
+                                                                                            i === nodeIdx ? { ...n, dialogueText: e.target.value } : n
+                                                                                        )
+                                                                                    }
+                                                                                    : b
+                                                                            )
+                                                                        })))
+                                                                    }
+                                                                    placeholder='"The senate must act — the people cannot wait any longer..."'
+                                                                    className="w-full p-[0.5rem] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[0.8rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none resize-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                                />
+                                                            </div>
+
+                                                            {/* Decision Choices */}
+                                                            <div className="space-y-[0.35rem]">
+                                                                <span className="block text-[0.72rem] font-bold text-[var(--text-muted)]">
+                                                                    Decision Choices ({node.choices.length})
+                                                                </span>
+
+                                                                {node.choices.map((choice, choiceIdx) => (
+                                                                    <div key={choice.id} className="flex items-center gap-[0.4rem]">
+                                                                        <span className="text-[0.7rem] font-bold text-orange-500 shrink-0 w-[3.5rem]">
+                                                                            Choice {choiceIdx + 1}:
+                                                                        </span>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={choice.text}
+                                                                            onChange={(e) =>
+                                                                                setModules(modules.map((m) => ({
+                                                                                    ...m,
+                                                                                    blocks: m.blocks.map((b) =>
+                                                                                        b.id === selectedBlockId
+                                                                                            ? {
+                                                                                                ...b,
+                                                                                                storylineNodes: b.storylineNodes?.map((n, ni) =>
+                                                                                                    ni === nodeIdx
+                                                                                                        ? {
+                                                                                                            ...n,
+                                                                                                            choices: n.choices.map((c, ci) =>
+                                                                                                                ci === choiceIdx ? { ...c, text: e.target.value } : c
+                                                                                                            )
+                                                                                                        }
+                                                                                                        : n
+                                                                                                )
+                                                                                            }
+                                                                                            : b
+                                                                                    )
+                                                                                })))
+                                                                            }
+                                                                            placeholder={`e.g. I stand with the Senate...`}
+                                                                            className="flex-1 p-[0.4rem] bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-lg text-[0.78rem] text-[var(--text-main)] focus:ring-2 focus:ring-[#FF6B35] focus:outline-none focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                                            aria-label={`Node ${nodeIdx + 1} Choice ${choiceIdx + 1} text`}
+                                                                        />
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                setModules(modules.map((m) => ({
+                                                                                    ...m,
+                                                                                    blocks: m.blocks.map((b) =>
+                                                                                        b.id === selectedBlockId
+                                                                                            ? {
+                                                                                                ...b,
+                                                                                                storylineNodes: b.storylineNodes?.map((n, ni) =>
+                                                                                                    ni === nodeIdx
+                                                                                                        ? { ...n, choices: n.choices.filter((_, ci) => ci !== choiceIdx) }
+                                                                                                        : n
+                                                                                                )
+                                                                                            }
+                                                                                            : b
+                                                                                    )
+                                                                                })))
+                                                                            }
+                                                                            className="text-red-400 hover:text-red-600 text-[0.75rem] font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus-ring,#FF6B35)]"
+                                                                            aria-label={`Remove choice ${choiceIdx + 1} from node ${nodeIdx + 1}`}
+                                                                        >
+                                                                            ✕
+                                                                        </button>
+                                                                    </div>
+                                                                ))}
+
+                                                                {/* Add Decision Choice */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        setModules(modules.map((m) => ({
+                                                                            ...m,
+                                                                            blocks: m.blocks.map((b) =>
+                                                                                b.id === selectedBlockId
+                                                                                    ? {
+                                                                                        ...b,
+                                                                                        storylineNodes: b.storylineNodes?.map((n, ni) =>
+                                                                                            ni === nodeIdx
+                                                                                                ? {
+                                                                                                    ...n,
+                                                                                                    choices: [
+                                                                                                        ...n.choices,
+                                                                                                        { id: `choice-${Date.now()}`, text: "" }
+                                                                                                    ]
+                                                                                                }
+                                                                                                : n
+                                                                                        )
+                                                                                    }
+                                                                                    : b
+                                                                            )
+                                                                        })))
+                                                                    }
+                                                                    className="text-[0.75rem] font-bold text-orange-600 hover:text-orange-800 border border-dashed border-orange-300 hover:border-orange-500 rounded-lg px-[0.75rem] py-[0.35rem] transition-colors w-full text-center focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                                >
+                                                                    + Add Decision Choice
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="py-[1.5rem] border border-dashed border-orange-200 rounded-xl text-center text-[var(--text-muted)] text-[0.8rem]">
+                                                        <span className="block text-[1.2rem] mb-[0.25rem]">📖</span>
+                                                        No dialogue nodes yet. Add one below.
+                                                    </div>
+                                                )}
+
+                                                {/* Add New Dialogue*/}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const newNode: StorylineNode = {
+                                                            id: `node-${Date.now()}`,
+                                                            speakerName: "",
+                                                            speakerAvatarUrl: "",
+                                                            dialogueText: "",
+                                                            choices: []
+                                                        };
+                                                        setModules(modules.map((m) => ({
+                                                            ...m,
+                                                            blocks: m.blocks.map((b) =>
+                                                                b.id === selectedBlockId
+                                                                    ? { ...b, storylineNodes: [...(b.storylineNodes || []), newNode] }
+                                                                    : b
+                                                            )
+                                                        })));
+                                                        announce("New dialogue node added to storyline block.");
+                                                    }}
+                                                    className="w-full py-[0.6rem] bg-orange-500 hover:bg-orange-600 text-white font-bold text-[0.85rem] rounded-xl transition-colors focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                                                >
+                                                    + Add Dialogue Node
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
                                 </div>
                             ) : (
                                 <div className="py-[4rem] text-center text-gray-400">
