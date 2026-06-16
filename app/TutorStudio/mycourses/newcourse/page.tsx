@@ -752,6 +752,24 @@ export default function CourseCreatorStudio() {
                         </button>
 
                         <button
+                            onClick={() => handleAddBlock("storyline")}
+                            className="w-full p-[1rem] bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-orange-400 rounded-xl flex items-center gap-[0.75rem] text-left transition-all hover:-translate-y-[1px] hover:shadow-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2">
+                            <div className="w-[2.2rem] h-[2.2rem] rounded-lg bg-orange-100 flex items-center justify-center shrink-0" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="2" y="3" width="7" height="5" rx="1" />
+                                    <rect x="15" y="3" width="7" height="5" rx="1" />
+                                    <rect x="8" y="16" width="8" height="5" rx="1" />
+                                    <line x1="5.5" y1="8" x2="12" y2="16" />
+                                    <line x1="18.5" y1="8" x2="12" y2="16" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span className="block font-semibold text-[0.95rem] text-[var(--text-main)]">Interactive Storyline</span>
+                                <span className="text-[0.75rem] text-[var(--text-muted)]">Configurable immersive branched narratives</span>
+                            </div>
+                        </button>
+
+                        <button
                             onClick={() => {
                                 setCurrentView("course-overview");
                                 announce("Switched back to Course Outline overview.");
