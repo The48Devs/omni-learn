@@ -146,6 +146,99 @@ export default function StudentDashboard() {
                     <div className="absolute top-0 right-0 w-[2.2rem] h-[2.2rem] rounded-full bg-[#7ec4cf] text-[#0b1b3d] flex items-center justify-center font-bold text-[1.1rem] shadow-md border-2 border-white">🎖️</div>
                 </div>
             </section >
+            {/*Coontinue learning grid */}
+            <section aria-labelledby="continue-learning-heading" className="space-y-[1rem]">
+                <div className="flex items-center justify-between">
+                    <h2 id="continue-learning-heading" className="text-[1.2rem] font-extrabold text-[#0b1b3d]">
+                        Continue Learning</h2>
+                    <a
+                        href="#all-courses"
+                        className="text-[0.85rem] font-extrabold text-[#ff6b35] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]">
+                        View All Courses
+                    </a>
+                </div>
+                <div className="rid grid-cols-1 md:grid-cols-3 gap-[1.2rem]">
+                    {continueLearningCourses.map((course) => {
+                        const isLocked = course.status === "up-next";
+                        const isReview = course.status === "review";
+                        return (
+                            <div
+                                key={course.id}
+                                className="bg-white border border-[#e2e8f0] rounded-2xl flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
+                            >
+                                <div className="p-[1.2rem] space-y-[1rem]">
+                                    <div className="flex items-center justify-between">
+                                        <span
+                                            className={`px-[0.6rem] py-[0.25rem] rounded-full text-[0.68rem] font-extrabold uppercase tracking-wider ${isLocked
+                                                ? "bg-slate-100 text-slate-500"
+                                                : "bg-blue-50 text-blue-600"
+                                                }`}
+                                        >
+                                            {course.status === "in-progress" ? "In Progress" : course.status === "up-next" ? "Up Next" : "In Progress"}
+                                        </span>
+                                        {isLocked ? (
+                                            <div className="w-[1.8rem] h-[1.8rem] rounded-full bg-[#f1f5f9] text-[#64748b] flex items-center justify-center text-[0.9rem] shadow-sm">
+                                                🔒
+                                            </div>
+                                        ) : (
+                                            <button type="button"
+                                                className="w-[1.8rem] h-[1.8rem] rounded-full bg-[#0b1b3d] hover:bg-[#ff6b35] text-white flex items-center justify-center text-[0.7rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35"
+                                                aria-label={`Play Lesson content for ${course.title}`}>
+                                                ▶
+                                            </button>
+                                        )}
+                                    </div>
+                                    <h3
+                                        className="text-[0.98rem] font-extrabold text-[#0b1b3d] leading-snug min-h-[2.6rem]">
+                                        {course.title}
+                                    </h3>
+                                    <div className="space-y-[0.35rem]">
+                                        <div className="flex justify-between text-[0.72rem] font-bold text-gray-500">
+                                            <span>{course.metricText}</span>
+                                        </div>
+                                        <div className="w-full h-[0.3rem] bg-gray-100 rounded-full overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full ${isLocked ? "bg-gray-300" : "bg-[#ff6b35]"}`}
+                                                style={{ width: `${course.progress || 10}%` }}
+                                                aria-valuenow={course.progress}
+                                                aria-valuemin={0}
+                                                aria-valuemax={100}
+                                                role="progressbar"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-[#f8fafc] border-t border-[#e2e8f0] px-[1.2rem] py-[0.75rem] flex items-center justify-between gap-[0.5rem]">
+                                    <span className={`text-[0.72rem] font-extrabold ${isLocked ? "text-slate-500" : "text-[#0b1b3d]"}`}>
+                                        {course.footerText}
+                                    </span>
+                                    {isLocked ? (
+                                        <div className="w-[1.5rem] h-[1.5rem] rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[0.7rem]">
+                                            🔒
+                                        </div>
+                                    ) : isReview ? (
+                                        <button
+                                            type="button"
+                                            className="w-[1.5rem] h-[1.5rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.75rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
+                                            aria-label={`Restart/Review last module of ${course.title}`}
+                                        >
+                                            ↻
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className="w-[1.5rem] h-[1.5rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.75rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
+                                            aria-label={`Proceed with recommended next step in ${course.title}`}
+                                        >
+                                            →
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </section >
 
         </div >
     )
