@@ -163,6 +163,25 @@ export default function MyCoursesPage() {
                     })}
                 </div>
             </div>
+            {/*Hero card*/}
+            {coursesData.length > 0 && (
+                <section aria-labelledby="continue-learning-hero-title">
+                    <div className="bg-gradient-to-br from-[#2a5c8f] to-[#4585ab] rounded-2xl p-[1.8rem] text-white relative overflow-hidden shadow-xl flex flex-col justify-between gap-[1.5rem] min-h-[14rem]">
+                        <div className="space-y-[0.6rem] z-10">
+                            <span className="inline-block px-[0.6rem] py-[0.25rem] bg-white/10 rounded-full text-[0.68rem] font-extrabold uppercase tracking-widest border border-white/10">
+                                Continue Learning
+                            </span>
+                            <h2 id="continue-learning-hero-title" className="text-[1.6rem] font-extrabold tracking-tight">
+                                {coursesData[0].title}
+                            </h2>
+                            <p className="text-[0.85rem] opacity-90 font-semibold tracking-wide">
+                                {coursesData[0].currentModule}
+                            </p>
+                        </div>
+
+                    </div>
+                </section>
+            )}
         </div>
     );
 }
