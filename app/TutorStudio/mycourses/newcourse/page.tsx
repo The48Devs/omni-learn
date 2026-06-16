@@ -996,8 +996,57 @@ export default function CourseCreatorStudio() {
                                                             </p>
                                                         </div>
                                                     )}
+
+                                                    {/* 🆕 Lab Notes Preview sub-card */}
+                                                    {block.labNotes && (
+                                                        <div className="mt-[0.75rem] bg-sky-50 border border-sky-200 rounded-lg p-[0.75rem] flex flex-col gap-[0.4rem]">
+                                                            <div className="flex items-center gap-[0.5rem]">
+                                                                <div
+                                                                    className="w-[1.4rem] h-[1.4rem] rounded-full bg-sky-400 flex items-center justify-center text-white text-[0.65rem] font-extrabold shrink-0"
+                                                                    aria-hidden="true"
+                                                                >
+                                                                    i
+                                                                </div>
+                                                                <span className="text-[0.75rem] font-bold text-sky-800 uppercase tracking-wide">Lab Notes Preview</span>
+                                                            </div>
+                                                            <p className="text-[0.75rem] text-sky-700 leading-relaxed line-clamp-3 font-mono">
+                                                                {block.labNotes}
+                                                            </p>
+                                                        </div>
+                                                    )}
+
+                                                    {/* 🆕 Current Objectives checklist */}
+                                                    {block.objectives && block.objectives.length > 0 && (
+                                                        <div className="mt-[0.5rem] flex flex-col gap-[0.35rem]">
+                                                            <span className="text-[0.7rem] font-extrabold text-[var(--text-muted)] uppercase tracking-wider">
+                                                                Current Objectives
+                                                            </span>
+                                                            <ul className="space-y-[0.3rem]" role="list" aria-label="Lesson objectives checklist preview">
+                                                                {block.objectives.map((obj, i) => (
+                                                                    <li key={i} className="flex items-start gap-[0.5rem] text-[0.78rem] text-[var(--text-main)]">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            defaultChecked={i === 0}
+                                                                            readOnly
+                                                                            className="mt-[0.15rem] accent-[#FF6B35] shrink-0"
+                                                                            aria-label={`Objective: ${obj}`}
+                                                                            tabIndex={-1}
+                                                                        />
+                                                                        <span className={i === 0 ? "line-through text-[var(--text-muted)]" : ""}>{obj}</span>
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        </div>
+                                                    )}
+
+
+
                                                 </div>
+
+
                                             )}
+
+
 
                                             {block.type === "quiz" && (
                                                 <div className="border border-gray-100 bg-gray-50 p-[1.25rem] rounded-lg flex flex-col gap-[1rem]">
@@ -1048,7 +1097,6 @@ export default function CourseCreatorStudio() {
                                                             </div>
                                                         </div>
                                                     ))}
-
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
