@@ -1,10 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useAuth } from "@/app/components/AuthCOntext";
-import RequireAuth from "@/app/components/RequireAuth";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
-import { transform } from "next/dist/build/swc";
 
 interface ContinueLearningCourse {
     id: string;
@@ -15,6 +12,7 @@ interface ContinueLearningCourse {
     footerText: string;
     unlockCondition?: string;
 }
+
 interface RecommendedCourse {
     id: string;
     title: string;
@@ -22,7 +20,6 @@ interface RecommendedCourse {
     rating: number;
     lessonsCount: number;
     bgGradient: string;
-
 }
 
 export default function StudentDashboard() {
@@ -102,32 +99,38 @@ export default function StudentDashboard() {
     const handlePrevCarousel = () => {
         if (carouselIndex > 0) {
             setCarouselIndex((prev) => prev - 1);
-            announce("Showing Previous recommended courses")
+            announce("Showing Previous recommended courses");
         }
-    }
+    };
+
     return (
         <div className="space-y-[2rem]">
-            {/*Viewport header*/}
-            <div className="flex items-center justify-between pb-[1rem] border-b border-gray-200">
-                <h2 className="text-[1.35rem] font-extrabold text-[#0b1b3d]">Student Dasboard</h2>
+            {/* Viewport header */}
+            <div className="flex items-center justify-between pb-[1rem] border-b border-[var(--border-color)]">
+                <h2 className="text-[1.35rem] font-extrabold text-[var(--text-main)]">Student Dashboard</h2>
                 <div className="flex items-center gap-[1rem]">
-                    <span className="text-[0.8rem] font-bold text-gray-500 bg-gray-100 px-[0.75rem] py-[0.35rem] rounded-full">
+                    <span className="text-[0.8rem] font-bold text-[var(--text-muted)] bg-[var(--bg-tertiary)] px-[0.75rem] py-[0.35rem] rounded-full">
                         Sarah A.
                     </span>
                 </div>
             </div>
-            {/*Level progression + hero banner*/}
-            <section aria-lavel="Level progression status"
-                className="bg-gradient-to-r from-[#2a5c8f] to-[#4585ab] rounded-2xl p-[1.8rem] text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-[1.5rem] relative overflow-hidden shadow-xl">
-                {/*Left metadata stack*/}
+
+            {/* Level progression + hero banner */}
+            <section
+                aria-label="Level progression status"
+                className="bg-gradient-to-r from-[#2a5c8f] to-[#4585ab] rounded-2xl p-[1.8rem] text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-[1.5rem] relative overflow-hidden shadow-xl"
+            >
+                {/* Left metadata stack */}
                 <div className="space-y-[1.2rem] max-w-[28rem] z-10">
-                    <div> <h1 className="text-[1.8rem] font-extrabold leading-tight">
-                        Welcome back, Sarah A.
-                    </h1>
+                    <div>
+                        <h1 className="text-[1.8rem] font-extrabold leading-tight">
+                            Welcome back, Sarah A.
+                        </h1>
                         <p className="text-[0.9rem] opacity-90 font-medium leading-relaxed mt-[0.35rem]">
-                            You're making great progress this week. Keep up the momentum and reach Level 13! </p>
+                            You're making great progress this week. Keep up the momentum and reach Level 13!
+                        </p>
                     </div>
-                    {/*Linear metric tracker */}
+                    {/* Linear metric tracker */}
                     <div className="space-y-[0.4rem]">
                         <div className="flex justify-between text-[0.78rem] font-bold tracking-wide ">
                             <span>Progress to Level 13</span>
@@ -145,7 +148,7 @@ export default function StudentDashboard() {
                         </div>
                     </div>
                 </div>
-                {/* XP medal*/}
+                {/* XP medal */}
                 <div className="relative shrink-0 z-10 self-center md:self-auto">
                     <div className="w-[8.5rem] h-[8.5rem] rounded-full bg-[#c04d2b] border-4 border-white/20 shadow-2xl flex flex-col items-center justify-center text-center">
                         <span className="text-[1.35rem] font-extrabold tracking-tight"> 2,450 XP</span>
@@ -153,58 +156,62 @@ export default function StudentDashboard() {
                     </div>
                     <div className="absolute top-0 right-0 w-[2.2rem] h-[2.2rem] rounded-full bg-[#7ec4cf] text-[#0b1b3d] flex items-center justify-center font-bold text-[1.1rem] shadow-md border-2 border-white">🎖️</div>
                 </div>
-            </section >
-            {/*Coontinue learning grid */}
+            </section>
+
+            {/* Continue learning grid */}
             <section aria-labelledby="continue-learning-heading" className="space-y-[1rem]">
                 <div className="flex items-center justify-between">
-                    <h2 id="continue-learning-heading" className="text-[1.2rem] font-extrabold text-[#0b1b3d]">
-                        Continue Learning</h2>
+                    <h2 id="continue-learning-heading" className="text-[1.2rem] font-extrabold text-[var(--text-main)]">
+                        Continue Learning
+                    </h2>
                     <a
                         href="#all-courses"
-                        className="text-[0.85rem] font-extrabold text-[#ff6b35] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]">
+                        className="text-[0.85rem] font-extrabold text-[#ff6b35] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
+                    >
                         View All Courses
                     </a>
                 </div>
-                <div className="rid grid-cols-1 md:grid-cols-3 gap-[1.2rem]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.2rem]">
                     {continueLearningCourses.map((course) => {
                         const isLocked = course.status === "up-next";
                         const isReview = course.status === "review";
                         return (
                             <div
                                 key={course.id}
-                                className="bg-white border border-[#e2e8f0] rounded-2xl flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
+                                className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
                             >
                                 <div className="p-[1.2rem] space-y-[1rem]">
                                     <div className="flex items-center justify-between">
                                         <span
                                             className={`px-[0.6rem] py-[0.25rem] rounded-full text-[0.68rem] font-extrabold uppercase tracking-wider ${isLocked
-                                                ? "bg-slate-100 text-slate-500"
-                                                : "bg-blue-50 text-blue-600"
+                                                    ? "bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
+                                                    : "bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)]"
                                                 }`}
                                         >
                                             {course.status === "in-progress" ? "In Progress" : course.status === "up-next" ? "Up Next" : "In Progress"}
                                         </span>
                                         {isLocked ? (
-                                            <div className="w-[1.8rem] h-[1.8rem] rounded-full bg-[#f1f5f9] text-[#64748b] flex items-center justify-center text-[0.9rem] shadow-sm">
+                                            <div className="w-[1.8rem] h-[1.8rem] rounded-full bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex items-center justify-center text-[0.9rem] shadow-sm">
                                                 🔒
                                             </div>
                                         ) : (
-                                            <button type="button"
-                                                className="w-[1.8rem] h-[1.8rem] rounded-full bg-[#0b1b3d] hover:bg-[#ff6b35] text-white flex items-center justify-center text-[0.7rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35"
-                                                aria-label={`Play Lesson content for ${course.title}`}>
+                                            <button
+                                                type="button"
+                                                className="w-[1.8rem] h-[1.8rem] rounded-full bg-[var(--button-primary,var(--text-main))] text-[var(--bg-primary)] flex items-center justify-center text-[0.7rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
+                                                aria-label={`Play Lesson content for ${course.title}`}
+                                            >
                                                 ▶
                                             </button>
                                         )}
                                     </div>
-                                    <h3
-                                        className="text-[0.98rem] font-extrabold text-[#0b1b3d] leading-snug min-h-[2.6rem]">
+                                    <h3 className="text-[0.98rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.6rem]">
                                         {course.title}
                                     </h3>
                                     <div className="space-y-[0.35rem]">
-                                        <div className="flex justify-between text-[0.72rem] font-bold text-gray-500">
+                                        <div className="flex justify-between text-[0.72rem] font-bold text-[var(--text-muted)]">
                                             <span>{course.metricText}</span>
                                         </div>
-                                        <div className="w-full h-[0.3rem] bg-gray-100 rounded-full overflow-hidden">
+                                        <div className="w-full h-[0.3rem] bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
                                             <div
                                                 className={`h-full rounded-full ${isLocked ? "bg-gray-300" : "bg-[#ff6b35]"}`}
                                                 style={{ width: `${course.progress || 10}%` }}
@@ -216,12 +223,12 @@ export default function StudentDashboard() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-[#f8fafc] border-t border-[#e2e8f0] px-[1.2rem] py-[0.75rem] flex items-center justify-between gap-[0.5rem]">
-                                    <span className={`text-[0.72rem] font-extrabold ${isLocked ? "text-slate-500" : "text-[#0b1b3d]"}`}>
+                                <div className="bg-[var(--bg-secondary)] border-t border-[var(--border-color)] px-[1.2rem] py-[0.75rem] flex items-center justify-between gap-[0.5rem]">
+                                    <span className="text-[0.72rem] font-extrabold text-[var(--text-main)]">
                                         {course.footerText}
                                     </span>
                                     {isLocked ? (
-                                        <div className="w-[1.5rem] h-[1.5rem] rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[0.7rem]">
+                                        <div className="w-[1.5rem] h-[1.5rem] rounded-full bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex items-center justify-center text-[0.7rem]">
                                             🔒
                                         </div>
                                     ) : isReview ? (
@@ -246,12 +253,12 @@ export default function StudentDashboard() {
                         );
                     })}
                 </div>
-            </section >
+            </section>
 
-            {/* Recommended courses*/}
+            {/* Recommended courses */}
             <section aria-labelledby="recommended-courses-heading" className="space-y-[1rem]">
                 <div className="flex items-center justify-between">
-                    <h2 id="recommended-courses-heading" className="text-[1.2rem] font-extrabold text-[#0b1b3d]">
+                    <h2 id="recommended-courses-heading" className="text-[1.2rem] font-extrabold text-[var(--text-main)]">
                         Recommended Courses
                     </h2>
                     <div className="flex items-center gap-[0.4rem]">
@@ -259,9 +266,9 @@ export default function StudentDashboard() {
                             type="button"
                             onClick={handlePrevCarousel}
                             disabled={carouselIndex === 0}
-                            className={`w-[2rem] h-[2rem] rounded-full border border-gray-200 bg-white flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex === 0
-                                ? "opacity-40 cursor-not-allowed"
-                                : "hover:bg-[#ff6b35] hover:text-white"
+                            className={`w-[2rem] h-[2rem] rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex === 0
+                                    ? "opacity-40 cursor-not-allowed text-[var(--text-muted)]"
+                                    : "hover:bg-[#ff6b35] hover:text-white text-[var(--text-main)]"
                                 }`}
                             aria-label="Previous recommended courses page"
                         >
@@ -271,9 +278,9 @@ export default function StudentDashboard() {
                             type="button"
                             onClick={handleNextCarousel}
                             disabled={carouselIndex >= recommendedCourses.length - 1}
-                            className={`w-[2rem] h-[2rem] rounded-full border border-gray-200 bg-white flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex >= recommendedCourses.length - 1
-                                ? "opacity-40 cursor-not-allowed"
-                                : "hover:bg-[#ff6b35] hover:text-white"
+                            className={`w-[2rem] h-[2rem] rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex >= recommendedCourses.length - 1
+                                    ? "opacity-40 cursor-not-allowed text-[var(--text-muted)]"
+                                    : "hover:bg-[#ff6b35] hover:text-white text-[var(--text-main)]"
                                 }`}
                             aria-label="Next recommended courses page"
                         >
@@ -288,15 +295,15 @@ export default function StudentDashboard() {
                     >
                         {recommendedCourses.map((course) => {
                             const badgeStyles = {
-                                SCIENCE: "bg-blue-100 text-blue-800",
-                                DESIGN: "bg-pink-100 text-pink-800",
-                                TECH: "bg-purple-100 text-purple-800",
-                                ROBOTICS: "bg-emerald-100 text-emerald-800",
+                                SCIENCE: "bg-blue-100/10 text-blue-400 border border-blue-400/25",
+                                DESIGN: "bg-pink-100/10 text-pink-400 border border-pink-400/25",
+                                TECH: "bg-purple-100/10 text-purple-400 border border-purple-400/25",
+                                ROBOTICS: "bg-emerald-100/10 text-emerald-400 border border-emerald-400/25",
                             }[course.category];
                             return (
                                 <div
                                     key={course.id}
-                                    className="bg-white border border-[#e2e8f0] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group focus-within:ring-3 focus-within:ring-[#2563eb]"
+                                    className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group focus-within:ring-3 focus-within:ring-[#2563eb]"
                                 >
                                     <div
                                         className={`w-full h-[6.5rem] bg-gradient-to-br ${course.bgGradient} relative flex items-center justify-center text-white/10 text-[2.5rem] font-bold select-none`}
@@ -307,7 +314,7 @@ export default function StudentDashboard() {
                                         <span className={`inline-block px-[0.5rem] py-[0.15rem] rounded-md text-[0.62rem] font-extrabold tracking-wider ${badgeStyles}`}>
                                             {course.category}
                                         </span>
-                                        <h3 className="text-[0.85rem] font-extrabold text-[#0b1b3d] leading-snug min-h-[2.4rem] group-hover:text-[#ff6b35] transition-colors">
+                                        <h3 className="text-[0.85rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.4rem] group-hover:text-[#ff6b35] transition-colors">
                                             <a
                                                 href={`#course-${course.id}`}
                                                 className="focus:outline-none"
@@ -315,7 +322,7 @@ export default function StudentDashboard() {
                                                 {course.title}
                                             </a>
                                         </h3>
-                                        <div className="flex justify-between items-center text-[0.72rem] font-bold pt-[0.4rem] border-t border-gray-50 text-gray-500">
+                                        <div className="flex justify-between items-center text-[0.72rem] font-bold pt-[0.4rem] border-t border-[var(--border-color)] text-[var(--text-muted)]">
                                             <span className="flex items-center gap-[0.2rem] text-amber-500">
                                                 ⭐ {course.rating.toFixed(1)}
                                             </span>
@@ -328,6 +335,6 @@ export default function StudentDashboard() {
                     </div>
                 </div>
             </section>
-        </div >
-    )
+        </div>
+    );
 }

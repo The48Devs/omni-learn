@@ -73,8 +73,8 @@ export default function StudentPortalLayout({
                                                 href={item.href}
                                                 onClick={() => announce(`Navigating to ${item.label}`)}
                                                 className={`w-full flex items-center gap-[0.75rem] px-[1rem] py-[0.7rem] rounded-xl text-[0.88rem] font-bold transition-all text-left block focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 ${isActive
-                                                        ? "bg-[var(--button-primary,var(--text-main))] text-[var(--bg-primary)] shadow-md"
-                                                        : "text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-main)]"
+                                                    ? "bg-[var(--button-primary,var(--text-main))] text-[var(--bg-primary)] shadow-md"
+                                                    : "text-[var(--text-muted)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-main)]"
                                                     }`}
                                                 aria-current={isActive ? "page" : undefined}
                                             >
