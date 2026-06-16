@@ -145,7 +145,7 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap gap-4 pt-2">
             <Link
-              href="/StudentPortal"
+              href="/StudentPortal/dashboard"
               className="px-8 py-3.5 rounded-full text-base font-bold bg-[#0b1b3d] text-white hover:bg-[#152c5a] shadow-md hover:shadow-lg focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-all duration-200 active:scale-95 text-center min-w-[9.375rem]"
               aria-label="Enter the Student Portal to see your learning progress"
             >
@@ -193,7 +193,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Card 1: Student Portal */}
           <Link
-            href="/StudentPortal"
+            href="/StudentPortal/dashboard"
             className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left transition-all ${getCardStyle("student").bg}`}
             aria-label="Go to Student Portal. Learn your progress or aim for an early graduation with personalized paths."
           >
@@ -409,6 +409,6 @@ export default function Home() {
 
         </div>
       </section>
-    </main>
+    </main >
   );
 }
