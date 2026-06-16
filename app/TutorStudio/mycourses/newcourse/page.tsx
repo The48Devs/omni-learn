@@ -10,7 +10,12 @@ interface StorylineNode {
     speakerName: string;
     speakerAvatarUrl: string;
     dialogueText: string;
-    choices: { id: string; text: string }[];
+    choices: {
+        id: string;
+        text: string;
+        targetNodeId: string;
+        syncPointsModifier: number;
+    }[];
 }
 
 interface Module {
