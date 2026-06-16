@@ -208,6 +208,61 @@ export default function MyCoursesPage() {
                     </div>
                 </section>
             )}
+            {/* Course cards layout */}
+            <section aria-label="Subscribed courses grid">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.5rem]">
+                    {filteredCourses.slice(1).map((course) => (
+                        <div
+                            key={course.id}
+                            className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow group"
+                        >
+                            <div className="space-y-[1.2rem]">
+                                <div className={`h-[8rem] bg-gradient-to-br ${course.themeColor.gradient} relative flex items-center justify-center text-white/20 select-none`}>
+                                    <span className="absolute top-[0.8rem] left-[0.8rem] px-[0.6rem] py-[0.2rem] bg-white/10 border border-white/10 rounded-full text-[0.62rem] font-extrabold uppercase tracking-widest text-white">
+                                        {course.category}
+                                    </span>
+                                    {course.iconGlyph}
+                                </div>
+                                {/* Text content panel */}
+                                <div className="px-[1.2rem] space-y-[0.6rem]">
+                                    <h3 className="text-[1.05rem] font-extrabold text-[var(--text-main)] group-hover:text-[#ff6b35] transition-colors leading-snug">
+                                        {course.title}
+                                    </h3>
+                                    <p className="text-[0.78rem] text-[var(--text-muted)] leading-relaxed line-clamp-3">
+                                        {course.description}
+                                    </p>
+                                </div>
+                            </div>
+                            {/* Footer */}
+                            <div className="p-[1.2rem] mt-[1.2rem] space-y-[1rem] border-t border-[var(--border-color)] bg-[var(--bg-secondary)]">
+                                {/* progress metrics */}
+                                <div className="space-y-[0.3rem]">
+                                    <div className="flex justify-between text-[0.72rem] font-bold text-[var(--text-muted)]">
+                                        <span>{course.progress}%</span>
+                                    </div>
+                                    <div className="w-full h-[0.25rem] bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                                        <div
+                                            className="h-full bg-[var(--text-main)] rounded-full"
+                                            style={{ width: `${course.progress}%` }}
+                                            role="progressbar"
+                                            aria-valuenow={course.progress}
+                                            aria-valuemin={0}
+                                            aria-valuemax={100}
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="w-full py-[0.5rem] border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-main)] font-extrabold text-[0.82rem] rounded-xl transition-all focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-1"
+                                >
+                                    {course.progress > 0 ? "Resume Course" : "Start Course"}
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
         </div>
     );
 }
