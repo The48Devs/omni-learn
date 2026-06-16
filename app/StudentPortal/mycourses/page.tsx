@@ -178,6 +178,32 @@ export default function MyCoursesPage() {
                                 {coursesData[0].currentModule}
                             </p>
                         </div>
+                        {/* Progress bar and run button */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-[1.2rem] z-10 border-t border-white/10 pt-[1.2rem]">
+                            <div className="flex-1 space-y-[0.35rem] max-w-[28rem]">
+                                <div className="flex justify-between text-[0.75rem] font-bold tracking-wide">
+                                    <span>{coursesData[0].progress}% Completed</span>
+                                    <span>{coursesData[0].timeRemaining}</span>
+                                </div>
+                                <div className="w-full h-[0.5rem] bg-black/20 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-[#ff6b35] rounded-full transition-all duration-500"
+                                        style={{ width: `${coursesData[0].progress}%` }}
+                                        role="progressbar"
+                                        aria-valuenow={coursesData[0].progress}
+                                        aria-valuemin={0}
+                                        aria-valuemax={100}
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                className="w-[3rem] h-[3rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.95rem] shadow-lg transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#ff6b35] focus-visible:outline-offset-2 shrink-0 self-start sm:self-auto"
+                                aria-label={`Resume playing course module for ${coursesData[0].title}`}
+                            >
+                                ▶
+                            </button>
+                        </div>
 
                     </div>
                 </section>
