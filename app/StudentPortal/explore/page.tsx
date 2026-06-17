@@ -5,17 +5,17 @@ import React, { useState } from "react";
 //mock data arrays
 
 const trendingCourses = [
-    { id: 1, title: 'Introduction to Quantum Mechanics', tag: 'Physics', lessons: 12, image: 'bg-blue-900' },
-    { id: 2, title: 'Advanced UI/UX Principles', tag: 'Design', lessons: 8, image: 'bg-purple-900' },
-    { id: 3, title: 'Cellular Biology Fundamentals', tag: 'Biology', lessons: 15, image: 'bg-green-900' },
+    { id: 1, title: 'Organic Chemistry Synthesis', category: 'Science', publisher: 'Dr. Sarah Collins', rating: 4.9, lessonsCount: 12, duration: '4h 30m', imageTheme: 'bg-[#1a2b4c]' },
+    { id: 2, title: 'Advanced UI/UX Principles', category: 'Design', publisher: 'Design Academy', rating: 4.8, lessonsCount: 8, duration: '3h 15m', imageTheme: 'bg-purple-900' },
+    { id: 3, title: 'Quantum Mechanics Basics', category: 'Physics', publisher: 'Prof. Alan Turing', rating: 4.9, lessonsCount: 15, duration: '6h 00m', imageTheme: 'bg-slate-900' },
 ];
 const narrativeCourses = [
-    { id: 4, title: 'The Fall of Rome: An Interactive Journey', nodes: 45, time: '2hrs 30 mins', image: 'bg-stone-800' },
-    { id: 5, title: 'Cyberpunk Ethics & Philosophy', nodes: 32, time: '1hr 45 mins', image: 'bg-indigo-900' },
+    { id: 4, title: 'The Fall of Rome: An Interactive Journey', category: 'History', publisher: 'Omni History Dept', rating: 4.7, lessonsCount: 10, duration: '2h 30m', imageTheme: 'bg-stone-800' },
+    { id: 5, title: 'Cyberpunk Ethics & Philosophy', category: 'Philosophy', publisher: 'Tech Ethics Org', rating: 4.8, lessonsCount: 6, duration: '1h 45m', imageTheme: 'bg-indigo-900' },
 ];
 const sandboxCourses = [
-    { id: 6, title: 'Kinematics Sandbox Lab', hasNotes: true, hasTracking: true, image: 'bg-slate-800' },
-    { id: 7, title: 'Neural Net Visualizer', hasNotes: true, hasTracking: false, image: 'bg-zinc-800' },
+    { id: 6, title: 'Kinematics Mechanics Lab', category: 'Physics', publisher: 'Newton Labs', rating: 4.9, lessonsCount: 5, duration: '3h 00m', imageTheme: 'bg-slate-800' },
+    { id: 7, title: 'Neural Net Architecture', category: 'Technology', publisher: 'AI Fundamentals', rating: 4.9, lessonsCount: 8, duration: '4h 20m', imageTheme: 'bg-zinc-800' },
 ];
 
 export default function ExploreCourses() {
