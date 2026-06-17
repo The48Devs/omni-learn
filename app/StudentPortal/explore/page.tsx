@@ -13,7 +13,7 @@ const narrativeCourses = [
     { id: 4, title: 'The Fall of Rome: An Interactive Journey', nodes: 45, time: '2hrs 30 mins', image: 'bg-stone-800' },
     { id: 5, title: 'Cyberpunk Ethics & Philosophy', nodes: 32, time: '1hr 45 mins', image: 'bg-indigo-900' },
 ];
-const sandboxModules = [
+const sandboxCourses = [
     { id: 6, title: 'Kinematics Sandbox Lab', hasNotes: true, hasTracking: true, image: 'bg-slate-800' },
     { id: 7, title: 'Neural Net Visualizer', hasNotes: true, hasTracking: false, image: 'bg-zinc-800' },
 ];
@@ -92,90 +92,23 @@ export default function ExploreCourses() {
 
             {/*Discovery Sections */}
             <div className="w-full max-w-7xl mx-auto flex flex-col gap-16 pb-16">
-                {/*Trending this week*/}
                 <DiscoverSection title="🔥 Trending This Week" arialabel="Trending Courses Carousel">
-                    <div className="flex overflw-x-auto gap-6 pb-4 snap-x snap-mandatory hide-scrollbar">
-                        {trendingCourses.map(course => (
-                            <a href={`/StudentPortal/course/${course.id}`}
-                                className="snap-start flex-none w-[85vw] sm:w-[20rem] flex flex-col rounded-2xl overflow-hidden transition-transform hover:-translate-y-1"
-                                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-                                <div className={`w-full h[12rem] ${course.image} opacity-80`}>
-                                    <div className="p-6 flex flex-col gap-4 flex-grow">
-                                        <span className="self-start text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full"
-                                            style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>
-                                            {course.tag}
-                                        </span>
-                                        <h3 className="text-xl font-bold leading-tight">{course.title}</h3>
-                                        <div className="mt-auto flex justify-between items-center"
-                                            style={{ color: 'var(--text-muted' }}>
-                                            <span className="text-sm font-medium">{course.lessons} Lessons </span>
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            </a>
-                        ))}
+                    <div className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory hide-scrollbar">
+                        {trendingCourses.map(course => <CourseCard key={course.id} course={course} layout="horizontal" />)}
                     </div>
-
                 </DiscoverSection>
-                {/*Immersive Narrative */}
-                <DiscoverSection title="📖 Immersive Narrative Highlights" arialabel="Narrative Storyline Courses">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {narrativeCourses.map(course => (
-                            <a href={`/StudentPortal/course/${course.id}`}
-                                key={course.id}
-                                className="flex flex-col sm:flex-row rounded-2xl overflow-hidden transition-transform hover:-translate-y-1"
-                                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-                                <div className={`w-full sm:w-[12rem] h-[12rem] sm:h-auto ${course.image} opacity-80`}></div>
-                                <div className="p-6 flex flex-col justify-center gap-3 flex-grow">
-                                    <h3 className="text-xl font-bold leading-tight">{course.title}</h3>
-                                    <div className="flex flex-col gap-1 mt-2" style={{ color: 'var(--text-muted)' }}>
-                                        <span className="text-sm font-medium flex items-center gap-2">
-                                            <span aria-hidden="true">🔀</span> {course.nodes} Branching Nodes
-                                        </span>
-                                        <span className="text-sm font-medium flex items-center gap-2">
-                                            <span aria-hidden="true">⏱️</span> {course.time} Est. Completion
-                                        </span>
-                                    </div>
-                                </div>
-
-                            </a>
-                        ))}
-                    </div>
-
-                </DiscoverSection>
-                {/*Advanced Sandboxes*/}
-                <DiscoverSection title="🔬 Advanced Virtual Sandboxes" arialabel="Technical Sandbox Modules">
+                <DiscoverSection title="📖 Courses with Storyline Modules" arialabel="Narrative Storyline Courses">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {sandboxModules.map(course => (
-                            <a
-                                href={`/student/sandbox/${course.id}`}
-                                key={course.id}
-                                className="flex flex-col rounded-2xl overflow-hidden p-6 gap-4 transition-transform hover:-translate-y-1"
-                                style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}
-                            >
-                                <h3 className="text-xl font-bold">{course.title}</h3>
-                                <div className="flex flex-wrap gap-2 mt-auto">
-                                    {course.hasNotes && (
-                                        <span className="text-xs font-semibold px-3 py-1 rounded-md flex items-center gap-1" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
-                                            <span aria-hidden="true">📝</span> Lab Notes
-                                        </span>
-                                    )}
-                                    {course.hasTracking && (
-                                        <span className="text-xs font-semibold px-3 py-1 rounded-md flex items-center gap-1" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
-                                            <span aria-hidden="true">🎯</span> Live Objectives
-                                        </span>
-                                    )}
-                                </div>
-                            </a>
-                        ))}
+                        {narrativeCourses.map(course => <CourseCard key={course.id} course={course} layout="grid" />)}
                     </div>
                 </DiscoverSection>
-
+                <DiscoverSection title="🔬 Courses with Sandbox Labs" arialabel="Technical Sandbox Courses">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {sandboxCourses.map(course => <CourseCard key={course.id} course={course} layout="grid" />)}
+                    </div>
+                </DiscoverSection>
             </div>
-        </main >
+        </main>
     );
 }
 
