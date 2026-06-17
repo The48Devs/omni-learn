@@ -89,3 +89,15 @@ function FIlterSelect({ label, options }: {
         </div>
     );
 }
+
+function DiscoverSection({ title, arialabel, children }: { title: string, arialabel: string, children: React.ReactNode }) {
+    return (
+        <section className="flex flex-col gap-6" aria-label={arialabel}>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight"
+                style={{ color: `var(--text-main)` }}>
+                {title}
+            </h2>
+            {children}
+        </section>
+    )
+} 
