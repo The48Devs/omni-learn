@@ -146,6 +146,34 @@ export default function ExploreCourses() {
                     </div>
 
                 </DiscoverSection>
+                {/*Advanced Sandboxes*/}
+                <DiscoverSection title="🔬 Advanced Virtual Sandboxes" arialabel="Technical Sandbox Modules">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {sandboxModules.map(course => (
+                            <a
+                                href={`/student/sandbox/${course.id}`}
+                                key={course.id}
+                                className="flex flex-col rounded-2xl overflow-hidden p-6 gap-4 transition-transform hover:-translate-y-1"
+                                style={{ backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)' }}
+                            >
+                                <h3 className="text-xl font-bold">{course.title}</h3>
+                                <div className="flex flex-wrap gap-2 mt-auto">
+                                    {course.hasNotes && (
+                                        <span className="text-xs font-semibold px-3 py-1 rounded-md flex items-center gap-1" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
+                                            <span aria-hidden="true">📝</span> Lab Notes
+                                        </span>
+                                    )}
+                                    {course.hasTracking && (
+                                        <span className="text-xs font-semibold px-3 py-1 rounded-md flex items-center gap-1" style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)', border: '1px solid var(--border-color)' }}>
+                                            <span aria-hidden="true">🎯</span> Live Objectives
+                                        </span>
+                                    )}
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+                </DiscoverSection>
+
             </div>
         </main >
     );
