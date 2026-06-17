@@ -229,12 +229,30 @@ export default function MyCoursesPage() {
                                 </div>
                                 {/* Text content panel */}
                                 <div className="px-[1.2rem] space-y-[0.6rem]">
+                                    <div className="self-start px-2 py-1 rounded-md border text-[0.6rem] font-bold uppercase tracking-wider inline-block"
+                                        style={{ color: '#3b82f6', borderColor: '#bfdbfe', backgroundColor: 'transparent' }}>
+                                        {course.category}
+                                    </div>
                                     <h3 className="text-[1.05rem] font-extrabold text-[var(--text-main)] group-hover:text-[#ff6b35] transition-colors leading-snug">
                                         {course.title}
                                     </h3>
-                                    <p className="text-[0.78rem] text-[var(--text-muted)] leading-relaxed line-clamp-3">
+
+                                    {/* New Publisher Display */}
+                                    <p className="text-[0.75rem] font-medium" style={{ color: 'var(--text-muted)' }}>
+                                        By {course.publisher || "OmniLearn Partner"}
+                                    </p>
+                                    <p className="text-[0.78rem] text-[var(--text-muted)] leading-relaxed line-clamp-2">
                                         {course.description}
                                     </p>
+                                </div>
+                                <div className="px-[1.2rem] flex justify-between items-center text-[0.75rem] font-bold mt-2" style={{ color: 'var(--text-muted)' }}>
+                                    <span className="flex items-center gap-1 text-amber-500">
+                                        ★ <span style={{ color: 'var(--text-main)' }}>{course.rating || "4.8"}</span>
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span>⏱ {course.duration || "2h 45m"}</span>
+                                        <span style={{ color: 'var(--text-main)' }}>{course.lessonsCount || 10} Lessons</span>
+                                    </div>
                                 </div>
                             </div>
                             {/* Footer */}
