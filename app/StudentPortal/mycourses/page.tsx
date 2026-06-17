@@ -20,6 +20,10 @@ interface Course {
         gradient: string;
     };
     iconGlyph: React.ReactNode;
+    publisher?: string;
+    duration?: string;
+    lessonsCount?: number;
+    rating?: number;
 }
 
 export default function MyCoursesPage() {
