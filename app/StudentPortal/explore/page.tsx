@@ -17,3 +17,51 @@ const sandboxModules = [
     { id: 6, title: 'Kinematics Sandbox Lab', hasNotes: true, hasTracking: true, image: 'bg-slate-800' },
     { id: 7, title: 'Neural Net Visualizer', hasNotes: true, hasTracking: false, image: 'bg-zinc-800' },
 ];
+
+export default function ExploreCourses() {
+    const [searchQuery, setSearchQuery] = useState('');
+
+    return (
+        < main
+            className="w-full min-h-screen p-4 md:p-8 lg:p-12 flex flex-col gap-12"
+            style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)' }}>
+            {/*Header and search zone */}
+            <section className="flex flex-col items-center text-center max-w-4xl mx-auto w-full pt-8 gap-6">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+                    Discover New Skills
+                </h1>
+                <p className="text-lg md:text-xl max-w-2xl" style={{ color: 'var(--text-muted)' }}>
+                    Explore immersive storylines, elite interactive sandboxes, and expert-led programs tailored for your learning track.
+                </p>
+                <form
+                    className="w-full max-w-3xl mt-4 relative flex items-center rounded-2xl overflow-hidden shadow-lg transition-shadow focus-within:shadow-xl"
+                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+                    onSubmit={(e) => e.preventDefault()}
+                >
+                    <div className="pl-6 flex items-center justify-center" aria-hidden="true" style={{ color: 'var(--text-muted)' }}>
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input
+                        type="search"
+                        className="w-full py-4 px-4 bg-transparent border-none outline-none text-lg placeholder-opacity-70"
+                        placeholder="Search across courses, subjects, sandboxes, or modules..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{ color: 'var(--text-main)' }}
+                        aria-label="Search across courses"
+                    />
+                    <button
+                        type="submit"
+                        className="px-8 py-4 font-semibold text-white transition-opacity hover:opacity-90"
+                        style={{ backgroundColor: 'var(--focus-ring-color)' }}
+                        aria-label="Execute search"
+                    >
+                        Search
+                    </button>
+                </form>
+            </section>
+        </main>
+    )
+}
