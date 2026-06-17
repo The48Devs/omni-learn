@@ -5,7 +5,7 @@ Organization -> Course(s)
 Activity completion Point Criteria, (Total 30pts)
     Accuracy [%/10]
     Speed [time allocated % (100 -> 0) /10]
-    B4 Deadline (If any) [10]
+    B4 Deadline (If any) [10] 
     
 Levels,
     Each organization has a seperate level per student
