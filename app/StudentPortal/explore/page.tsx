@@ -62,11 +62,38 @@ export default function ExploreCourses() {
                     </button>
                 </form>
             </section>
+            {/*Refined filter and sort bar*/}
+            <section className="w-full max-w-7xl mx-auto flex flex-col xl:flex-row gap-4 justify-between items-center p-4 rounded-xl shadow-sm"
+                style={{ backgroundColor: `var(--bg-secondary)`, border: '1px solid var(--border-color' }}
+                aria-label="Course Filters">
+                <div className="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+                    <FilterSelect
+                        label="Subject"
+                        options={['All Subjects', 'Physics', 'Biology', 'Technology', 'History', 'Design', 'Robotics']}
+                    />
+                    <FilterSelect
+                        label="Experience Type"
+                        options={['All Formats', 'Interactive Storylines', 'Sandbox Simulations', 'Core Assessments']}
+                    />
+                    <FilterSelect
+                        label="Duration"
+                        options={['Any Duration', 'Quick Sessions (< 1 hr)', 'Standard Modules (1-3 hrs)', 'Deep Dives (3+ hrs)']}
+                    />
+                </div>
+
+                <div className="w-full xl:w-auto flex justify-start xl:justify-end mt-4 xl:mt-0">
+                    <FilterSelect
+                        label="Sort By"
+                        options={['Popularity', 'Highest Rated (★)', 'Newest Releases']}
+                    />
+                </div>
+
+            </section>
         </main >
     );
 }
 
-function FIlterSelect({ label, options }: {
+function FilterSelect({ label, options }: {
     label: string, options: string[]
 }) {
     return (
