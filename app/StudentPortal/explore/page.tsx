@@ -89,6 +89,38 @@ export default function ExploreCourses() {
                 </div>
 
             </section>
+
+            {/*Discovery Sections */}
+            <div className="w-full max-w-7xl mx-auto flex flex-col gap-16 pb-16">
+                {/*Trending this week*/}
+                <DiscoverSection title="🔥 Trending This Week" arialabel="Trending Courses Carousel">
+                    <div className="flex overflw-x-auto gap-6 pb-4 snap-x snap-mandatory hide-scrollbar">
+                        {trendingCourses.map(course => (
+                            <a href={`/StudentPortal/course/${course.id}`}
+                                className="snap-start flex-none w-[85vw] sm:w-[20rem] flex flex-col rounded-2xl overflow-hidden transition-transform hover:-translate-y-1"
+                                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                                <div className={`w-full h[12rem] ${course.image} opacity-80`}>
+                                    <div className="p-6 flex flex-col gap-4 flex-grow">
+                                        <span className="self-start text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full"
+                                            style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>
+                                            {course.tag}
+                                        </span>
+                                        <h3 className="text-xl font-bold leading-tight">{course.title}</h3>
+                                        <div className="mt-auto flex justify-between items-center"
+                                            style={{ color: 'var(--text-muted' }}>
+                                            <span className="text-sm font-medium">{course.lessons}Lessons </span>
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
+
+                </DiscoverSection>
+            </div>
         </main >
     );
 }
