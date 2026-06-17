@@ -213,4 +213,60 @@ function DiscoverSection({ title, arialabel, children }: { title: string, ariala
             {children}
         </section>
     )
-} 
+}
+
+function CourseCard({ course, layout }: { course: any, layout: "horizontal" | "grid" }) {
+    return (
+        <a
+            href={`/StudentPortal/course/${course.id}`}
+            className={`flex flex-col rounded-2xl overflow-hidden shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md ${layout === 'horizontal' ? 'snap-start flex-none w-[85vw] sm:w-[20rem]' : ''}`}
+            style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}
+        >
+            {/* Top Graphic Area with Faded Text */}
+            <div className={`w-full h-[8rem] flex items-center justify-center relative overflow-hidden select-none ${course.imageTheme}`}>
+                <span className="text-4xl md:text-5xl font-black text-white opacity-10 uppercase tracking-widest pointer-events-none drop-shadow-md">
+                    {course.category}
+                </span>
+            </div>
+
+            {/* Content Area */}
+            <div className="p-5 flex flex-col gap-3 flex-grow">
+                {/* Outlined Pill */}
+                <div className="self-start px-3 py-1 rounded-lg border text-[0.65rem] font-bold uppercase tracking-wider"
+                    style={{ color: '#3b82f6', borderColor: '#bfdbfe', backgroundColor: 'transparent' }}>
+                    {course.category}
+                </div>
+
+                {/* Title & Publisher */}
+                <div className="flex flex-col gap-1">
+                    <h3 className="text-lg font-bold leading-tight line-clamp-2" style={{ color: 'var(--text-main)' }}>
+                        {course.title}
+                    </h3>
+                    <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                        By {course.publisher}
+                    </p>
+                </div>
+
+                {/* Footer Data */}
+                <div className="mt-auto pt-4 border-t flex justify-between items-center text-sm font-semibold"
+                    style={{ borderColor: 'var(--border-color)', color: 'var(--text-muted)' }}>
+                    <div className="flex items-center gap-1.5 text-amber-500">
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span style={{ color: 'var(--text-main)' }}>{course.rating}</span>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        {course.duration && (
+                            <span className="flex items-center gap-1">
+                                <span aria-hidden="true" className="opacity-70">⏱</span> {course.duration}
+                            </span>
+                        )}
+                        <span style={{ color: 'var(--text-main)' }}>{course.lessonsCount} Lessons</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+    );
+}
