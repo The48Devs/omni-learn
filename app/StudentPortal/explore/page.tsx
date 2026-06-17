@@ -108,13 +108,39 @@ export default function ExploreCourses() {
                                         <h3 className="text-xl font-bold leading-tight">{course.title}</h3>
                                         <div className="mt-auto flex justify-between items-center"
                                             style={{ color: 'var(--text-muted' }}>
-                                            <span className="text-sm font-medium">{course.lessons}Lessons </span>
+                                            <span className="text-sm font-medium">{course.lessons} Lessons </span>
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                             </svg>
                                         </div>
                                     </div>
                                 </div>
+                            </a>
+                        ))}
+                    </div>
+
+                </DiscoverSection>
+                {/*Immersive Narrative */}
+                <DiscoverSection title="📖 Immersive Narrative Highlights" arialabel="Narrative Storyline Courses">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {narrativeCourses.map(course => (
+                            <a href={`/StudentPortal/course/${course.id}`}
+                                key={course.id}
+                                className="flex flex-col sm:flex-row rounded-2xl overflow-hidden transition-transform hover:-translate-y-1"
+                                style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                                <div className={`w-full sm:w-[12rem] h-[12rem] sm:h-auto ${course.image} opacity-80`}></div>
+                                <div className="p-6 flex flex-col justify-center gap-3 flex-grow">
+                                    <h3 className="text-xl font-bold leading-tight">{course.title}</h3>
+                                    <div className="flex flex-col gap-1 mt-2" style={{ color: 'var(--text-muted)' }}>
+                                        <span className="text-sm font-medium flex items-center gap-2">
+                                            <span aria-hidden="true">🔀</span> {course.nodes} Branching Nodes
+                                        </span>
+                                        <span className="text-sm font-medium flex items-center gap-2">
+                                            <span aria-hidden="true">⏱️</span> {course.time} Est. Completion
+                                        </span>
+                                    </div>
+                                </div>
+
                             </a>
                         ))}
                     </div>
