@@ -1,0 +1,15 @@
+﻿Minimal list of commands GitHub
+
+
+# cloning at first
+git clone -b main https://github.com/The48Devs/omni-learn 
+
+
+# updating, if you logged to GitHub through git already
+And then cd omni-learn
+git pull origin main
+
+# do your changes
+git add .
+git commit -m "added community page, made homepage complete and added a GROQ based AI Chatbot  "
+git push origin main

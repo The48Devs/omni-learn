@@ -401,7 +401,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
               />
               <span className="text-sm text-[var(--text-muted)]">
                 I have read the{" "}
-                <Link href="/terms" className="text-[#7ecef4] underline">
+                <Link href="/terms-of-service" target="_blank" rel="noopener noreferrer" className="text-[#7ecef4] underline">
                   Terms of Use
                 </Link>
               </span>

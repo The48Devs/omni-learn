@@ -4,6 +4,7 @@ import "./globals.css";
 import NavbarMain from "@/app/components/NavbarMain";
 import { AccessibilityProvider } from "@/app/components/AccessibilityContext";
 import AccessibilityToolbar from "@/app/components/AccessibilityToolbar";
+import ChatBot from "@/app/components/ChatBot";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./components/AuthCOntext";
 
@@ -43,6 +44,7 @@ export default function RootLayout({
           </a>
           <AuthProvider>
             <NavbarMain />
+            <ChatBot />
             <AccessibilityToolbar />
             {children}
           </AuthProvider>

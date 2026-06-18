@@ -15,9 +15,7 @@ export default function Navbar() {
     // Navigation Links
     const navLinks = [
         { name: "Explore", href: "/" },
-        { name: "Community", href: "/communityForum" },
-        { name: "Tutor Studio", href: "/TutorStudio/dashboard" },
-        { name: "Arena", href: "/TheArena" }
+        { name: "Community", href: "/community" },
     ];
 
     return (

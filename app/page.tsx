@@ -143,22 +143,7 @@ export default function Home() {
             Experience the next generation of online education. Our integrated modules combine
             theory with hands-on practice in a real-time collaborative arena.
           </p>
-          <div className="flex flex-wrap gap-4 pt-2">
-            <Link
-              href="/StudentPortal/dashboard"
-              className="px-8 py-3.5 rounded-full text-base font-bold bg-[#0b1b3d] text-white hover:bg-[#152c5a] shadow-md hover:shadow-lg focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-all duration-200 active:scale-95 text-center min-w-[9.375rem]"
-              aria-label="Enter the Student Portal to see your learning progress"
-            >
-              Student Portal
-            </Link>
-            <Link
-              href="/TutorStudio/dashboard"
-              className="px-8 py-3.5 rounded-full text-base font-bold bg-[#f05a28] text-white hover:bg-[#d8481b] shadow-md hover:shadow-lg focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-all duration-200 active:scale-95 text-center min-w-[9.375rem]"
-              aria-label="Enter Tutor Studio to create and manage courses"
-            >
-              Tutor Studio
-            </Link>
-          </div>
+
         </div>
 
         {/* Hero Visual Image */}
@@ -192,10 +177,8 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Card 1: Student Portal */}
-          <Link
-            href="/StudentPortal/dashboard"
+          <div
             className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left transition-all ${getCardStyle("student").bg}`}
-            aria-label="Go to Student Portal. Learn your progress or aim for an early graduation with personalized paths."
           >
             <div>
               <div className={`${getCardStyle("student").icon}`}>
@@ -211,13 +194,11 @@ export default function Home() {
               </p>
             </div>
             <div className={`w-6 h-[2px] rounded-full ${getCardStyle("student").line} group-hover:w-12 transition-all duration-200`} />
-          </Link>
+          </div>
 
           {/* Card 2: Tutor Studio */}
-          <Link
-            href="/TutorStudio"
+          <div
             className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left transition-all ${getCardStyle("tutor").bg}`}
-            aria-label="Go to Tutor Studio. Share your methods and grow your audience with our professional tutor toolset."
           >
             <div>
               <div className={`${getCardStyle("tutor").icon}`}>
@@ -232,13 +213,11 @@ export default function Home() {
               </p>
             </div>
             <div className={`w-6 h-[2px] rounded-full ${getCardStyle("tutor").line} group-hover:w-12 transition-all duration-200`} />
-          </Link>
+          </div>
 
           {/* Card 3: Analytics */}
-          <button
-            onClick={() => alert("Loading learning analytics dashboard...")}
-            className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left cursor-pointer transition-all ${getCardStyle("analytics").bg}`}
-            aria-label="Open Analytics module. Monitor real-time learning metrics and receive actionable data-driven insights."
+          <div
+            className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left transition-all ${getCardStyle("analytics").bg}`}
           >
             <div>
               <div className={`${getCardStyle("analytics").icon}`}>
@@ -253,13 +232,11 @@ export default function Home() {
               </p>
             </div>
             <div className={`w-6 h-[2px] rounded-full ${getCardStyle("analytics").line} group-hover:w-12 transition-all duration-200`} />
-          </button>
+          </div>
 
           {/* Card 4: The Arena */}
-          <Link
-            href="/TheArena"
+          <div
             className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left transition-all ${getCardStyle("arena").bg}`}
-            aria-label="Go to The Arena. Explore our competitive landscape and challenge peers in real-time skill arenas."
           >
             <div>
               <div className={`${getCardStyle("arena").icon}`}>
@@ -275,13 +252,11 @@ export default function Home() {
               </p>
             </div>
             <div className={`w-6 h-[2px] rounded-full ${getCardStyle("arena").line} group-hover:w-12 transition-all duration-200`} />
-          </Link>
+          </div>
 
           {/* Card 5: Story Creator */}
-          <button
-            onClick={() => alert("Launching Story Creator workspace...")}
-            className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left cursor-pointer transition-all ${getCardStyle("story").bg}`}
-            aria-label="Open Story Creator module. Create complex educational narratives and invite students into your unique world."
+          <div
+            className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left transition-all ${getCardStyle("story").bg}`}
           >
             <div>
               <div className={`${getCardStyle("story").icon}`}>
@@ -296,13 +271,11 @@ export default function Home() {
               </p>
             </div>
             <div className={`w-6 h-[2px] rounded-full ${getCardStyle("story").line} group-hover:w-12 transition-all duration-200`} />
-          </button>
+          </div>
 
           {/* Card 6: Simulations */}
-          <button
-            onClick={() => alert("Initializing 3D spatial simulation portal...")}
-            className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left cursor-pointer transition-all ${getCardStyle("simulations").bg}`}
-            aria-label="Start Simulations. Experience life-like interactive simulations designed for high-stakes practical learning."
+          <div
+            className={`group p-8 rounded-2xl flex flex-col justify-between h-[15.625rem] text-left transition-all ${getCardStyle("simulations").bg}`}
           >
             <div>
               <div className={`${getCardStyle("simulations").icon}`}>
@@ -317,7 +290,7 @@ export default function Home() {
               </p>
             </div>
             <div className={`w-6 h-[2px] rounded-full ${getCardStyle("simulations").line} group-hover:w-12 transition-all duration-200`} />
-          </button>
+          </div>
         </div>
       </section>
 
@@ -373,9 +346,9 @@ export default function Home() {
                 and earn unique rank profile frames.
               </p>
               <Link
-                href="/TheArena"
+                href="/leaderboard"
                 className="inline-flex items-center text-sm font-bold text-[var(--focus-ring-color)] hover:underline gap-1.5 focus-visible:outline-2 focus-visible:outline-[var(--focus-ring-color)]"
-                aria-label="View leaderboards in the Arena module"
+                aria-label="View the Arena Leaderboard"
               >
                 View Leaderboard
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

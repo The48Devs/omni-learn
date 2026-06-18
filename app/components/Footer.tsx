@@ -17,19 +17,19 @@ export default function Footer() {
                         © 2026 OmniLearn Systems. All rights reserved. </p> </div>
                 <nav aria-label="Footer Navigation" className="flex flex-wrap items-center gap-x-6 gap-y-2" >
                     <Link
-                        href="/privacy"
+                        href="/privacy-policy"
                         className="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring-color)]"
                     >
                         Privacy Policy
                     </Link>
                     <Link
-                        href="/terms"
+                        href="/terms-of-service"
                         className="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring-color)]"
                     >
                         Terms of Service
                     </Link>
                     <Link
-                        href="/help"
+                        href="/help-center"
                         className="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-main)] transition-colors focus-visible:outline-2 focus-visible:outline-[var(--focus-ring-color)]"
                     >
                         Help Center
