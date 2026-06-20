@@ -150,9 +150,8 @@ function DiscoverSection({ title, arialabel, children }: { title: string, ariala
 
 function CourseCard({ course, layout }: { course: any, layout: "horizontal" | "grid" }) {
     return (
-        <a
-            href={`/StudentPortal/course/${course.id}`}
-            className={`flex flex-col rounded-2xl overflow-hidden shadow-sm transition-transform hover:-translate-y-1 hover:shadow-md ${layout === 'horizontal' ? 'snap-start flex-none w-[85vw] sm:w-[20rem]' : ''}`}
+        <div
+            className={`flex flex-col rounded-2xl overflow-hidden shadow-sm ${layout === 'horizontal' ? 'snap-start flex-none w-[85vw] sm:w-[20rem]' : ''}`}
             style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}
         >
             {/* Top Graphic Area with Faded Text */}
@@ -200,6 +199,6 @@ function CourseCard({ course, layout }: { course: any, layout: "horizontal" | "g
                     </div>
                 </div>
             </div>
-        </a>
+        </div>
     );
 }

@@ -9,8 +9,9 @@ export default function Navbar() {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const { isAuthenticated, role, logout } = useAuth();
+    const { isAuthenticated, profile, logout } = useAuth();
 
+    const dashboardHref = profile?.role === "tutor" ? "/TutorStudio/dashboard" : "/StudentPortal/dashboard";
 
     // Navigation Links
     const navLinks = [
@@ -47,7 +48,7 @@ export default function Navbar() {
                                 {/* Dashboard link – resolved from role */}
                                 <li>
                                     <Link
-                                        href={`/${role}/dashboard`}
+                                        href={dashboardHref}
                                         className="px-3 py-2 rounded text-[var(--text-main)] hover:bg-[var(--bg-secondary)]"
                                     >
                                         Dashboard

@@ -79,13 +79,13 @@ export default function TutorStudioLayout({
                     <div className="p-4 border-t border-slate-800 data-[theme=high-contrast]:border-white">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-sx text-slate-400 truncate max-w-[150px]">
-                                {user || "daniel@gmail.com"}
+                                {user?.email ?? "daniel@gmail.com"}
                             </span>
                         </div>
                         <button
                             onClick={logout}
                             className="w-full text-left flex items-center gap-2 px-3 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-950/20 hover:text-rose-300 rounded-lg transition-colors cursor-pointer"
-                            aria-lavel="Sign out from Tutor Studio">
+                            aria-label="Sign out from Tutor Studio">
                             <svg className="w-4 h-4"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

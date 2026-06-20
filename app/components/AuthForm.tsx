@@ -1,14 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "./AuthCOntext";
+import type { Role } from "./AuthCOntext";
+
+function getFirebaseErrorMessage(code: string): string {
+  const map: Record<string, string> = {
+    "auth/email-already-in-use": "This email is already registered. Try logging in instead.",
+    "auth/invalid-email": "Invalid email address. Please check and try again.",
+    "auth/user-not-found": "No account found with this email. Please sign up first.",
+    "auth/wrong-password": "Incorrect password. Please try again.",
+    "auth/weak-password": "Password should be at least 6 characters.",
+    "auth/too-many-requests": "Too many attempts. Please wait a moment and try again.",
+    "auth/invalid-credential": "Invalid email or password. Please try again.",
+    "auth/network-request-failed": "Network error. Please check your internet connection.",
+  };
+  return map[code] || "Something went wrong. Please try again.";
+}
 
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
-  const { login, register } = useAuth();
+  const { login, register, isAuthenticated, profile, loading: authLoading } = useAuth();
+  const router = useRouter();
 
-  // form vars
-  const [role, setRole] = useState<"student" | "tutor">("student");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [role, setRole] = useState<Role>("student");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [customId, setCustomId] = useState("");
@@ -20,34 +38,89 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-  // submit functionality
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.replace(profile?.role === "tutor" ? "/TutorStudio/dashboard" : "/StudentPortal/dashboard");
+    }
+  }, [authLoading, isAuthenticated, profile, router]);
+
+  if (authLoading) {
+    return (
+      <main id="main-content" className="auth-page-bg min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-3 text-[var(--text-muted)]">
+          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          Checking authentication...
+        </div>
+      </main>
+    );
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
     if (mode === "login") {
-      login(email, password);
-    } else {
-      if (!agreedToTerms) {
-        alert("Please agree to the Terms of Use before signing up.");
+      if (!email || !password) {
+        setError("Please fill in all fields.");
         return;
       }
-      if (password !== confirmPassword) {
-        alert("Passwords do not match.");
-        return;
+      setSubmitting(true);
+      try {
+        await login(email, password);
+      } catch (err: unknown) {
+        const fbErr = err as { code?: string; message?: string };
+        setError(getFirebaseErrorMessage(fbErr.code ?? ""));
+      } finally {
+        setSubmitting(false);
       }
-      if (fullName) {
-        localStorage.setItem("auth-user-name", fullName);
-      }
-      register(email, password, role);
+      return;
+    }
+
+    if (!fullName || !email || !customId || !mobile || !institution || !password || !confirmPassword) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (!agreedToTerms) {
+      setError("Please agree to the Terms of Use before signing up.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await register({
+        email,
+        password,
+        role,
+        fullName,
+        studentId: role === "student" ? customId : undefined,
+        tutorId: role === "tutor" ? customId : undefined,
+        mobileNumber: mobile,
+        institution,
+      });
+    } catch (err: unknown) {
+      const fbErr = err as { code?: string; message?: string };
+      setError(getFirebaseErrorMessage(fbErr.code ?? ""));
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // reusable styles
   const inputClass =
     "w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] " +
     "px-4 py-2.5 text-sm text-[var(--text-main)] placeholder-[var(--text-muted)] " +
     "focus:border-[var(--focus-ring-color)] focus:outline-none transition-colors";
 
-  // eye toggle
   const EyeIcon = ({ visible }: { visible: boolean }) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -70,14 +143,12 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
     </svg>
   );
 
-  //Registration view
   if (mode === "register") {
     return (
       <main
         id="main-content"
         className="auth-page-bg min-h-screen flex flex-col items-center justify-center py-10 px-4"
       >
-        {/* Page heading */}
         <h1 className="text-3xl font-bold text-[var(--text-main)] mb-1 text-center">
           <span className="font-extrabold">Create</span>{" "}
           <span className="font-light text-[#7ecef4]">New Account</span>
@@ -88,10 +159,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
             : "Join OmniLearn and start shaping minds globally."}
         </p>
 
-        {/* Card */}
         <div className="auth-card w-full max-w-lg p-8">
-
-          {/* Role pill toggle */}
           <div className="flex justify-center mb-6">
             <div className="role-pill-track" role="group" aria-label="Select account type">
               <button
@@ -113,13 +181,15 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
             </div>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              {error}
+            </div>
+          )}
 
-            {/* student view*/}
+          <form onSubmit={handleSubmit} className="space-y-4">
             {role === "student" ? (
               <>
-                {/* Full Name */}
                 <div>
                   <label htmlFor="fullName" className="block text-sm font-medium text-[var(--text-main)] mb-1">
                     Full Name
@@ -135,7 +205,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   />
                 </div>
 
-                {/* Email Address */}
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-[var(--text-main)] mb-1">
                     Email Address
@@ -151,7 +220,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   />
                 </div>
 
-                {/* Student ID */}
                 <div>
                   <label htmlFor="studentId" className="block text-sm font-medium text-[var(--text-main)] mb-1">
                     Create Student ID
@@ -167,7 +235,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   />
                 </div>
 
-                {/* Mobile Number */}
                 <div>
                   <label htmlFor="mobile" className="block text-sm font-medium text-[var(--text-main)] mb-1">
                     Mobile Number
@@ -183,7 +250,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   />
                 </div>
 
-                {/* Institution */}
                 <div>
                   <label htmlFor="institution" className="block text-sm font-medium text-[var(--text-main)] mb-1">
                     Institution
@@ -199,9 +265,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   />
                 </div>
 
-                {/* Passwords row */}
                 <div className="grid grid-cols-2 gap-4">
-                  {/* Create Password */}
                   <div>
                     <label htmlFor="password" className="block text-sm font-medium text-[var(--text-main)] mb-1">
                       Create Password
@@ -227,7 +291,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                     </div>
                   </div>
 
-                  {/* Confirm Password */}
                   <div>
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-[var(--text-main)] mb-1">
                       Confirm your Password
@@ -255,9 +318,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                 </div>
               </>
             ) : (
-              /* tutor view */
               <>
-                {/*Full Name + Email */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="fullName" className="block text-sm font-medium text-[var(--text-main)] mb-1">
@@ -289,7 +350,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   </div>
                 </div>
 
-                {/*Tutor ID + Mobile */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="tutorId" className="block text-sm font-medium text-[var(--text-main)] mb-1">
@@ -321,7 +381,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   </div>
                 </div>
 
-                {/* Institution */}
                 <div>
                   <label htmlFor="institution" className="block text-sm font-medium text-[var(--text-main)] mb-1">
                     Institution
@@ -337,7 +396,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
                   />
                 </div>
 
-                {/*Passwords */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="password" className="block text-sm font-medium text-[var(--text-main)] mb-1">
@@ -391,7 +449,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
               </>
             )}
 
-            {/* Terms checkbox */}
             <label className="flex items-start gap-2 cursor-pointer mt-2">
               <input
                 type="checkbox"
@@ -407,22 +464,27 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
               </span>
             </label>
 
-            {/* Sign Up*/}
             <button
               type="submit"
-              className="mt-2 w-full flex items-center justify-center gap-2 rounded-full bg-[var(--focus-ring-color)] py-2.5 font-semibold text-white hover:opacity-90 focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-opacity"
+              disabled={submitting}
+              className="mt-2 w-full flex items-center justify-center gap-2 rounded-full bg-[var(--focus-ring-color)] py-2.5 font-semibold text-white hover:opacity-90 focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-opacity disabled:opacity-60"
             >
-              Sign Up
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
+              {submitting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Creating Account...
+                </>
+              ) : (
+                <>
+                  Sign Up
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </>
+              )}
             </button>
           </form>
 
@@ -437,7 +499,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
     );
   }
 
-  //login view
   return (
     <main
       id="main-content"
@@ -451,8 +512,12 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         Log in to continue your learning journey.
       </p>
       <div className="auth-card w-full max-w-md p-8">
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Email */}
           <div>
             <label htmlFor="loginEmail" className="block text-sm font-medium text-[var(--text-main)] mb-1">
               Email Address
@@ -467,7 +532,6 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
               className={inputClass}
             />
           </div>
-          {/* Password */}
           <div>
             <label htmlFor="loginPassword" className="block text-sm font-medium text-[var(--text-main)] mb-1">
               Password
@@ -498,22 +562,27 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
               Forgot password?
             </Link>
           </div>
-          {/* Submit */}
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-2 rounded-full bg-[var(--focus-ring-color)] py-2.5 font-semibold text-white hover:opacity-90 focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-opacity"
+            disabled={submitting}
+            className="w-full flex items-center justify-center gap-2 rounded-full bg-[var(--focus-ring-color)] py-2.5 font-semibold text-white hover:opacity-90 focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color)] transition-opacity disabled:opacity-60"
           >
-            Log In
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-            </svg>
+            {submitting ? (
+              <>
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Logging in...
+              </>
+            ) : (
+              <>
+                Log In
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </>
+            )}
           </button>
         </form>
         <p className="mt-6 text-center text-sm text-[var(--text-muted)]">

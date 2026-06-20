@@ -141,12 +141,9 @@ export default function MyCoursesPage() {
                                 </p>
                             </div>
                             <div className="flex flex-col gap-2 mt-3">
-                                <Link
-                                    href={`/TutorStudio/mycourses/${course.id}`}
-                                    className="w-full text-center border border-[var(--border-color)] text-slate-700 bg-[var(--bg-secondary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-main)] font-semibold text-xs py-3 rounded-xl transition-colors outline-none focus-visible:outline-3 focus-visible:outline-yellow-400 block"
-                                >
+                                <span className="w-full text-center border border-[var(--border-color)] text-[var(--text-muted)] bg-[var(--bg-secondary)] font-semibold text-xs py-3 rounded-xl block cursor-default">
                                     View Course
-                                </Link>
+                                </span>
                                 <Link
                                     href={`/TutorStudio/courses/${course.id}/analytics`}
                                     className="w-full text-center bg-[#0b1b3d] hover:bg-[#FF6B35] text-white font-bold text-xs py-3 rounded-xl transition-colors outline-none focus-visible:outline-3 focus-visible:outline-yellow-400 block"

@@ -268,3 +268,288 @@ textarea:focus-visible,
 [data-focus-profile="distraction-free"] .auth-card {
   box-shadow: none !important;
 }
+
+/* =====================
+   UNIVERSAL THEME OVERRIDES
+   Override Tailwind's --color-* CSS custom properties so ALL utilities
+   (bg-white, text-gray-900, border-gray-200, etc.) automatically
+   respond to theme changes across EVERY page.
+   ===================== */
+
+/* High Contrast — black backgrounds, white text, neon accents */
+[data-theme="high-contrast"] {
+  --color-white: #000000;
+  --color-black: #ffffff;
+  --color-gray-50: #1a1a1a;
+  --color-gray-100: #222222;
+  --color-gray-200: #333333;
+  --color-gray-300: #555555;
+  --color-gray-400: #888888;
+  --color-gray-500: #aaaaaa;
+  --color-gray-600: #cccccc;
+  --color-gray-700: #dddddd;
+  --color-gray-800: #eeeeee;
+  --color-gray-900: #ffffff;
+  --color-gray-950: #ffffff;
+  --color-teal-50: #002a22;
+  --color-teal-100: #003d33;
+  --color-teal-200: #005544;
+  --color-teal-300: #007766;
+  --color-teal-400: #009988;
+  --color-teal-500: #00ccaa;
+  --color-teal-600: #00b399;
+  --color-teal-700: #00e5a0;
+  --color-teal-800: #00cc88;
+  --color-teal-900: #009966;
+  --color-green-50: #002200;
+  --color-green-100: #003300;
+  --color-green-200: #005500;
+  --color-green-300: #007700;
+  --color-green-400: #00aa00;
+  --color-green-500: #00cc00;
+  --color-green-600: #00dd00;
+  --color-green-700: #00ff44;
+  --color-green-800: #00ee33;
+  --color-green-900: #00cc22;
+  --color-amber-50: #332200;
+  --color-amber-100: #443300;
+  --color-amber-200: #665500;
+  --color-amber-300: #887700;
+  --color-amber-400: #ccaa00;
+  --color-amber-500: #ffcc00;
+  --color-amber-600: #ddbb00;
+  --color-amber-700: #ffdd00;
+  --color-amber-800: #ccaa00;
+  --color-amber-900: #aa8800;
+  --color-blue-50: #001133;
+  --color-blue-100: #002255;
+  --color-blue-200: #003377;
+  --color-blue-300: #004499;
+  --color-blue-400: #0066cc;
+  --color-blue-500: #0088ee;
+  --color-blue-600: #2299ff;
+  --color-blue-700: #66bbff;
+  --color-blue-800: #4499ee;
+  --color-blue-900: #2277cc;
+  --color-red-50: #330000;
+  --color-red-100: #550000;
+  --color-red-200: #770000;
+  --color-red-300: #990000;
+  --color-red-400: #cc0000;
+  --color-red-500: #ff4444;
+  --color-red-600: #ee3333;
+  --color-red-700: #dd2222;
+  --color-red-800: #cc1111;
+  --color-red-900: #aa0000;
+}
+/* Keep text-white readable on dark teal buttons in high-contrast */
+[data-theme="high-contrast"] .text-white { color: #ffffff !important; }
+[data-theme="high-contrast"] .text-white\/90 { color: rgba(255,255,255,0.9) !important; }
+
+/* Protanopia — blue-based scheme for red-green colorblind */
+[data-theme="protanopia"] {
+  --color-white: #f0f4f8;
+  --color-black: #0f172a;
+  --color-gray-50: #f0f4f8;
+  --color-gray-100: #e2e8f0;
+  --color-gray-200: #cbd5e1;
+  --color-gray-300: #94a3b8;
+  --color-gray-400: #64748b;
+  --color-gray-500: #475569;
+  --color-gray-600: #334155;
+  --color-gray-700: #1e293b;
+  --color-gray-800: #0f172a;
+  --color-gray-900: #020617;
+  --color-teal-50: #e0f2fe;
+  --color-teal-100: #bae6fd;
+  --color-teal-200: #7dd3fc;
+  --color-teal-300: #38bdf8;
+  --color-teal-400: #0ea5e9;
+  --color-teal-500: #0284c7;
+  --color-teal-600: #0369a1;
+  --color-teal-700: #075985;
+  --color-teal-800: #0c4a6e;
+  --color-teal-900: #082f49;
+  --color-green-50: #eff6ff;
+  --color-green-100: #dbeafe;
+  --color-green-200: #bfdbfe;
+  --color-green-300: #93c5fd;
+  --color-green-400: #60a5fa;
+  --color-green-500: #3b82f6;
+  --color-green-600: #2563eb;
+  --color-green-700: #1d4ed8;
+  --color-green-800: #1e40af;
+  --color-green-900: #1e3a8a;
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
+  --color-amber-900: #78350f;
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a8a;
+  --color-red-50: #fef3c7;
+  --color-red-100: #fde68a;
+  --color-red-200: #fcd34d;
+  --color-red-300: #fbbf24;
+  --color-red-400: #f59e0b;
+  --color-red-500: #d97706;
+  --color-red-600: #b45309;
+  --color-red-700: #92400e;
+  --color-red-800: #78350f;
+  --color-red-900: #451a03;
+}
+
+/* Deuteranopia — indigo-based scheme for red-green colorblind */
+[data-theme="deuteranopia"] {
+  --color-white: #f0f0ff;
+  --color-black: #0b0f19;
+  --color-gray-50: #f0f0ff;
+  --color-gray-100: #e0e0f0;
+  --color-gray-200: #c0c0e0;
+  --color-gray-300: #9090b0;
+  --color-gray-400: #6060a0;
+  --color-gray-500: #4040a0;
+  --color-gray-600: #3030a0;
+  --color-gray-700: #1e293b;
+  --color-gray-800: #0f172a;
+  --color-gray-900: #020617;
+  --color-teal-50: #eef2ff;
+  --color-teal-100: #e0e7ff;
+  --color-teal-200: #c7d2fe;
+  --color-teal-300: #a5b4fc;
+  --color-teal-400: #818cf8;
+  --color-teal-500: #6366f1;
+  --color-teal-600: #4f46e5;
+  --color-teal-700: #4338ca;
+  --color-teal-800: #3730a3;
+  --color-teal-900: #312e81;
+  --color-green-50: #eef2ff;
+  --color-green-100: #e0e7ff;
+  --color-green-200: #c7d2fe;
+  --color-green-300: #a5b4fc;
+  --color-green-400: #818cf8;
+  --color-green-500: #6366f1;
+  --color-green-600: #4f46e5;
+  --color-green-700: #4338ca;
+  --color-green-800: #3730a3;
+  --color-green-900: #312e81;
+  --color-amber-50: #fffbeb;
+  --color-amber-100: #fef3c7;
+  --color-amber-200: #fde68a;
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+  --color-amber-700: #b45309;
+  --color-amber-800: #92400e;
+  --color-amber-900: #78350f;
+  --color-blue-50: #eef2ff;
+  --color-blue-100: #e0e7ff;
+  --color-blue-200: #c7d2fe;
+  --color-blue-300: #a5b4fc;
+  --color-blue-400: #818cf8;
+  --color-blue-500: #6366f1;
+  --color-blue-600: #4f46e5;
+  --color-blue-700: #4338ca;
+  --color-blue-800: #3730a3;
+  --color-blue-900: #312e81;
+  --color-red-50: #fffbeb;
+  --color-red-100: #fef3c7;
+  --color-red-200: #fde68a;
+  --color-red-300: #fbbf24;
+  --color-red-400: #f59e0b;
+  --color-red-500: #d97706;
+  --color-red-600: #b45309;
+  --color-red-700: #92400e;
+  --color-red-800: #78350f;
+  --color-red-900: #451a03;
+}
+
+/* Tritanopia — rose/pink-based for blue-yellow colorblind */
+[data-theme="tritanopia"] {
+  --color-white: #faf5f5;
+  --color-black: #0c0a09;
+  --color-gray-50: #faf5f5;
+  --color-gray-100: #f5e6e6;
+  --color-gray-200: #e0cccc;
+  --color-gray-300: #c9a8a8;
+  --color-gray-400: #a88080;
+  --color-gray-500: #886060;
+  --color-gray-600: #664444;
+  --color-gray-700: #1c1917;
+  --color-gray-800: #1c1917;
+  --color-gray-900: #0c0a09;
+  --color-teal-50: #fff1f2;
+  --color-teal-100: #ffe4e6;
+  --color-teal-200: #fecdd3;
+  --color-teal-300: #fda4af;
+  --color-teal-400: #fb7185;
+  --color-teal-500: #f43f5e;
+  --color-teal-600: #e11d48;
+  --color-teal-700: #be123c;
+  --color-teal-800: #9f1239;
+  --color-teal-900: #881337;
+  --color-green-50: #fff1f2;
+  --color-green-100: #ffe4e6;
+  --color-green-200: #fecdd3;
+  --color-green-300: #fda4af;
+  --color-green-400: #fb7185;
+  --color-green-500: #f43f5e;
+  --color-green-600: #e11d48;
+  --color-green-700: #be123c;
+  --color-green-800: #9f1239;
+  --color-green-900: #881337;
+  --color-amber-50: #f0fdfa;
+  --color-amber-100: #ccfbf1;
+  --color-amber-200: #99f6e4;
+  --color-amber-300: #5eead4;
+  --color-amber-400: #2dd4bf;
+  --color-amber-500: #14b8a6;
+  --color-amber-600: #0d9488;
+  --color-amber-700: #0f766e;
+  --color-amber-800: #115e59;
+  --color-amber-900: #134e4a;
+  --color-blue-50: #fff1f2;
+  --color-blue-100: #ffe4e6;
+  --color-blue-200: #fecdd3;
+  --color-blue-300: #fda4af;
+  --color-blue-400: #fb7185;
+  --color-blue-500: #f43f5e;
+  --color-blue-600: #e11d48;
+  --color-blue-700: #be123c;
+  --color-blue-800: #9f1239;
+  --color-blue-900: #881337;
+  --color-red-50: #f0fdfa;
+  --color-red-100: #ccfbf1;
+  --color-red-200: #99f6e4;
+  --color-red-300: #5eead4;
+  --color-red-400: #2dd4bf;
+  --color-red-500: #14b8a6;
+  --color-red-600: #0d9488;
+  --color-red-700: #0f766e;
+  --color-red-800: #115e59;
+  --color-red-900: #134e4a;
+}
+
+/* Universal distraction-free overrides */
+[data-focus-profile="distraction-free"] .group-hover\:text-teal-700:hover,
+[data-focus-profile="distraction-free"] .hover\:text-teal-700:hover,
+[data-focus-profile="distraction-free"] .hover\:text-teal-600:hover {
+  color: inherit !important;
+}
+[data-focus-profile="distraction-free"] .hover\:shadow-md:hover {
+  box-shadow: none !important;
+}

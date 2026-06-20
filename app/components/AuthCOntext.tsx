@@ -1,77 +1,138 @@
 "use client";
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import type { User } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
+import { ref, set, get, child } from "firebase/database";
+import { auth, db } from "../lib/firebase";
 
-type Role = "student" | "tutor";
-interface AuthContextProps {
-    user: string | null;
-    role: Role | null;
-    isAuthenticated: boolean;
-    login: (email: string, password: string) => void;
-    logout: () => void;
-    register: (email: string, password: string, role: Role) => void;
+export type Role = "student" | "tutor";
+
+export interface UserProfile {
+  uid: string;
+  role: Role;
+  fullName: string;
+  email: string;
+  studentId?: string;
+  tutorId?: string;
+  mobileNumber: string;
+  institution: string;
+  termsAccepted: boolean;
+  createdAt: string;
 }
 
-//firebase integration
+interface AuthContextProps {
+  user: User | null;
+  profile: UserProfile | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
+}
+
+export interface RegisterData {
+  email: string;
+  password: string;
+  role: Role;
+  fullName: string;
+  studentId?: string;
+  tutorId?: string;
+  mobileNumber: string;
+  institution: string;
+}
 
 export const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [user, setUser] = useState<string | null>(null);
-    const [role, setRole] = useState<Role | null>(null);
-    const isAuthenticated = !!user;
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const savedUser = localStorage.getItem("auth-user");
-        const savedRole = localStorage.getItem("auth-role") as Role | null;
-        if (savedUser && savedRole) {
-            setUser(savedUser);
-            setRole(savedRole);
-        }
-    }, []);
-
-    const login = (email: string, password: string) => {
-        //firebase integration
-        if (email && password) {
-            const token = crypto.randomUUID();
-            localStorage.setItem("auth-token", token);
-            localStorage.setItem("auth-role", email);
-            setUser(email);
-        } else {
-            alert("Please provide email & Password")
-        }
-    };
-
-
-
-    const register = (email: string, password: string, role: Role) => {
-        //firebase integration
-        const token = crypto.randomUUID();
-        localStorage.setItem("auth-token", token);
-        localStorage.setItem("auth-role", role);
-        localStorage.setItem("auth-user", email);
-        setUser(email);
-        setRole(role);
-    };
-
-    const logout = () => {
-        //firebase integration
-        localStorage.clear();
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+      } else {
         setUser(null);
-        setRole(null);
-    };
+        setProfile(null);
+        setLoading(false);
+      }
+    });
+    return unsub;
+  }, []);
 
-    return (
-        <AuthContext.Provider
-            value={{ user, role, isAuthenticated, login, logout, register }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    const fetchProfile = async () => {
+      try {
+        const snapshot = await get(child(ref(db), `users/${user.uid}`));
+        if (!cancelled && snapshot.exists()) {
+          setProfile(snapshot.val() as UserProfile);
+        }
+      } catch {
+        // profile fetch failed
+      }
+      if (!cancelled) setLoading(false);
+    };
+    fetchProfile();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  const login = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password);
+  };
+
+  const logout = async () => {
+    await signOut(auth);
+    setProfile(null);
+  };
+
+  const register = async (data: RegisterData) => {
+    const cred = await createUserWithEmailAndPassword(auth, data.email, data.password);
+    const uid = cred.user.uid;
+
+    const profileData: UserProfile = {
+      uid,
+      role: data.role,
+      fullName: data.fullName,
+      email: data.email,
+      mobileNumber: data.mobileNumber,
+      institution: data.institution,
+      termsAccepted: true,
+      createdAt: new Date().toISOString(),
+    };
+    if (data.role === "student") profileData.studentId = data.studentId;
+    if (data.role === "tutor") profileData.tutorId = data.tutorId;
+
+    try {
+      await set(ref(db, `users/${uid}`), profileData);
+    } catch (err) {
+      console.error("RTDB write failed:", err);
+      await signOut(auth);
+      throw err;
+    }
+    setProfile(profileData);
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{ user, profile, loading, isAuthenticated: !!user, login, logout, register }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within AuthProvider");
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return context;
 };

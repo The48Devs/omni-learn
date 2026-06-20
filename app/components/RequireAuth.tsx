@@ -11,16 +11,16 @@ export default function RequireAuth({
     role: "student" | "tutor";
     children: React.ReactNode;
 }) {
-    const { isAuthenticated, role: userRole } = useAuth();
+    const { isAuthenticated, profile } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
         if (!isAuthenticated) {
             router.replace("/auth/signin");
-        } else if (userRole !== role) {
-            router.replace(`/${userRole}/dashboard`);
+        } else if (profile?.role !== role) {
+            router.replace(profile?.role === "tutor" ? "/TutorStudio/dashboard" : "/StudentPortal/dashboard");
         }
-    }, [isAuthenticated, userRole, router]);
+    }, [isAuthenticated, profile, role, router]);
 
     return <>{children}</>
 }

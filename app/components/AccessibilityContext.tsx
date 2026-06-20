@@ -1,6 +1,5 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { text } from "stream/consumers";
 
 export type AccessibilityTheme = "default" | "high-contrast" | "protanopia" | "deuteranopia" | "tritanopia";
 export type FontProfile = "default" | "dyslexic";
