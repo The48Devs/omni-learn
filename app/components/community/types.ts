@@ -29,6 +29,8 @@ export interface User {
   helpfulCount: number;
   activeCourses: ActiveCourse[];
   badges: Badge[];
+  streak: number;
+  lastActiveDate: string;
 }
 
 export interface Reply {

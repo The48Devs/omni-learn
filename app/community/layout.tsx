@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 const NAV_LINKS = [
   { href: '/community', label: 'Discussions' },
   { href: '/community/categories', label: 'Categories' },
-  { href: '/community/leaderboard', label: 'Leaderboard' },
+  { href: '/community/leaderboards', label: 'Leaderboards' },
 ];
 
 export default function CommunityLayout({ children }: { children: React.ReactNode }) {

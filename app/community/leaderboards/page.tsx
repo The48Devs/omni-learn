@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Trophy, Crown, Medal, Award, ArrowUp, MessageSquare, CheckCircle2 } from 'lucide-react';
+import { Trophy, Crown, Medal, Award, ArrowUp, MessageSquare, CheckCircle2, Flame, Users } from 'lucide-react';
 import { useCommunity } from '../../components/community/CommunityContext';
 
 type Period = 'all-time' | 'this-month' | 'this-week';
@@ -13,9 +13,10 @@ const PERIOD_LABELS: { key: Period; label: string }[] = [
   { key: 'this-week', label: 'This Week' },
 ];
 
-export default function Leaderboard() {
+export default function Leaderboards() {
   const { users, getPostsByUser, getRepliesByUser, currentUserId } = useCommunity();
   const [period, setPeriod] = useState<Period>('all-time');
+  const [activeTab, setActiveTab] = useState<'community' | 'streak'>('community');
 
   const ranked = users
     .map(user => {
@@ -30,8 +31,12 @@ export default function Leaderboard() {
     })
     .sort((a, b) => b.pts - a.pts);
 
-  const top3 = ranked.slice(0, 3);
-  const rest = ranked.slice(3);
+  const streakRanked = [...users].sort((a, b) => (b.streak || 0) - (a.streak || 0));
+
+  const activeRanked = activeTab === 'community' ? ranked : streakRanked.map(u => ({ user: u, pts: u.streak || 0, posts: 0, replies: 0, accepted: 0, totalUpvotes: 0 }));
+
+  const top3 = activeRanked.slice(0, 3);
+  const rest = activeRanked.slice(3);
 
   const podiumOrder = top3.length >= 3 ? [top3[1], top3[0], top3[2]] : top3;
   const podiumHeights = ['h-20', 'h-28', 'h-16'];
@@ -49,7 +54,7 @@ export default function Leaderboard() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Trophy size={22} className="text-amber-500" />
-            Leaderboard
+            Leaderboards
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">Top community contributors</p>
         </div>
@@ -70,7 +75,32 @@ export default function Leaderboard() {
         </div>
       </div>
 
-      <div className="bg-gradient-to-br from-teal-700 to-teal-900 rounded-2xl p-6 text-white">
+      <div className="flex items-center border-b border-gray-200 w-full" role="tablist" aria-label="Leaderboard views">
+        <button
+          role="tab"
+          aria-selected={activeTab === 'community'}
+          aria-controls="leaderboard-panel"
+          onClick={() => setActiveTab('community')}
+          className={`flex-1 flex justify-center items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
+            activeTab === 'community' ? 'border-teal-600 text-teal-700 bg-teal-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          <Users size={16} /> Community Leaderboard
+        </button>
+        <button
+          role="tab"
+          aria-selected={activeTab === 'streak'}
+          aria-controls="leaderboard-panel"
+          onClick={() => setActiveTab('streak')}
+          className={`flex-1 flex justify-center items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 ${
+            activeTab === 'streak' ? 'border-orange-500 text-orange-600 bg-orange-50/50' : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          <Flame size={16} /> Streak Leaderboard
+        </button>
+      </div>
+
+      <div id="leaderboard-panel" role="tabpanel" aria-labelledby={`${activeTab}-tab`} className={`bg-gradient-to-br ${activeTab === 'community' ? 'from-teal-700 to-teal-900' : 'from-orange-500 to-orange-700'} rounded-2xl p-6 text-white`}>
         <p className="text-center text-sm text-teal-200 mb-6 font-medium">
           {period === 'all-time' ? 'All Time Champions' : period === 'this-month' ? 'This Month\'s Leaders' : 'This Week\'s MVPs'}
         </p>
@@ -93,7 +123,7 @@ export default function Leaderboard() {
                   <p className="text-sm font-semibold text-white group-hover:text-teal-200 transition-colors">
                     {entry.user.name}
                   </p>
-                  <p className="text-xs text-teal-200 font-bold">{entry.pts.toLocaleString()} pts</p>
+                  <p className="text-xs text-white/80 font-bold">{entry.pts.toLocaleString()} {activeTab === 'streak' ? 'days' : 'pts'}</p>
                 </div>
               </Link>
               <div className={`${podiumHeights[i]} ${podiumColors[i]} w-20 rounded-t-xl flex items-start justify-center pt-2`}>
@@ -110,7 +140,7 @@ export default function Leaderboard() {
           <p className="text-sm font-bold text-gray-800">Full Rankings</p>
         </div>
         <div className="divide-y divide-gray-100">
-          {ranked.map((entry, i) => {
+          {activeRanked.map((entry, i) => {
             const rank = i + 1;
             const isCurrentUser = entry.user.id === currentUserId;
             const rankIcon =
@@ -150,24 +180,26 @@ export default function Leaderboard() {
                   </div>
                 </Link>
 
-                <div className="hidden sm:flex items-center gap-5 text-xs text-gray-400">
-                  <span className="flex items-center gap-1" title="Total upvotes">
-                    <ArrowUp size={12} className="text-teal-500" />
-                    {entry.totalUpvotes}
-                  </span>
-                  <span className="flex items-center gap-1" title="Posts">
-                    <MessageSquare size={12} className="text-blue-500" />
-                    {entry.posts}
-                  </span>
-                  <span className="flex items-center gap-1" title="Accepted answers">
-                    <CheckCircle2 size={12} className="text-green-500" />
-                    {entry.accepted}
-                  </span>
-                </div>
+                {activeTab === 'community' && (
+                  <div className="hidden sm:flex items-center gap-5 text-xs text-gray-400">
+                    <span className="flex items-center gap-1" title="Total upvotes">
+                      <ArrowUp size={12} className="text-teal-500" />
+                      {entry.totalUpvotes}
+                    </span>
+                    <span className="flex items-center gap-1" title="Posts">
+                      <MessageSquare size={12} className="text-blue-500" />
+                      {entry.posts}
+                    </span>
+                    <span className="flex items-center gap-1" title="Accepted answers">
+                      <CheckCircle2 size={12} className="text-green-500" />
+                      {entry.accepted}
+                    </span>
+                  </div>
+                )}
 
                 <div className="shrink-0 text-right">
-                  <p className="text-sm font-bold text-teal-700">{entry.pts.toLocaleString()}</p>
-                  <p className="text-xs text-gray-400">points</p>
+                  <p className={`text-sm font-bold ${activeTab === 'streak' ? 'text-orange-600' : 'text-teal-700'}`}>{entry.pts.toLocaleString()}</p>
+                  <p className="text-xs text-gray-400">{activeTab === 'streak' ? 'days' : 'points'}</p>
                 </div>
               </div>
             );
@@ -175,27 +207,29 @@ export default function Leaderboard() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
-        <h2 className="text-sm font-bold text-gray-800 flex items-center gap-2 mb-4">
-          <Award size={15} className="text-teal-600" />
-          How Points Work
-        </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {[
-            { action: 'Post a discussion', pts: '+5 pts', color: 'bg-blue-50 text-blue-700 border-blue-100' },
-            { action: 'Receive an upvote', pts: '+10 pts', color: 'bg-teal-50 text-teal-700 border-teal-100' },
-            { action: 'Reply accepted as answer', pts: '+25 pts', color: 'bg-green-50 text-green-700 border-green-100' },
-            { action: 'Post goes viral (50+ views)', pts: '+15 pts', color: 'bg-purple-50 text-purple-700 border-purple-100' },
-            { action: 'Reply upvoted', pts: '+5 pts', color: 'bg-amber-50 text-amber-700 border-amber-100' },
-            { action: 'Daily login streak', pts: '+2 pts', color: 'bg-pink-50 text-pink-700 border-pink-100' },
-          ].map(item => (
-            <div key={item.action} className={`flex items-center justify-between p-3 rounded-xl border ${item.color}`}>
-              <p className="text-xs font-medium leading-tight">{item.action}</p>
-              <span className="text-xs font-bold shrink-0 ml-2">{item.pts}</span>
-            </div>
-          ))}
+      {activeTab === 'community' && (
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <h2 className="text-sm font-bold text-gray-800 flex items-center gap-2 mb-4">
+            <Award size={15} className="text-teal-600" />
+            How Points Work
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { action: 'Post a discussion', pts: '+5 pts', color: 'bg-blue-50 text-blue-700 border-blue-100' },
+              { action: 'Receive an upvote', pts: '+10 pts', color: 'bg-teal-50 text-teal-700 border-teal-100' },
+              { action: 'Reply accepted as answer', pts: '+25 pts', color: 'bg-green-50 text-green-700 border-green-100' },
+              { action: 'Post goes viral (50+ views)', pts: '+15 pts', color: 'bg-purple-50 text-purple-700 border-purple-100' },
+              { action: 'Reply upvoted', pts: '+5 pts', color: 'bg-amber-50 text-amber-700 border-amber-100' },
+              { action: 'Daily login streak', pts: '+2 pts', color: 'bg-pink-50 text-pink-700 border-pink-100' },
+            ].map(item => (
+              <div key={item.action} className={`flex items-center justify-between p-3 rounded-xl border ${item.color}`}>
+                <p className="text-xs font-medium leading-tight">{item.action}</p>
+                <span className="text-xs font-bold shrink-0 ml-2">{item.pts}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
