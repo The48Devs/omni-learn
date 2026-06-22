@@ -48,7 +48,7 @@ export default function TutorStudioLayout({
     ];
     return (
         <RequireAuth role="tutor">
-            <div className="flex min-h-[calc(100vh-4rem)] bg-[var(--bg-secondary)] font-sans transition-colors duration-200">
+            <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-[var(--bg-secondary)] font-sans transition-colors duration-200">
                 <aside className="w-64 bg-[#0b1b3d] text-slate-200 flex flex-col justify-between shrink-0 border-r border-slate-800 transition-colors duration-200
                      data-[theme=high-contrast]:bg-black data-[theme=high-contrast]:border-white data-[theme=high-contrast]:text-white">
                     <div className="p-5">

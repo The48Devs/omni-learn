@@ -25,7 +25,7 @@ export default function StudentPortalLayout({
 
     return (
         <RequireAuth role="student">
-            <div className="min-h-screen bg-[var(--bg-secondary)] text-[var(--text-main)] flex flex-col md:flex-row font-sans">
+            <div className="h-[calc(100vh-4rem)] overflow-hidden bg-[var(--bg-secondary)] text-[var(--text-main)] flex flex-col md:flex-row font-sans">
                 {/* Skip to Main Content Link */}
                 <a
                     href="#student-main-content"
