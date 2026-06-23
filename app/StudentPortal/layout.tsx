@@ -20,6 +20,7 @@ export default function StudentPortalLayout({
         { href: "/StudentPortal/dashboard", label: "Dashboard", icon: "⊞" },
         { href: "/StudentPortal/mycourses", label: "My Courses", icon: "📖" },
         { href: "/StudentPortal/explore", label: "Explore", icon: "🧭" },
+        { href: "/StudentPortal/organizations", label: "Organizations", icon: "🏛️" },
         { href: "/StudentPortal/community", label: "Community", icon: "👥" },
     ];
 

@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
+import { useAuth } from "../../components/AuthCOntext";
+import { useOrganizations } from "../../components/organizations/OrganizationContext";
+import Link from "next/link";
+import { Zap, Flame } from "lucide-react";
 
 interface ContinueLearningCourse {
     id: string;
@@ -24,6 +28,22 @@ interface RecommendedCourse {
 
 export default function StudentDashboard() {
     const { announce } = useAccessibility();
+    const { user } = useAuth();
+    const { getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak } = useOrganizations();
+    const [orgLevelData, setOrgLevelData] = useState<{ orgName: string; orgId: string; level: number; currentXp: number; nextLevelXp: number } | null>(null);
+    const [streak, setStreak] = useState<{ current: number; longest: number } | null>(null);
+
+    useEffect(() => {
+        if (!user?.uid) return;
+        getOrganizationsForStudent(user.uid).then(async (orgs) => {
+            if (orgs.length === 0) return;
+            const org = orgs[0];
+            const xp = await getStudentXp(org.id, user.uid);
+            const progress = getXpProgress(xp);
+            setOrgLevelData({ orgName: org.name, orgId: org.id, ...progress });
+        });
+        getStreak(user.uid).then(data => setStreak(data));
+    }, [user?.uid, getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak]);
 
     const continueLearningCourses: ContinueLearningCourse[] = [
         {
@@ -120,42 +140,62 @@ export default function StudentDashboard() {
                 aria-label="Level progression status"
                 className="bg-gradient-to-r from-[#2a5c8f] to-[#4585ab] rounded-2xl p-[1.8rem] text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-[1.5rem] relative overflow-hidden shadow-xl"
             >
-                {/* Left metadata stack */}
-                <div className="space-y-[1.2rem] max-w-[28rem] z-10">
-                    <div>
+                {orgLevelData ? (
+                    <>
+                        <div className="space-y-[1.2rem] max-w-[28rem] z-10">
+                            <div>
+                                <h1 className="text-[1.8rem] font-extrabold leading-tight">
+                                    Welcome back, {user?.displayName || 'Student'}.
+                                </h1>
+                                <Link href={`/StudentPortal/organization/${orgLevelData.orgId}`} className="text-[0.85rem] opacity-80 font-medium hover:opacity-100 transition-opacity underline underline-offset-2">
+                                    {orgLevelData.orgName}
+                                </Link>
+                            </div>
+                            <div className="space-y-[0.4rem]">
+                                <div className="flex justify-between text-[0.78rem] font-bold tracking-wide">
+                                    <span>Progress to Level {orgLevelData.level + 1}</span>
+                                    <span>{orgLevelData.nextLevelXp > 0 ? Math.round((orgLevelData.currentXp / orgLevelData.nextLevelXp) * 100) : 0}%</span>
+                                </div>
+                                <div className="w-full h-[0.75rem] bg-black/20 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-[#ff6b35] rounded-full transition-all duration-500"
+                                        style={{ width: `${orgLevelData.nextLevelXp > 0 ? Math.min((orgLevelData.currentXp / orgLevelData.nextLevelXp) * 100, 100) : 0}%` }}
+                                        aria-valuenow={orgLevelData.nextLevelXp > 0 ? Math.round((orgLevelData.currentXp / orgLevelData.nextLevelXp) * 100) : 0}
+                                        aria-valuemin={0}
+                                        aria-valuemax={100}
+                                        role="progressbar"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="relative shrink-0 z-10 self-center md:self-auto flex items-center gap-4">
+                            <div className="w-[8.5rem] h-[8.5rem] rounded-full bg-[#c04d2b] border-4 border-white/20 shadow-2xl flex flex-col items-center justify-center text-center">
+                                <span className="text-[1.35rem] font-extrabold tracking-tight flex items-center gap-1">
+                                    <Zap size={22} /> {orgLevelData.currentXp} XP
+                                </span>
+                                <span className="text-[0.68rem] uppercase font-extrabold tracking-widest opacity-80 mt-[0.2rem]">Level {orgLevelData.level}</span>
+                            </div>
+                            {streak && (
+                                <div className="flex flex-col items-center">
+                                    <div className="w-[4.5rem] h-[4.5rem] rounded-full bg-[#c04d2b]/70 border-2 border-white/20 shadow-lg flex flex-col items-center justify-center text-center">
+                                        <Flame size={18} className="text-orange-300" />
+                                        <span className="text-[1.1rem] font-extrabold tracking-tight leading-none">{streak.current}</span>
+                                    </div>
+                                    <span className="text-[0.6rem] uppercase font-extrabold tracking-widest opacity-70 mt-1">Streak</span>
+                                </div>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <div className="w-full text-center py-6">
                         <h1 className="text-[1.8rem] font-extrabold leading-tight">
-                            Welcome back, Sarah A.
+                            Welcome back, {user?.displayName || 'Student'}.
                         </h1>
-                        <p className="text-[0.9rem] opacity-90 font-medium leading-relaxed mt-[0.35rem]">
-                            You're making great progress this week. Keep up the momentum and reach Level 13!
+                        <p className="text-[0.9rem] opacity-90 font-medium mt-2">
+                            Join or create an organization to start tracking your level!
                         </p>
                     </div>
-                    {/* Linear metric tracker */}
-                    <div className="space-y-[0.4rem]">
-                        <div className="flex justify-between text-[0.78rem] font-bold tracking-wide ">
-                            <span>Progress to Level 13</span>
-                            <span>75%</span>
-                        </div>
-                        <div className="w-full h-[0.75rem] bg-black/20 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-[#ff6b35] rounded-full transition-all duration-500"
-                                style={{ width: "75%" }}
-                                aria-valuenow={75}
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                role="progressbar"
-                            />
-                        </div>
-                    </div>
-                </div>
-                {/* XP medal */}
-                <div className="relative shrink-0 z-10 self-center md:self-auto">
-                    <div className="w-[8.5rem] h-[8.5rem] rounded-full bg-[#c04d2b] border-4 border-white/20 shadow-2xl flex flex-col items-center justify-center text-center">
-                        <span className="text-[1.35rem] font-extrabold tracking-tight"> 2,450 XP</span>
-                        <span className="text-[0.68rem] uppercase font-extrabold tracking-widest opacity-80 mt-[0.2rem]">Level 12 Scholar</span>
-                    </div>
-                    <div className="absolute top-0 right-0 w-[2.2rem] h-[2.2rem] rounded-full bg-[#7ec4cf] text-[#0b1b3d] flex items-center justify-center font-bold text-[1.1rem] shadow-md border-2 border-white">🎖️</div>
-                </div>
+                )}
             </section>
 
             {/* Continue learning grid */}

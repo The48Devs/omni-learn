@@ -7,6 +7,8 @@ import AccessibilityToolbar from "@/app/components/AccessibilityToolbar";
 import ChatBot from "@/app/components/ChatBot";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./components/AuthCOntext";
+import { OrganizationProvider } from "./components/organizations/OrganizationContext";
+import { CommunityProvider } from "./components/community/CommunityContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,7 +22,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "OmniLearn",
-  description: "An interactive online learning platform",
+  description: "Next-generation accessible learning platform",
 };
 
 export default function RootLayout({
@@ -43,10 +45,14 @@ export default function RootLayout({
             Skip to Main Content
           </a>
           <AuthProvider>
-            <NavbarMain />
-            <ChatBot />
-            <AccessibilityToolbar />
-            {children}
+            <OrganizationProvider>
+              <CommunityProvider>
+                <NavbarMain />
+                <ChatBot />
+                <AccessibilityToolbar />
+                {children}
+              </CommunityProvider>
+            </OrganizationProvider>
           </AuthProvider>
           <Footer />
         </AccessibilityProvider>

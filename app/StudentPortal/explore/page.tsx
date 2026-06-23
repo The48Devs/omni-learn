@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { useOrganizations } from "../../components/organizations/OrganizationContext";
+import { useAuth } from "../../components/AuthCOntext";
+import { Building2, Globe, Users, BookOpen } from "lucide-react";
 
 //mock data arrays
 
@@ -20,6 +24,9 @@ const sandboxCourses = [
 
 export default function ExploreCourses() {
     const [searchQuery, setSearchQuery] = useState('');
+    const { getPublicOrganizations } = useOrganizations();
+    const { user } = useAuth();
+    const publicOrgs = getPublicOrganizations();
 
     return (
         < main
@@ -88,6 +95,64 @@ export default function ExploreCourses() {
                     />
                 </div>
 
+            </section>
+
+            {/* Organizations Section */}
+            <section className="w-full max-w-7xl mx-auto flex flex-col gap-8">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ color: 'var(--text-main)' }}>
+                        <Building2 className="inline mr-2 text-blue-500" size={28} />
+                        Organizations
+                    </h2>
+                    <Link
+                        href="/StudentPortal/organizations"
+                        className="text-sm font-bold text-blue-600 hover:underline"
+                    >
+                        View all &rarr;
+                    </Link>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {publicOrgs.length === 0 ? (
+                        <div className="col-span-full text-center py-8 text-slate-400 font-medium">
+                            No public organizations available yet.
+                        </div>
+                    ) : (
+                        publicOrgs.slice(0, 6).map(org => (
+                            <Link
+                                key={org.id}
+                                href={`/StudentPortal/organization/${org.id}`}
+                                className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col"
+                            >
+                                <div className="p-6 flex-1">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 bg-emerald-100 text-emerald-800">
+                                            <Globe size={12} /> Public
+                                        </div>
+                                    </div>
+                                    <h3 className="text-xl font-bold text-slate-800 mb-2">{org.name}</h3>
+                                    <p className="text-slate-600 text-sm line-clamp-2 mb-6">{org.description}</p>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
+                                            <BookOpen className="text-blue-500" size={20} />
+                                            <div>
+                                                <div className="text-xl font-bold text-slate-800 leading-none">{org.courseCount}</div>
+                                                <div className="text-xs text-slate-500 font-medium mt-1">Courses</div>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
+                                            <Users className="text-emerald-500" size={20} />
+                                            <div>
+                                                <div className="text-xl font-bold text-slate-800 leading-none">{org.memberCount}</div>
+                                                <div className="text-xs text-slate-500 font-medium mt-1">Members</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))
+                    )}
+                </div>
             </section>
 
             {/*Discovery Sections */}

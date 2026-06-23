@@ -1,8 +1,18 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
+import { useOrganizations } from "@/app/components/organizations/OrganizationContext";
+
+export default function NewCourseWrapper() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="text-slate-400 text-lg font-semibold">Loading course editor...</div></div>}>
+      <CourseCreatorStudio />
+    </Suspense>
+  );
+}
 
 // interface types
 interface StorylineNode {
@@ -96,8 +106,34 @@ function ObjectiveInputRow({ onAdd }: { onAdd: (text: string) => void }) {
 }
 
 
-export default function CourseCreatorStudio() {
+function CourseCreatorStudio() {
     const { announce } = useAccessibility();
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const orgId = searchParams.get('orgId');
+    const { getOrganization } = useOrganizations();
+    const org = orgId ? getOrganization(orgId) : undefined;
+
+    // Require orgId - redirect if not present
+    useEffect(() => {
+        if (!orgId) {
+            router.replace('/TutorStudio/organizations');
+        }
+    }, [orgId, router]);
+
+    if (!orgId || !org) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center p-8">
+                    <h2 className="text-xl font-bold text-slate-800 mb-2">Organization Required</h2>
+                    <p className="text-slate-500 mb-4">Courses can only be created from within an organization.</p>
+                    <Link href="/TutorStudio/organizations" className="text-blue-600 font-bold hover:underline">
+                        Go to Organizations
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     // Switching functionality between the two view modes
     const [currentView, setCurrentView] = useState<"course-overview" | "edit-module">("course-overview");
@@ -834,6 +870,14 @@ export default function CourseCreatorStudio() {
                             <div>
                                 <h1 className="text-[2rem] font-bold text-[var(--text-main)]">Create New Course</h1>
                                 <p className="text-[1rem] text-[var(--text-muted)] mt-[0.25rem]">Outline the modules below (Drag handles to reorder)</p>
+                                {org && (
+                                    <div className="mt-3 flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-100 rounded-xl">
+                                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        <span className="text-sm font-bold text-blue-700">Organization: {org.name}</span>
+                                    </div>
+                                )}
                             </div>
                             <Link
                                 href="/TutorStudio/mycourses"

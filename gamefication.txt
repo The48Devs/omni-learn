@@ -12,6 +12,8 @@ Levels,
     1/4 of all points gained and rounded upto 5 get added as xp
     level xp req goes up by +50% every level and rounded upto 5
     Lvl(0) = 5xp
+    The level/xp box on the top of student porrtal show the last active organizaton
+    every student that joins automatically gets added to the organization leaderboard at level 0
     
 Streak,
     Streak is universal
