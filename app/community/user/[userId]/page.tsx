@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, MessageSquare, Eye, ArrowUp, Calendar, Award, BookOpen } from 'lucide-react';
 import { useCommunity } from '../../../components/community/CommunityContext';
+import { useCommunityBasePath } from '../../../components/community/CommunityBasePathContext';
 
 function timeAgo(isoDate: string) {
   const diff = Date.now() - new Date(isoDate).getTime();
@@ -20,6 +21,7 @@ function joinedDate(isoDate: string) {
 }
 
 export default function UserProfile() {
+  const basePath = useCommunityBasePath();
   const { userId } = useParams<{ userId: string }>();
   const router = useRouter();
   const { getUser, getPostsByUser, getRepliesByUser, getPost, getCategory, currentUserId, posts, getRepliesForPost } = useCommunity();
@@ -191,7 +193,7 @@ export default function UserProfile() {
             const cat = getCategory(post.categoryId);
             const postReplies = getRepliesForPost(post.id);
             return (
-              <Link key={post.id} href={`/community/post/${post.id}`} className="block px-5 py-3 hover:bg-gray-50 transition-colors group">
+              <Link key={post.id} href={`${basePath}/post/${post.id}`} className="block px-5 py-3 hover:bg-gray-50 transition-colors group">
                 <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-800 group-hover:text-teal-700 leading-snug truncate">
@@ -232,7 +234,7 @@ export default function UserProfile() {
           {userReplies.slice(0, 5).map(reply => {
             const parentPost = getPost(reply.postId);
             return (
-              <Link key={reply.id} href={`/community/post/${reply.postId}`} className="block px-5 py-3 hover:bg-gray-50 transition-colors group">
+              <Link key={reply.id} href={`${basePath}/post/${reply.postId}`} className="block px-5 py-3 hover:bg-gray-50 transition-colors group">
                 <div className="flex items-start gap-3">
                   {reply.isAccepted && (
                     <span className="shrink-0 mt-0.5 w-4 h-4 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-[10px]">✓</span>

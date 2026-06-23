@@ -8,6 +8,7 @@ import {
   SlidersHorizontal, Flame, Clock, TrendingUp, Filter
 } from 'lucide-react';
 import { useCommunity } from '../components/community/CommunityContext';
+import { useCommunityBasePath } from '../components/community/CommunityBasePathContext';
 import type { Post, FilterOption, SortOption } from '../components/community/types';
 
 function timeAgo(isoDate: string) {
@@ -43,6 +44,7 @@ function StatusBadge({ status }: { status: Post['status'] }) {
 
 function PostCard({ post }: { post: Post }) {
   const { getUser, getCategory, upvotePost, toggleBookmark, currentUserId } = useCommunity();
+  const basePath = useCommunityBasePath();
   const author = getUser(post.authorId);
   const category = getCategory(post.categoryId);
   const hasUpvoted = post.upvotedBy.includes(currentUserId);
@@ -92,7 +94,7 @@ function PostCard({ post }: { post: Post }) {
             </button>
           </div>
 
-          <Link href={`/community/post/${post.id}`} className="block group">
+          <Link href={`${basePath}/post/${post.id}`} className="block group">
             <h2 className="text-base font-semibold text-gray-900 group-hover:text-teal-700 transition-colors leading-snug mb-1">
               {post.title}
             </h2>
@@ -103,7 +105,7 @@ function PostCard({ post }: { post: Post }) {
           <div className="flex items-center gap-4 text-xs text-gray-400">
             <div className="flex items-center gap-1.5">
               {author && (
-                <Link href={`/community/user/${author.id}`} className="flex items-center gap-1.5 hover:text-teal-600">
+                <Link href={`${basePath}/user/${author.id}`} className="flex items-center gap-1.5 hover:text-teal-600">
                   <div
                     className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
                     style={{ backgroundColor: author.avatarColor }}
@@ -119,7 +121,7 @@ function PostCard({ post }: { post: Post }) {
               <Eye size={12} />
               {post.views}
             </span>
-            <Link href={`/community/post/${post.id}`} className="flex items-center gap-1 hover:text-teal-600">
+            <Link href={`${basePath}/post/${post.id}`} className="flex items-center gap-1 hover:text-teal-600">
               <MessageSquare size={12} />
               {post.status === 'resolved' ? (
                 <span className="text-green-600 font-medium">Answered</span>
@@ -155,6 +157,7 @@ const SORTS: { key: SortOption; label: string; icon: React.ComponentType<any> }[
 
 function CommunityHubContent() {
   const { posts, categories } = useCommunity();
+  const basePath = useCommunityBasePath();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -300,7 +303,7 @@ function CommunityHubContent() {
               {q ? 'Try different search terms' : 'Be the first to start one!'}
             </p>
             <Link
-              href="/community/post/new"
+              href={`${basePath}/post/new`}
               className="inline-block mt-4 bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-teal-800 transition-colors"
             >
               Start a Discussion

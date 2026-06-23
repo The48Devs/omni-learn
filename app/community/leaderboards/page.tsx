@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Trophy, Crown, Medal, Award, ArrowUp, MessageSquare, CheckCircle2, Flame, Users } from 'lucide-react';
 import { useCommunity } from '../../components/community/CommunityContext';
+import { useCommunityBasePath } from '../../components/community/CommunityBasePathContext';
 
 type Period = 'all-time' | 'this-month' | 'this-week';
 
@@ -15,6 +16,7 @@ const PERIOD_LABELS: { key: Period; label: string }[] = [
 
 export default function Leaderboards() {
   const { users, getPostsByUser, getRepliesByUser, currentUserId } = useCommunity();
+  const basePath = useCommunityBasePath();
   const [period, setPeriod] = useState<Period>('all-time');
   const [activeTab, setActiveTab] = useState<'community' | 'streak'>('community');
 
@@ -107,7 +109,7 @@ export default function Leaderboards() {
         <div className="flex items-end justify-center gap-4">
           {podiumOrder.map((entry, i) => (
             <div key={entry.user.id} className="flex flex-col items-center gap-2">
-              <Link href={`/community/user/${entry.user.id}`} className="group flex flex-col items-center gap-2">
+              <Link href={`${basePath}/user/${entry.user.id}`} className="group flex flex-col items-center gap-2">
                 <div className="relative">
                   <div
                     className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-white/30 shadow-lg"
@@ -158,7 +160,7 @@ export default function Leaderboards() {
                   {typeof rankIcon === 'string' ? <span className="text-lg">{rankIcon}</span> : rankIcon}
                 </div>
 
-                <Link href={`/community/user/${entry.user.id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
+                <Link href={`${basePath}/user/${entry.user.id}`} className="flex items-center gap-3 flex-1 min-w-0 group">
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
                     style={{ backgroundColor: entry.user.avatarColor }}

@@ -20,12 +20,12 @@ export default function StudentPortalLayout({
         { href: "/StudentPortal/dashboard", label: "Dashboard", icon: "⊞" },
         { href: "/StudentPortal/mycourses", label: "My Courses", icon: "📖" },
         { href: "/StudentPortal/explore", label: "Explore", icon: "🧭" },
-        { href: "/community", label: "Community", icon: "👥" },
+        { href: "/StudentPortal/community", label: "Community", icon: "👥" },
     ];
 
     return (
         <RequireAuth role="student">
-            <div className="h-[calc(100vh-4rem)] overflow-hidden bg-[var(--bg-secondary)] text-[var(--text-main)] flex flex-col md:flex-row font-sans">
+            <div className="h-screen overflow-hidden bg-[var(--bg-secondary)] text-[var(--text-main)] flex flex-col md:flex-row font-sans">
                 {/* Skip to Main Content Link */}
                 <a
                     href="#student-main-content"
@@ -35,37 +35,37 @@ export default function StudentPortalLayout({
                 </a>
 
                 {/* Left Navigation Panel */}
-                <aside className="w-full md:w-[18rem] bg-[var(--bg-primary)] border-r border-[var(--border-color)] flex flex-col justify-between p-[1.5rem] shrink-0">
-                    <div className="space-y-[2rem]">
-                        {/* Branding space */}
-                        <div className="flex items-center gap-[0.75rem]">
-                            <div className="w-[3rem] h-[3rem] rounded-full bg-[var(--button-primary,var(--text-main))] flex items-center justify-center text-[var(--bg-primary)] shrink-0">
-                                <svg
-                                    className="w-[1.6rem] h-[1.6rem]"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                >
-                                    <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
-                                    <path d="M22 9L12 15 2 9" className="opacity-70" />
-                                    <path d="M17 14v3.5c0 1.38-2.24 2.5-5 2.5s-5-1.12-5-2.5V14l5 2.73L17 14z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <span className="block text-[1.15rem] font-extrabold tracking-tight text-[var(--text-main)]">
-                                    OmniLearn
-                                </span>
-                                <span className="block text-[0.72rem] font-bold text-[var(--text-muted)] uppercase tracking-widest">
-                                    Student Portal
-                                </span>
-                            </div>
+                <aside className="w-full md:w-[18rem] bg-[var(--bg-primary)] border-r border-[var(--border-color)] flex flex-col p-[1.5rem] shrink-0">
+                    {/* Branding space */}
+                    <div className="flex items-center gap-[0.75rem] shrink-0">
+                        <div className="w-[3rem] h-[3rem] rounded-full bg-[var(--button-primary,var(--text-main))] flex items-center justify-center text-[var(--bg-primary)] shrink-0">
+                            <svg
+                                className="w-[1.6rem] h-[1.6rem]"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3z" />
+                                <path d="M22 9L12 15 2 9" className="opacity-70" />
+                                <path d="M17 14v3.5c0 1.38-2.24 2.5-5 2.5s-5-1.12-5-2.5V14l5 2.73L17 14z" />
+                            </svg>
                         </div>
+                        <div>
+                            <span className="block text-[1.15rem] font-extrabold tracking-tight text-[var(--text-main)]">
+                                OmniLearn
+                            </span>
+                            <span className="block text-[0.72rem] font-bold text-[var(--text-muted)] uppercase tracking-widest">
+                                Student Portal
+                            </span>
+                        </div>
+                    </div>
 
-                        {/* Navigation Options */}
+                    {/* Navigation Options */}
+                    <div className="flex-1 overflow-y-auto mt-[2rem] pr-2">
                         <nav aria-label="Student Portal navigation">
                             <ul className="space-y-[0.74rem]">
                                 {navItems.map((item) => {
-                                    const isActive = pathname === item.href;
+                                    const isActive = pathname === item.href || (item.href !== '/StudentPortal/dashboard' && pathname.startsWith(item.href));
                                     return (
                                         <li key={item.href}>
                                             <Link
@@ -87,7 +87,7 @@ export default function StudentPortalLayout({
                         </nav>
                     </div>
 
-                    <div className="mt-[2rem] space-y-[1.5rem]">
+                    <div className="shrink-0 mt-[1rem]">
                         {/* Utility actions footnote */}
                         <div className="border-t border-[var(--border-color)] pt-[1rem] space-y-[0.4rem]">
                             <button

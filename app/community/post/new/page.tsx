@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Eye, Code2, Bold, List, AlertCircle, BookOpen } from 'lucide-react';
 import { useCommunity } from '../../../components/community/CommunityContext';
+import { useCommunityBasePath } from '../../../components/community/CommunityBasePathContext';
 
 export default function NewPost() {
   const { categories, addPost, getUser, currentUserId } = useCommunity();
+  const basePath = useCommunityBasePath();
   const router = useRouter();
   const currentUser = getUser(currentUserId);
 
@@ -48,7 +50,7 @@ export default function NewPost() {
       ? currentUser.activeCourses[0].id
       : undefined;
     const id = addPost({ title: title.trim(), content: content.trim(), categoryId, tags, courseId });
-    router.push(`/community/post/${id}`);
+    router.push(`${basePath}/post/${id}`);
   };
 
   const insertCode = () => {
@@ -262,7 +264,7 @@ export default function NewPost() {
             {submitting ? 'Posting…' : 'Post Discussion'}
           </button>
           <Link
-            href="/community"
+            href={basePath}
             className="px-6 py-2.5 bg-white border border-gray-200 text-sm text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors"
           >
             Cancel

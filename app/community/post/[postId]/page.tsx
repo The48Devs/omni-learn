@@ -9,6 +9,7 @@ import {
   CheckCircle2, Clock
 } from 'lucide-react';
 import { useCommunity } from '../../../components/community/CommunityContext';
+import { useCommunityBasePath } from '../../../components/community/CommunityBasePathContext';
 import type { Reply } from '../../../components/community/types';
 
 function timeAgo(isoDate: string) {
@@ -73,6 +74,7 @@ function ReplyCard({
   allReplies: Reply[];
 }) {
   const { getUser, upvoteReply, markResolved, currentUserId, addReply, deleteReply } = useCommunity();
+  const basePath = useCommunityBasePath();
   const author = getUser(reply.authorId);
   const hasUpvoted = reply.upvotedBy.includes(currentUserId);
   const [showReplyBox, setShowReplyBox] = useState(false);
@@ -100,7 +102,7 @@ function ReplyCard({
         )}
 
         <div className="flex items-center justify-between mb-3">
-          <Link href={`/community/user/${reply.authorId}`} className="flex items-center gap-2 group">
+          <Link href={`${basePath}/user/${reply.authorId}`} className="flex items-center gap-2 group">
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
               style={{ backgroundColor: author?.avatarColor ?? '#6b7280' }}
@@ -227,6 +229,7 @@ function ReplyCard({
 export default function PostDetail() {
   const { postId } = useParams<{ postId: string }>();
   const router = useRouter();
+  const basePath = useCommunityBasePath();
   const {
     getPost, getUser, getCategory, getRepliesForPost,
     upvotePost, toggleBookmark, incrementViews, addReply,
@@ -247,7 +250,7 @@ export default function PostDetail() {
     return (
       <div className="text-center py-20">
         <p className="text-gray-500 font-medium">Post not found.</p>
-        <Link href="/community" className="inline-block mt-4 text-teal-600 hover:underline text-sm">
+        <Link href={basePath} className="inline-block mt-4 text-teal-600 hover:underline text-sm">
           Back to discussions
         </Link>
       </div>
@@ -320,7 +323,7 @@ export default function PostDetail() {
           {post.tags.map(tag => (
             <Link
               key={tag}
-              href={`/community?q=${tag}`}
+              href={`${basePath}?q=${tag}`}
               className="text-xs text-teal-600 hover:underline"
             >
               #{tag}
@@ -332,7 +335,7 @@ export default function PostDetail() {
           <h1 className="text-xl font-bold text-gray-900 mb-4 leading-snug">{post.title}</h1>
 
           <div className="flex items-center justify-between mb-5">
-            <Link href={`/community/user/${post.authorId}`} className="flex items-center gap-3 group">
+            <Link href={`${basePath}/user/${post.authorId}`} className="flex items-center gap-3 group">
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
                 style={{ backgroundColor: author?.avatarColor ?? '#6b7280' }}
@@ -484,7 +487,7 @@ export default function PostDetail() {
             {related.map(p => (
               <Link
                 key={p.id}
-                href={`/community/post/${p.id}`}
+                href={`${basePath}/post/${p.id}`}
                 className="flex items-start gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors group"
               >
                 <MessageSquare size={14} className="text-gray-300 mt-0.5 shrink-0" />

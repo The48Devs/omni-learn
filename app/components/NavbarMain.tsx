@@ -11,6 +11,10 @@ export default function Navbar() {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const { isAuthenticated, profile, logout } = useAuth();
 
+    // Hide navbar entirely when inside portals – each portal has its own sidebar nav
+    const isPortalPage = pathname.startsWith('/StudentPortal') || pathname.startsWith('/TutorStudio');
+    if (isPortalPage) return null;
+
     const dashboardHref = profile?.role === "tutor" ? "/TutorStudio/dashboard" : "/StudentPortal/dashboard";
 
     // Navigation Links

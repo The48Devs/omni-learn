@@ -4,9 +4,11 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MessageSquare, TrendingUp, Hash } from 'lucide-react';
 import { useCommunity } from '../../components/community/CommunityContext';
+import { useCommunityBasePath } from '../../components/community/CommunityBasePathContext';
 
 export default function Categories() {
   const { categories, getPostsByCategory, posts } = useCommunity();
+  const basePath = useCommunityBasePath();
   const router = useRouter();
 
   const catStats = categories.map(cat => {
@@ -52,7 +54,7 @@ export default function Categories() {
           <div
             key={cat.id}
             className={`bg-white border rounded-xl overflow-hidden hover:shadow-md transition-shadow cursor-pointer ${cat.borderColor}`}
-            onClick={() => router.push(`/community?cat=${cat.id}`)}
+            onClick={() => router.push(`${basePath}?cat=${cat.id}`)}
           >
             <div className={`${cat.bgColor} px-5 py-4 border-b ${cat.borderColor}`}>
               <div className="flex items-center justify-between">
@@ -91,7 +93,7 @@ export default function Categories() {
 
               {recentPost ? (
                 <Link
-                  href={`/community/post/${recentPost.id}`}
+                  href={`${basePath}/post/${recentPost.id}`}
                   onClick={e => e.stopPropagation()}
                   className="block text-xs text-gray-500 truncate hover:text-teal-700 transition-colors"
                 >
@@ -103,7 +105,7 @@ export default function Categories() {
               )}
 
               <button
-                onClick={e => { e.stopPropagation(); router.push(`/community?cat=${cat.id}`); }}
+                onClick={e => { e.stopPropagation(); router.push(`${basePath}?cat=${cat.id}`); }}
                 className={`mt-3 w-full py-1.5 rounded-lg text-xs font-semibold border transition-colors ${cat.color} ${cat.bgColor} ${cat.borderColor} hover:opacity-80`}
               >
                 Browse {cat.name} →

@@ -45,21 +45,31 @@ export default function TutorStudioLayout({
                 </svg>
             ),
         },
+        {
+            name: "Community", href: "/TutorStudio/community", icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+            ),
+        },
     ];
     return (
         <RequireAuth role="tutor">
-            <div className="flex h-[calc(100vh-4rem)] overflow-hidden bg-[var(--bg-secondary)] font-sans transition-colors duration-200">
-                <aside className="w-64 bg-[#0b1b3d] text-slate-200 flex flex-col justify-between shrink-0 border-r border-slate-800 transition-colors duration-200
+            <div className="flex h-screen overflow-hidden bg-[var(--bg-secondary)] font-sans transition-colors duration-200">
+                <aside className="w-64 bg-[#0b1b3d] text-slate-200 flex flex-col shrink-0 border-r border-slate-800 transition-colors duration-200
                      data-[theme=high-contrast]:bg-black data-[theme=high-contrast]:border-white data-[theme=high-contrast]:text-white">
-                    <div className="p-5">
-                        <div className="flex items-center gap-2 mb-8">
+                    <div className="p-5 pb-0 shrink-0">
+                        <div className="flex items-center gap-2 mb-6">
                             <span className="text-xl font-bold tracking-wider text-white">
                                 Tutor Studio
                             </span>
                         </div>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto px-5 pb-5">
                         <nav className="space-y-1.5" aria-label="Tutor Studio Navigation">
                             {navItems.map((item) => {
-                                const isActive = pathname === item.href;
+                                const isActive = pathname === item.href || (item.href !== '/TutorStudio/dashboard' && pathname.startsWith(item.href));
                                 return (
                                     <Link
                                         key={item.name}
@@ -74,9 +84,9 @@ export default function TutorStudioLayout({
                                 );
                             })}
                         </nav>
-                        {/*Sign Out*/}
                     </div>
-                    <div className="p-4 border-t border-slate-800 data-[theme=high-contrast]:border-white">
+
+                    <div className="p-4 border-t border-slate-800 data-[theme=high-contrast]:border-white shrink-0">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-sx text-slate-400 truncate max-w-[150px]">
                                 {user?.email ?? "daniel@gmail.com"}

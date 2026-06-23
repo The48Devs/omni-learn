@@ -1,8 +1,16 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+    const pathname = usePathname();
+
+    // Hide footer on portal routes
+    if (pathname.startsWith('/StudentPortal') || pathname.startsWith('/TutorStudio')) {
+        return null;
+    }
+
     return (
         <footer
             role="contentinfo"
