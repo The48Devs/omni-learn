@@ -1,14 +1,37 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useOrganizations } from '../../components/organizations/OrganizationContext';
 import { Building2, Globe, Users, BookOpen, Search } from 'lucide-react';
 
 export default function TutorExplore() {
-  const { getPublicOrganizations } = useOrganizations();
+  const { organizations, getPublicOrganizations, getOrgCourseCount, getOrgMemberCount } = useOrganizations();
   const publicOrgs = getPublicOrganizations();
   const [searchQuery, setSearchQuery] = useState('');
+  const [orgCounts, setOrgCounts] = useState<Record<string, { courses: number; members: number }>>({});
+
+  useEffect(() => {
+    if (publicOrgs.length === 0) return;
+    let cancelled = false;
+    const fetchCounts = async () => {
+      const counts: Record<string, { courses: number; members: number }> = {};
+      await Promise.all(publicOrgs.map(async (org) => {
+        try {
+          const [courses, members] = await Promise.all([
+            getOrgCourseCount(org.id),
+            getOrgMemberCount(org.id),
+          ]);
+          if (!cancelled) counts[org.id] = { courses, members };
+        } catch {
+          if (!cancelled) counts[org.id] = { courses: 0, members: 0 };
+        }
+      }));
+      if (!cancelled) setOrgCounts(counts);
+    };
+    fetchCounts();
+    return () => { cancelled = true; };
+  }, [organizations, getOrgCourseCount, getOrgMemberCount]);
 
   const filteredOrgs = publicOrgs.filter(org =>
     org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -66,14 +89,14 @@ export default function TutorExplore() {
                     <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
                       <BookOpen className="text-blue-500" size={20} />
                       <div>
-                        <div className="text-xl font-bold text-slate-800 leading-none">{org.courseCount}</div>
+                        <div className="text-xl font-bold text-slate-800 leading-none">{orgCounts[org.id]?.courses ?? 0}</div>
                         <div className="text-xs text-slate-500 font-medium mt-1">Courses</div>
                       </div>
                     </div>
                     <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
                       <Users className="text-emerald-500" size={20} />
                       <div>
-                        <div className="text-xl font-bold text-slate-800 leading-none">{org.memberCount}</div>
+                        <div className="text-xl font-bold text-slate-800 leading-none">{orgCounts[org.id]?.members ?? 0}</div>
                         <div className="text-xs text-slate-500 font-medium mt-1">Members</div>
                       </div>
                     </div>

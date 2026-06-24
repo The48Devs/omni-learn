@@ -1,31 +1,33 @@
 "use client";
 import React, { useState } from "react";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
+import { useAuth } from "@/app/components/AuthCOntext";
 
 // use data interace
 interface ProfileData {
-    displayName: string;
+    fullName: string;
     email: string;
     tutorHandle: string;
-    phone: string;
     institution: string;
-    title: string;
+    mobile: string;
     bio: string;
+    tags: string[];
 }
 
 export default function TutorSettingsContent() {
     const { announce } = useAccessibility();
+    const { user, profile, updateProfile } = useAuth();
     const [activeTab, setActiveTab] = useState<"profile" | "classroom" | "notifications" | "financials">("profile");
 
     // initial session data
-    const [profile, setProfile] = useState<ProfileData>({
-        displayName: "Manuja Samarathunga",
-        email: "manuja.work61@gmail.com",
-        tutorHandle: "T-20043",
-        phone: "+94710816037",
-        institution: "Nalanda College",
-        title: "Senior Electronics Lecturer",
-        bio: "Passionate about building highly interactive learning ecosystems that align with universal accessibility design standards.",
+    const [profileState, setProfileState] = useState<ProfileData>({
+        fullName: profile?.fullName || user?.displayName || "",
+        email: profile?.email || user?.email || "",
+        tutorHandle: profile?.tutorId || "",
+        institution: profile?.institution || "",
+        mobile: profile?.mobileNumber || "",
+        bio: (profile as any)?.bio || "",
+        tags: (profile as any)?.tags || [],
     });
 
     // tags
@@ -61,10 +63,26 @@ export default function TutorSettingsContent() {
         announce(`Switched to ${tabs.find((t) => t.id === tabID)?.label} tab.`);
     };
 
-    const handleSave = (e: React.FormEvent) => {
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        announce("Tutor settings saved successfully.");
-        alert("Settings saved successfully!");
+        if (!profileState.tutorHandle.trim()) {
+            alert('Tutor handle is required');
+            return;
+        }
+        try {
+            await updateProfile({
+                fullName: profileState.fullName,
+                email: profileState.email,
+                tutorId: profileState.tutorHandle,
+                institution: profileState.institution,
+                mobileNumber: profileState.mobile,
+                bio: profileState.bio,
+                tags: profileState.tags,
+            } as any);
+            announce("Tutor settings saved successfully.");
+        } catch (err) {
+            alert('Failed to save settings');
+        }
     };
 
     const addTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -144,8 +162,8 @@ export default function TutorSettingsContent() {
                                     <input
                                         id="display-name"
                                         type="text"
-                                        value={profile.displayName}
-                                        onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
+                                        value={profileState.fullName}
+                                        onChange={(e) => setProfileState({ ...profileState, fullName: e.target.value })}
                                         className="w-full bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)] rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
                                         required
                                     />
@@ -153,14 +171,14 @@ export default function TutorSettingsContent() {
                                 {/* Email*/}
                                 <div className="flex flex-col gap-[0.5rem]">
                                     <label htmlFor="account-email" className="text-[0.95rem] font-semibold text-[var(--text-main)]">
-                                        Account Email (Read-Only)
+                                        Account Email
                                     </label>
                                     <input
                                         id="account-email"
                                         type="email"
-                                        value={profile.email}
-                                        disabled
-                                        className="w-full bg-[var(--bg-tertiary)] text-[var(--text-muted)] border border-[var(--border-color)] rounded-lg p-[0.75rem] text-[1rem] cursor-not-allowed focus:outline-none"
+                                        value={profileState.email}
+                                        onChange={(e) => setProfileState({ ...profileState, email: e.target.value })}
+                                        className="w-full bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)] rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
                                     />
                                 </div>
                                 {/* Tutor Handle*/}
@@ -168,14 +186,14 @@ export default function TutorSettingsContent() {
                                     <label htmlFor="tutor-handle" className="text-[0.95rem] font-semibold text-[var(--text-main)]">
                                         Tutor Handle
                                     </label>
-                                    <div className="relative flex items-center">
-                                        <span className="absolute left-[0.75rem] text-[var(--text-muted)] text-[1rem] select-none">@</span>
+                                    <div className="flex">
+                                        <span className="inline-flex items-center px-3 bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl text-slate-500 text-sm">@</span>
                                         <input
                                             id="tutor-handle"
                                             type="text"
-                                            value={profile.tutorHandle}
-                                            disabled
-                                            className="w-full bg-[var(--bg-tertiary)] text-[var(--text-muted)] border border-[var(--border-color)] rounded-lg p-[0.75rem] pl-[1.75rem] text-[1rem] cursor-not-allowed focus:outline-none"
+                                            value={profileState.tutorHandle}
+                                            onChange={(e) => setProfileState({ ...profileState, tutorHandle: e.target.value })}
+                                            className="flex-1 p-3 bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)] rounded-r-xl text-sm focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
                                         />
                                     </div>
                                 </div>
@@ -187,8 +205,8 @@ export default function TutorSettingsContent() {
                                     <input
                                         id="contact-phone"
                                         type="tel"
-                                        value={profile.phone}
-                                        onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                                        value={profileState.mobile}
+                                        onChange={(e) => setProfileState({ ...profileState, mobile: e.target.value })}
                                         className="w-full bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)] rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
                                     />
                                 </div>
@@ -200,22 +218,22 @@ export default function TutorSettingsContent() {
                                     <input
                                         id="institution"
                                         type="text"
-                                        value={profile.institution}
-                                        onChange={(e) => setProfile({ ...profile, institution: e.target.value })}
+                                        value={profileState.institution}
+                                        onChange={(e) => setProfileState({ ...profileState, institution: e.target.value })}
                                         className="w-full bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)] rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
                                     />
                                 </div>
-                                {/* Title */}
+                                {/* Full Name */}
                                 <div className="flex flex-col gap-[0.5rem]">
                                     <label htmlFor="professional-title" className="text-[0.95rem] font-semibold text-[var(--text-main)]">
-                                        Professional Title
+                                        Full Name
                                     </label>
                                     <input
                                         id="professional-title"
                                         type="text"
-                                        value={profile.title}
+                                        value={profileState.fullName}
                                         placeholder="e.g., Senior Electronics Lecturer"
-                                        onChange={(e) => setProfile({ ...profile, title: e.target.value })}
+                                        onChange={(e) => setProfileState({ ...profileState, fullName: e.target.value })}
                                         className="w-full bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)] rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 focus:outline-none"
                                     />
                                 </div>
@@ -261,8 +279,8 @@ export default function TutorSettingsContent() {
                                 <textarea
                                     id="instructor-bio"
                                     rows={5}
-                                    value={profile.bio}
-                                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                                    value={profileState.bio}
+                                    onChange={(e) => setProfileState({ ...profileState, bio: e.target.value })}
                                     className="w-full bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)] rounded-lg p-[0.75rem] text-[1rem] focus-visible:outline-[3px] focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2 focus:outline-none resize-y"
                                 />
                             </div>

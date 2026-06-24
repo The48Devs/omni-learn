@@ -1,0 +1,110 @@
+{
+  "rules": {
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        "role": {
+          ".read": "auth != null"
+        }
+      }
+    },
+    "organizations": {
+      ".read": "auth != null",
+      "$orgId": {
+        ".write": "auth != null && (!data.exists() || data.child('ownerId').val() === auth.uid)",
+        "members": {
+          "$uid": {
+            ".write": "auth != null && (auth.uid === $uid || auth.uid === root.child('organizations').child($orgId).child('ownerId').val())",
+            ".validate": "!newData.exists() || (newData.hasChild('role') && (newData.child('role').val() === 'student' || newData.child('role').val() === 'tutor'))"
+          }
+        },
+        "inviteLinks": {
+          "$token": {
+            ".write": "auth != null && auth.uid === root.child('organizations').child($orgId).child('ownerId').val()"
+          }
+        },
+        "courses": {
+          "$courseId": {
+            ".write": "auth != null && (auth.uid === root.child('organizations').child($orgId).child('ownerId').val() || (root.child('organizations').child($orgId).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child($orgId).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))"
+          }
+        },
+        "courseCount": {
+          ".write": "auth != null && auth.uid === root.child('organizations').child($orgId).child('ownerId').val()"
+        },
+        "memberCount": {
+          ".write": "auth != null && auth.uid === root.child('organizations').child($orgId).child('ownerId').val()"
+        },
+        "leaderboard": {
+          "$studentId": {
+            ".write": "auth != null && (auth.uid === $studentId || auth.uid === root.child('organizations').child($orgId).child('ownerId').val())",
+            ".validate": "newData.isNumber()"
+          }
+        },
+        "xp": {
+          "$studentId": {
+            ".write": "auth != null && (auth.uid === $studentId || auth.uid === root.child('organizations').child($orgId).child('ownerId').val())",
+            ".validate": "newData.isNumber()"
+          }
+        },
+        "name": {
+          ".write": "!data.exists() || auth.uid === root.child('organizations').child($orgId).child('ownerId').val()"
+        },
+        "description": {
+          ".write": "!data.exists() || auth.uid === root.child('organizations').child($orgId).child('ownerId').val()"
+        },
+        "ownerId": {
+          ".write": "!data.exists()"
+        },
+        "createdAt": {
+          ".write": "!data.exists()"
+        }
+      }
+    },
+    "courses": {
+      ".read": "auth != null",
+      "$courseId": {
+        ".write": "auth != null && (root.child('organizations').child(newData.child('orgId').val()).child('ownerId').val() === auth.uid || (root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))",
+        "id": { ".write": "!data.exists()" },
+        "createdAt": { ".write": "!data.exists()" },
+        "ownerId": { ".write": "!data.exists()" },
+        "orgId": { ".write": "!data.exists()" },
+        "leaderboard": {
+          "$studentId": {
+            ".write": "auth != null && (auth.uid === $studentId || root.child('courses').child($courseId).child('ownerId').val() === auth.uid)",
+            ".validate": "newData.isNumber()"
+          }
+        },
+        "moduleLeaderboard": {
+          "$moduleId": {
+            "$studentId": {
+              ".write": "auth != null && (auth.uid === $studentId || root.child('courses').child($courseId).child('ownerId').val() === auth.uid)",
+              ".validate": "newData.isNumber()"
+            }
+          }
+        }
+      }
+    },
+    "activities": {
+      ".read": "auth != null",
+      "$activityId": {
+        ".write": "auth != null && (root.child('organizations').child(newData.child('orgId').val()).child('ownerId').val() === auth.uid || (root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))",
+        "id": { ".write": "!data.exists()" },
+        "createdAt": { ".write": "!data.exists()" },
+        "courseId": { ".write": "!data.exists()" },
+        "moduleId": { ".write": "!data.exists()" },
+        "orgId": { ".write": "!data.exists()" },
+        "points": {
+          "$studentId": {
+            ".write": "auth != null && auth.uid === $studentId",
+            ".validate": "newData.isNumber()"
+          }
+        },
+        "updatedAt": {
+          ".write": "auth != null && root.child('activities').child($activityId).child('points').child(auth.uid).exists()"
+        }
+      }
+    }
+  }
+}

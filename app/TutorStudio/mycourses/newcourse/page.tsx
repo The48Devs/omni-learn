@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
 import { useOrganizations } from "@/app/components/organizations/OrganizationContext";
+import { useAuth } from "@/app/components/AuthCOntext";
 
 export default function NewCourseWrapper() {
   return (
@@ -110,9 +111,30 @@ function CourseCreatorStudio() {
     const { announce } = useAccessibility();
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { user } = useAuth();
     const orgId = searchParams.get('orgId');
-    const { getOrganization } = useOrganizations();
+    const { getOrganization, getOrgMember, createCourse } = useOrganizations();
     const org = orgId ? getOrganization(orgId) : undefined;
+    const [permissionChecked, setPermissionChecked] = useState(false);
+    const [hasPermission, setHasPermission] = useState(false);
+
+    useEffect(() => {
+        if (!orgId || !user?.uid) return;
+        if (!org) return;
+        if (org.ownerId === user.uid) {
+            setHasPermission(true);
+            setPermissionChecked(true);
+            return;
+        }
+        getOrgMember(orgId, user.uid).then(member => {
+            const ok = member?.role === 'tutor' && member?.permissions?.canCreateCourses === true;
+            setHasPermission(ok);
+            setPermissionChecked(true);
+            if (!ok) {
+                router.replace(`/TutorStudio/organization/${orgId}`);
+            }
+        });
+    }, [orgId, user?.uid, org, getOrgMember, router]);
 
     // Require orgId - redirect if not present
     useEffect(() => {
@@ -121,19 +143,40 @@ function CourseCreatorStudio() {
         }
     }, [orgId, router]);
 
-    if (!orgId || !org) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-center p-8">
-                    <h2 className="text-xl font-bold text-slate-800 mb-2">Organization Required</h2>
-                    <p className="text-slate-500 mb-4">Courses can only be created from within an organization.</p>
-                    <Link href="/TutorStudio/organizations" className="text-blue-600 font-bold hover:underline">
-                        Go to Organizations
-                    </Link>
-                </div>
-            </div>
-        );
-    }
+    const [saving, setSaving] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+
+    const handleCreateCourse = async () => {
+        if (!courseTitle.trim()) {
+            setSaveError('Course title is required');
+            return;
+        }
+        if (!modules.length || !modules.some(m => m.blocks.length > 0)) {
+            setSaveError('Add at least one module with content blocks');
+            return;
+        }
+        if (!user?.uid || !orgId) return;
+        setSaving(true);
+        setSaveError(null);
+        const modulesRecord: Record<string, { id: string; index: number; title: string; duration: string; blocks: any[] }> = {};
+        for (const mod of modules) {
+            modulesRecord[mod.id] = { id: mod.id, index: mod.index, title: mod.title, duration: mod.duration, blocks: mod.blocks };
+        }
+        const result = await createCourse({
+            title: courseTitle.trim(),
+            description: courseDescription.trim(),
+            subject: courseSubject,
+            orgId,
+            ownerId: user.uid,
+            modules: modulesRecord,
+        });
+        setSaving(false);
+        if (result.success) {
+            router.push(`/TutorStudio/organization/${orgId}`);
+        } else {
+            setSaveError(result.error || 'Failed to create course');
+        }
+    };
 
     // Switching functionality between the two view modes
     const [currentView, setCurrentView] = useState<"course-overview" | "edit-module">("course-overview");
@@ -761,6 +804,32 @@ function CourseCreatorStudio() {
         announce(`Block rearranged to canvas position ${targetIdx + 1}`);
     };
 
+    if (!orgId || !org) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center p-8">
+                    <h2 className="text-xl font-bold text-slate-800 mb-2">Organization Required</h2>
+                    <p className="text-slate-500 mb-4">Courses can only be created from within an organization.</p>
+                    <Link href="/TutorStudio/organizations" className="text-blue-600 font-bold hover:underline">
+                        Go to Organizations
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    if (!permissionChecked) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-slate-400 text-lg font-semibold">Checking permissions...</div>
+            </div>
+        );
+    }
+
+    if (!hasPermission) {
+        return null;
+    }
+
     return (
         <div className="w-full min-h-screen bg-[var(--bg-primary,#F9FAFB)] text-[var(--text-main,#041A3E)] flex flex-col lg:flex-row transition-colors duration-200">
 
@@ -1317,12 +1386,17 @@ function CourseCreatorStudio() {
                                 </select>
                             </div>
 
-                            <Link
-                                href="/TutorStudio/courses/course-1/analytics"
-                                className="w-full py-[0.75rem] bg-[#0b1b3d] dark:bg-[var(--button-primary)] text-white hover:opacity-90 font-bold rounded-lg text-center text-[0.95rem] transition-all block focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
+                            {saveError && (
+                                <p className="text-red-500 text-[0.85rem] font-semibold">{saveError}</p>
+                            )}
+                            <button
+                                type="button"
+                                onClick={handleCreateCourse}
+                                disabled={saving}
+                                className="w-full py-[0.75rem] bg-[#FF6B35] text-white hover:opacity-90 disabled:opacity-50 font-bold rounded-lg text-[0.95rem] transition-all focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2"
                             >
-                                View Course Analytics
-                            </Link>
+                                {saving ? 'Creating Course...' : 'Create Course'}
+                            </button>
 
 
                         </>

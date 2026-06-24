@@ -7,12 +7,13 @@ import { useAuth } from '../../components/AuthCOntext';
 import { Building2, Globe, Lock, Users, BookOpen } from 'lucide-react';
 
 export default function StudentOrganizations() {
-  const { getPublicOrganizations, getOrganizationsForStudent } = useOrganizations();
+  const { organizations, getPublicOrganizations, getOrganizationsForStudent, getOrgCourseCount, getOrgMemberCount } = useOrganizations();
   const { user } = useAuth();
   const [myOrgs, setMyOrgs] = useState<any[]>([]);
   const [loadingMyOrgs, setLoadingMyOrgs] = useState(true);
 
   const publicOrgs = getPublicOrganizations();
+  const [orgCounts, setOrgCounts] = useState<Record<string, { courses: number; members: number }>>({});
 
   useEffect(() => {
     if (!user) {
@@ -26,6 +27,29 @@ export default function StudentOrganizations() {
       setLoadingMyOrgs(false);
     });
   }, [user, getOrganizationsForStudent]);
+
+  useEffect(() => {
+    const allOrgs = [...(user ? myOrgs : []), ...publicOrgs];
+    if (allOrgs.length === 0) return;
+    let cancelled = false;
+    const fetchCounts = async () => {
+      const counts: Record<string, { courses: number; members: number }> = {};
+      await Promise.all(allOrgs.map(async (org) => {
+        try {
+          const [courses, members] = await Promise.all([
+            getOrgCourseCount(org.id),
+            getOrgMemberCount(org.id),
+          ]);
+          if (!cancelled) counts[org.id] = { courses, members };
+        } catch {
+          if (!cancelled) counts[org.id] = { courses: 0, members: 0 };
+        }
+      }));
+      if (!cancelled) setOrgCounts(counts);
+    };
+    fetchCounts();
+    return () => { cancelled = true; };
+  }, [myOrgs, organizations, getOrgCourseCount, getOrgMemberCount]);
 
   return (
     <div className="space-y-8 pb-16">
@@ -60,14 +84,14 @@ export default function StudentOrganizations() {
                     <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
                       <BookOpen className="text-blue-500" size={20} />
                       <div>
-                        <div className="text-xl font-bold text-slate-800 leading-none">{org.courseCount}</div>
+                        <div className="text-xl font-bold text-slate-800 leading-none">{orgCounts[org.id]?.courses ?? 0}</div>
                         <div className="text-xs text-slate-500 font-medium mt-1">Courses</div>
                       </div>
                     </div>
                     <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
                       <Users className="text-emerald-500" size={20} />
                       <div>
-                        <div className="text-xl font-bold text-slate-800 leading-none">{org.memberCount}</div>
+                        <div className="text-xl font-bold text-slate-800 leading-none">{orgCounts[org.id]?.members ?? 0}</div>
                         <div className="text-xs text-slate-500 font-medium mt-1">Members</div>
                       </div>
                     </div>
@@ -111,14 +135,14 @@ export default function StudentOrganizations() {
                     <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
                       <BookOpen className="text-blue-500" size={20} />
                       <div>
-                        <div className="text-xl font-bold text-slate-800 leading-none">{org.courseCount}</div>
+                        <div className="text-xl font-bold text-slate-800 leading-none">{orgCounts[org.id]?.courses ?? 0}</div>
                         <div className="text-xs text-slate-500 font-medium mt-1">Courses</div>
                       </div>
                     </div>
                     <div className="bg-slate-50 rounded-xl p-3 flex items-center gap-3">
                       <Users className="text-emerald-500" size={20} />
                       <div>
-                        <div className="text-xl font-bold text-slate-800 leading-none">{org.memberCount}</div>
+                        <div className="text-xl font-bold text-slate-800 leading-none">{orgCounts[org.id]?.members ?? 0}</div>
                         <div className="text-xs text-slate-500 font-medium mt-1">Members</div>
                       </div>
                     </div>

@@ -1,11 +1,18 @@
 Gamification logic
 
-Organization -> Course(s)
+Organization -> Course(s) -> Module(s) -> Activities
+
+Courses,
+    Each course has multiple modules
+    Each module has multiple Activities
+    Activity point total is shown with the Module
+    Module points total is shown inside the course leaderboard and completion
 
 Activity completion Point Criteria, (Total 30pts)
     Accuracy [%/10]
     Speed [time allocated % (100 -> 0) /10]
     B4 Deadline (If any) [10] 
+    
     
 Levels,
     Each organization has a seperate level per student
@@ -25,4 +32,5 @@ Streak,
 leaderboards, (Streak only shows students that are part of the organization/Course)
         Organization[Level/Streak]
         Course[Points(Activities are combined)/Streak]
+        Module(points of all Activities inside)
         Activity[Points + completion time]

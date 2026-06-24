@@ -1,24 +1,39 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useOrganizations } from '../../../components/organizations/OrganizationContext';
 import { useAuth } from '../../../components/AuthCOntext';
-import { ArrowLeft, BookOpen, Users, Trophy, Flame, Medal, Star, TrendingUp, Zap, Calendar } from 'lucide-react';
+import { ArrowLeft, BookOpen, Users, Trophy, Flame, Medal, Star, TrendingUp, Zap, Calendar, Shield } from 'lucide-react';
 
 type LeaderboardTab = 'streak' | 'level';
 
 export default function StudentOrganizationDetails() {
   const { orgId } = useParams<{ orgId: string }>();
   const router = useRouter();
-  const { getOrganization, getOrgLeaderboard, getOrgMembers, getStreak } = useOrganizations();
+  const { getOrganization, getOrgLeaderboard, getOrgMembers, getOrgMembersDetails, getStreak, joinViaInviteLink, leaveOrganization, getOrgCoursesWithData } = useOrganizations();
   const { user } = useAuth();
   const [leaderboardTab, setLeaderboardTab] = useState<LeaderboardTab>('level');
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+  const [orgCourses, setOrgCourses] = useState<any[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [inviteError, setInviteError] = useState<string | null>(null);
 
   const org = getOrganization(orgId);
+
+  useEffect(() => {
+    if (!orgId || !user?.uid) return;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (!token) return;
+    joinViaInviteLink(orgId, token, user.uid).then(result => {
+      if (!result.success) {
+        setInviteError(result.error || null);
+      }
+    });
+  }, [orgId, user?.uid, joinViaInviteLink]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -31,11 +46,12 @@ export default function StudentOrganizationDetails() {
         setLoadingLeaderboard(false);
       });
     } else {
-      getOrgMembers(orgId).then(async (memberIds) => {
+      getOrgMembersDetails(orgId).then(async (members) => {
+        const students = members.filter(m => m.role !== 'tutor');
         const streakEntries = await Promise.all(
-          memberIds.map(async (studentId) => {
-            const streak = await getStreak(studentId);
-            return { studentId, streak: streak.current };
+          students.map(async (m) => {
+            const streak = await getStreak(m.uid);
+            return { studentId: m.uid, streak: streak.current };
           })
         );
         const sorted = streakEntries.sort((a, b) => b.streak - a.streak);
@@ -43,7 +59,16 @@ export default function StudentOrganizationDetails() {
         setLoadingLeaderboard(false);
       });
     }
-  }, [orgId, leaderboardTab, getOrgLeaderboard, getOrgMembers, getStreak]);
+  }, [orgId, leaderboardTab, getOrgLeaderboard, getOrgMembers, getOrgMembersDetails, getStreak]);
+
+  useEffect(() => {
+    if (!orgId) return;
+    setLoadingCourses(true);
+    getOrgCoursesWithData(orgId).then(courses => {
+      setOrgCourses(courses);
+      setLoadingCourses(false);
+    });
+  }, [orgId, getOrgCoursesWithData]);
 
   if (!org) {
     return (
@@ -65,7 +90,7 @@ export default function StudentOrganizationDetails() {
             <h1 className="text-3xl font-extrabold text-slate-900">{org.name}</h1>
             <p className="text-slate-600 mt-2 max-w-2xl text-lg">{org.description}</p>
           </div>
-          <JoinButton orgId={org.id} userId={user?.uid} />
+          <JoinButton orgId={org.id} userId={user?.uid} isInviteOnly={org.isInviteOnly} />
         </div>
       </div>
 
@@ -82,7 +107,9 @@ export default function StudentOrganizationDetails() {
               </h2>
             </div>
             <div className="p-6">
-              {org.courseCount === 0 ? (
+              {loadingCourses ? (
+                <div className="text-center py-8 text-slate-400">Loading courses...</div>
+              ) : orgCourses.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3">
                     <BookOpen className="text-slate-400" size={24} />
@@ -90,7 +117,18 @@ export default function StudentOrganizationDetails() {
                   <p className="text-slate-500 font-medium">No courses yet.</p>
                 </div>
               ) : (
-                <p className="text-slate-500 text-sm">{org.courseCount} course{org.courseCount !== 1 ? 's' : ''} in this organization.</p>
+                <div className="space-y-3">
+                  {orgCourses.map(course => (
+                    <Link key={course.id} href={`/StudentPortal/courses/${course.id}`} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors">
+                      <div>
+                        <h3 className="font-bold text-slate-800">{course.title}</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">{course.subject} &middot; {Object.keys(course.modules || {}).length} modules</p>
+                      </div>
+                      <span className="text-xs font-medium text-slate-400 bg-slate-100 px-2 py-1 rounded-lg">Enrolled</span>
+                    </Link>
+                  ))}
+                  <p className="text-sm text-slate-500 mt-2">{orgCourses.length} course{orgCourses.length !== 1 ? 's' : ''} in this organization.</p>
+                </div>
               )}
             </div>
           </div>
@@ -172,7 +210,7 @@ export default function StudentOrganizationDetails() {
             <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
               <BookOpen className="text-blue-500" /> Courses
             </h2>
-            <div className="text-4xl font-black text-slate-900 mb-1">{org.courseCount}</div>
+            <div className="text-4xl font-black text-slate-900 mb-1">{orgCourses.length}</div>
             <p className="text-sm text-slate-500 font-medium">Available courses</p>
           </div>
 
@@ -184,9 +222,10 @@ export default function StudentOrganizationDetails() {
   );
 }
 
-function JoinButton({ orgId, userId }: { orgId: string; userId?: string }) {
-  const { joinOrganization, isOrgMember } = useOrganizations();
+function JoinButton({ orgId, userId, isInviteOnly }: { orgId: string; userId?: string; isInviteOnly: boolean }) {
+  const { joinOrganization, isOrgMember, leaveOrganization } = useOrganizations();
   const [joining, setJoining] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const [checking, setChecking] = useState(true);
 
@@ -201,9 +240,32 @@ function JoinButton({ orgId, userId }: { orgId: string; userId?: string }) {
   if (!userId) return null;
   if (checking) return <div className="px-5 py-2.5 text-sm text-slate-400">...</div>;
   if (isMember) {
+    const handleLeave = async () => {
+      setLeaving(true);
+      const result = await leaveOrganization(orgId, userId);
+      if (result.success) setIsMember(false);
+      setLeaving(false);
+    };
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-2.5 text-emerald-700 font-bold text-sm">
-        You're a member
+      <div className="flex items-center gap-2">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-5 py-2.5 text-emerald-700 font-bold text-sm">
+          You're a member
+        </div>
+        <button
+          onClick={handleLeave}
+          disabled={leaving}
+          className="bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all disabled:opacity-50"
+        >
+          {leaving ? 'Leaving...' : 'Leave'}
+        </button>
+      </div>
+    );
+  }
+
+  if (isInviteOnly) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-5 py-2.5 text-amber-700 font-bold text-sm flex items-center gap-2">
+        <Shield size={14} /> Invite-only — ask a tutor for access
       </div>
     );
   }

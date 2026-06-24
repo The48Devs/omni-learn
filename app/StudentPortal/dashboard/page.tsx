@@ -28,10 +28,11 @@ interface RecommendedCourse {
 
 export default function StudentDashboard() {
     const { announce } = useAccessibility();
-    const { user } = useAuth();
-    const { getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak } = useOrganizations();
+    const { user, profile } = useAuth();
+    const { getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData } = useOrganizations();
     const [orgLevelData, setOrgLevelData] = useState<{ orgName: string; orgId: string; level: number; currentXp: number; nextLevelXp: number } | null>(null);
     const [streak, setStreak] = useState<{ current: number; longest: number } | null>(null);
+    const [allCourses, setAllCourses] = useState<any[]>([]);
 
     useEffect(() => {
         if (!user?.uid) return;
@@ -41,72 +42,29 @@ export default function StudentDashboard() {
             const xp = await getStudentXp(org.id, user.uid);
             const progress = getXpProgress(xp);
             setOrgLevelData({ orgName: org.name, orgId: org.id, ...progress });
+            const courses = await getOrgCoursesWithData(org.id);
+            setAllCourses(courses);
         });
         getStreak(user.uid).then(data => setStreak(data));
-    }, [user?.uid, getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak]);
+    }, [user?.uid, getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData]);
 
-    const continueLearningCourses: ContinueLearningCourse[] = [
-        {
-            id: "quantum-mech",
-            title: "Advanced Quantum Mechanics",
-            status: "in-progress",
-            progress: 65,
-            metricText: "65% Complete • 2h 15m left",
-            footerText: "Recommended Next",
-        },
-        {
-            id: "cellular-bio",
-            title: "Cellular Biology: Structure & Function",
-            status: "up-next",
-            progress: 0,
-            metricText: "0% Complete • 8 Modules",
-            footerText: "Unlocks after Quantum Mechanics",
-            unlockCondition: "Advanced Quantum Mechanics",
-        },
-        {
-            id: "euro-history",
-            title: "European History: The Renaissance",
-            status: "review",
-            progress: 12,
-            metricText: "12% Complete • 4h left",
-            footerText: "Review Previous Module",
-        },
-    ];
+    const continueLearningCourses: ContinueLearningCourse[] = allCourses.length > 0 ? allCourses.slice(0, 3).map(c => ({
+        id: c.id,
+        title: c.title,
+        status: "in-progress" as const,
+        progress: 0,
+        metricText: `${Object.keys(c.modules || {}).length} Modules`,
+        footerText: "Continue",
+    })) : [];
 
-    const recommendedCourses: RecommendedCourse[] = [
-        {
-            id: "org-chem",
-            title: "Organic Chemistry Synthesis",
-            category: "SCIENCE",
-            rating: 4.9,
-            lessonsCount: 12,
-            bgGradient: "from-blue-900 to-indigo-950",
-        },
-        {
-            id: "uiux-principles",
-            title: "UI/UX Principles for Future Systems",
-            category: "DESIGN",
-            rating: 4.8,
-            lessonsCount: 18,
-            bgGradient: "from-orange-950 to-amber-900",
-        },
-        {
-            id: "intro-neural",
-            title: "Intro to Neural Networks",
-            category: "TECH",
-            rating: 5.0,
-            lessonsCount: 24,
-            bgGradient: "from-slate-900 to-sky-950",
-        },
-        {
-            id: "embedded-hardware",
-            title: "Embedded Systems & Hardware",
-            category: "ROBOTICS",
-            rating: 4.7,
-            lessonsCount: 15,
-            bgGradient: "from-emerald-950 to-teal-900",
-        },
-    ];
+    const recommendedCourses: RecommendedCourse[] = allCourses.length > 3 ? allCourses.slice(3).map((c, i) => ({
+        id: c.id,
+        title: c.title,
+        category: (["SCIENCE", "DESIGN", "TECH", "ROBOTICS"])[i % 4] as "SCIENCE" | "DESIGN" | "TECH" | "ROBOTICS",
+        rating: 4.8,
+        lessonsCount: Object.keys(c.modules || {}).length,
+        bgGradient: ["from-blue-900 to-indigo-950", "from-orange-950 to-amber-900", "from-slate-900 to-sky-950", "from-emerald-950 to-teal-900"][i % 4],
+    })) : [];
     const [carouselIndex, setCarouselIndex] = useState(0);
 
     const handleNextCarousel = () => {
@@ -130,7 +88,7 @@ export default function StudentDashboard() {
                 <h2 className="text-[1.35rem] font-extrabold text-[var(--text-main)]">Student Dashboard</h2>
                 <div className="flex items-center gap-[1rem]">
                     <span className="text-[0.8rem] font-bold text-[var(--text-muted)] bg-[var(--bg-tertiary)] px-[0.75rem] py-[0.35rem] rounded-full">
-                        Sarah A.
+                        {profile?.fullName || user?.displayName || 'Student'}
                     </span>
                 </div>
             </div>
@@ -145,7 +103,7 @@ export default function StudentDashboard() {
                         <div className="space-y-[1.2rem] max-w-[28rem] z-10">
                             <div>
                                 <h1 className="text-[1.8rem] font-extrabold leading-tight">
-                                    Welcome back, {user?.displayName || 'Student'}.
+                                    Welcome back, {profile?.fullName || user?.displayName || 'Student'}.
                                 </h1>
                                 <Link href={`/StudentPortal/organization/${orgLevelData.orgId}`} className="text-[0.85rem] opacity-80 font-medium hover:opacity-100 transition-opacity underline underline-offset-2">
                                     {orgLevelData.orgName}
@@ -189,7 +147,7 @@ export default function StudentDashboard() {
                 ) : (
                     <div className="w-full text-center py-6">
                         <h1 className="text-[1.8rem] font-extrabold leading-tight">
-                            Welcome back, {user?.displayName || 'Student'}.
+                            Welcome back, {profile?.fullName || user?.displayName || 'Student'}.
                         </h1>
                         <p className="text-[0.9rem] opacity-90 font-medium mt-2">
                             Join or create an organization to start tracking your level!
@@ -204,12 +162,12 @@ export default function StudentDashboard() {
                     <h2 id="continue-learning-heading" className="text-[1.2rem] font-extrabold text-[var(--text-main)]">
                         Continue Learning
                     </h2>
-                    <a
-                        href="#all-courses"
+                    <Link
+                        href="/StudentPortal/mycourses"
                         className="text-[0.85rem] font-extrabold text-[#ff6b35] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
                     >
                         View All Courses
-                    </a>
+                    </Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.2rem]">
                     {continueLearningCourses.map((course) => {
@@ -235,13 +193,13 @@ export default function StudentDashboard() {
                                                 🔒
                                             </div>
                                         ) : (
-                                            <button
-                                                type="button"
+                                            <Link
+                                                href={`/StudentPortal/courses/${course.id}`}
                                                 className="w-[1.8rem] h-[1.8rem] rounded-full bg-[var(--button-primary,var(--text-main))] text-[var(--bg-primary)] flex items-center justify-center text-[0.7rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
                                                 aria-label={`Play Lesson content for ${course.title}`}
                                             >
                                                 ▶
-                                            </button>
+                                            </Link>
                                         )}
                                     </div>
                                     <h3 className="text-[0.98rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.6rem]">
@@ -272,21 +230,21 @@ export default function StudentDashboard() {
                                             🔒
                                         </div>
                                     ) : isReview ? (
-                                        <button
-                                            type="button"
+                                        <Link
+                                            href={`/StudentPortal/courses/${course.id}`}
                                             className="w-[1.5rem] h-[1.5rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.75rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
                                             aria-label={`Restart/Review last module of ${course.title}`}
                                         >
                                             ↻
-                                        </button>
+                                        </Link>
                                     ) : (
-                                        <button
-                                            type="button"
+                                        <Link
+                                            href={`/StudentPortal/courses/${course.id}`}
                                             className="w-[1.5rem] h-[1.5rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.75rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
                                             aria-label={`Proceed with recommended next step in ${course.title}`}
                                         >
                                             →
-                                        </button>
+                                        </Link>
                                     )}
                                 </div>
                             </div>

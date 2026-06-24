@@ -11,7 +11,11 @@ interface NodeItem {
     color: string;
 }
 
-export default function InteractiveSandbox() {
+interface SandboxProps {
+    onComplete?: (points: number) => void;
+}
+
+export default function InteractiveSandbox({ onComplete }: SandboxProps) {
     const { announce } = useAccessibility();
 
     // Nodes starting layout configuration
@@ -52,8 +56,9 @@ export default function InteractiveSandbox() {
     useEffect(() => {
         if (isCircuitComplete) {
             announce("Success! The circuit is complete. The current is flowing and the LED is illuminated.");
+            if (onComplete) onComplete(30);
         }
-    }, [isCircuitComplete, announce]);
+    }, [isCircuitComplete, announce, onComplete]);
 
     // Mouse Drag implementation
     const handlePointerDown = (e: React.PointerEvent<SVGElement>, id: string) => {

@@ -7,7 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-import { ref, set, get, child } from "firebase/database";
+import { ref, set, get, child, update } from "firebase/database";
 import { auth, db } from "../lib/firebase";
 
 export type Role = "student" | "tutor";
@@ -33,6 +33,7 @@ interface AuthContextProps {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
+  updateProfile: (data: Partial<UserProfile>) => Promise<void>;
 }
 
 export interface RegisterData {
@@ -120,9 +121,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setProfile(profileData);
   };
 
+  const updateProfile = async (data: Partial<UserProfile>) => {
+    if (!user) throw new Error('Not authenticated');
+    const userRef = ref(db, `users/${user.uid}`);
+    await update(userRef, data);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, profile, loading, isAuthenticated: !!user, login, logout, register }}
+      value={{ user, profile, loading, isAuthenticated: !!user, login, logout, register, updateProfile }}
     >
       {children}
     </AuthContext.Provider>

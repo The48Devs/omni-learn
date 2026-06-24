@@ -1,52 +1,57 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
+import { useOrganizations } from "@/app/components/organizations/OrganizationContext";
+import { useAuth } from "@/app/components/AuthCOntext";
+import { Users, BookOpen, Eye } from "lucide-react";
 import Link from "next/link";
 
 interface Course {
     id: string;
     title: string;
     category: string;
-    gradientClass: string;
+    gradient: string;
     accessibilityCompliant: boolean;
 }
 
 export default function TutorDashboardContent() {
     const { announce } = useAccessibility();
+    const { user, profile } = useAuth();
+    const { getOrganizationsByOwner, getOrganizationsForStudent, getOrgCoursesWithData } = useOrganizations();
+    const [courses, setCourses] = useState<any[]>([]);
 
-    // use session data 
+    useEffect(() => {
+        if (!user?.uid) return;
+        Promise.all([
+            getOrganizationsByOwner(user.uid),
+            getOrganizationsForStudent(user.uid),
+        ]).then(async ([owned, memberOf]) => {
+            const allOrgs = [...owned, ...memberOf.filter(o => !owned.find(x => x.id === o.id))];
+            const allCourses = await Promise.all(allOrgs.map(org => getOrgCoursesWithData(org.id)));
+            setCourses(allCourses.flat());
+        });
+    }, [user, getOrganizationsByOwner, getOrganizationsForStudent, getOrgCoursesWithData]);
+
     const userSession = {
-        fullName: "Manuja Samarathunga",
-        handle: "T-20043",
-        institution: "Nalanda College",
-        avatarInitials: "MS",
+        fullName: profile?.fullName || user?.displayName || "Tutor",
+        handle: profile?.tutorId || user?.uid?.slice(0, 8) || "T-00000",
+        institution: profile?.institution || "",
+        avatarInitials: (profile?.fullName || "T")?.split(" ").map((s: string) => s[0]).join("").slice(0, 2).toUpperCase() || "TU",
     };
 
-    // Published Courses Data
-    const courses: Course[] = [
-        {
-            id: "course-1",
-            title: "Advanced Quantum Mechanics",
-            category: "Physics",
-            gradientClass: "from-teal-600 to-emerald-700",
-            accessibilityCompliant: true,
-        },
-        {
-            id: "course-2",
-            title: "Cellular Biology & Genetics",
-            category: "Biology",
-            gradientClass: "from-blue-600 to-indigo-800",
-            accessibilityCompliant: true,
-        },
-        {
-            id: "course-3",
-            title: "Industrial Revolution & Modernity",
-            category: "History",
-            gradientClass: "from-slate-700 to-gray-900",
-            accessibilityCompliant: true,
-        },
-    ];
+    const coursesList: Course[] = courses.map((c, i) => ({
+        id: c.id,
+        title: c.title,
+        category: c.subject || "General",
+        gradient: [
+            "from-[#4ca5bf] to-[#128a9b]",
+            "from-[#b47a61] to-[#cf987f]",
+            "from-[#5b7887] to-[#7f9ba9]",
+            "from-[#8b6fa0] to-[#b392bc]",
+        ][i % 4],
+        accessibilityCompliant: true,
+    }));
 
     const handleCourseClick = (title: string) => {
         announce(`Navigating to ${title} details.`);
@@ -74,6 +79,12 @@ export default function TutorDashboardContent() {
             value: "42 min",
             change: "+5m average",
         },
+    ];
+
+    const quickStats = [
+        { label: "Total Learners", value: "Active", icon: Users },
+        { label: "Active Modules", value: `${courses.reduce((sum, c) => sum + Object.keys(c.modules || {}).length, 0)}`, icon: BookOpen },
+        { label: "Accessibility", value: "98%", icon: Eye },
     ];
 
     return (
@@ -105,18 +116,12 @@ export default function TutorDashboardContent() {
 
                 {/* quick stats */}
                 <div className="grid grid-cols-3 gap-[1rem] md:gap-[2rem] w-full md:w-auto border-t md:border-t-0 border-blue-900 pt-[1.5rem] md:pt-0">
-                    <div className="text-center md:text-right space-y-[0.15rem]">
-                        <span className="block text-[0.8rem] md:text-[0.9rem] uppercase tracking-wider text-blue-300">Total Learners</span>
-                        <span className="block text-[1.4rem] md:text-[1.8rem] font-bold text-white">1,240</span>
-                    </div>
-                    <div className="text-center md:text-right space-y-[0.15rem]">
-                        <span className="block text-[0.8rem] md:text-[0.9rem] uppercase tracking-wider text-blue-300">Active Modules</span>
-                        <span className="block text-[1.4rem] md:text-[1.8rem] font-bold text-white">8</span>
-                    </div>
-                    <div className="text-center md:text-right space-y-[0.15rem]">
-                        <span className="block text-[0.8rem] md:text-[0.9rem] uppercase tracking-wider text-blue-300">Accessibility</span>
-                        <span className="block text-[1.4rem] md:text-[1.8rem] font-bold text-[#FF6B35]">98%</span>
-                    </div>
+                    {quickStats.map((stat, i) => (
+                        <div key={i} className="text-center md:text-right space-y-[0.15rem]">
+                            <span className="block text-[0.8rem] md:text-[0.9rem] uppercase tracking-wider text-blue-300">{stat.label}</span>
+                            <span className={`block text-[1.4rem] md:text-[1.8rem] font-bold ${i === 2 ? 'text-[#FF6B35]' : 'text-white'}`}>{stat.value}</span>
+                        </div>
+                    ))}
                 </div>
             </section>
 
@@ -138,11 +143,11 @@ export default function TutorDashboardContent() {
 
                 {/* grid wrapper */}
                 <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1.5rem]" role="list">
-                    {courses.map((course) => (
+                    {coursesList.map((course) => (
                         <li key={course.id}>
                             <article className="bg-[var(--bg-secondary)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 border border-[var(--border-color)] flex flex-col h-full">
                                 {/* bg gradient */}
-                                <div className={`p-[1.5rem] bg-gradient-to-br ${course.gradientClass} min-h-[9rem] flex flex-col justify-between`}>
+                                <div className={`p-[1.5rem] bg-gradient-to-br ${course.gradient} min-h-[9rem] flex flex-col justify-between`}>
                                     {/* Category */}
                                     <span className="inline-block self-start text-[0.75rem] font-bold tracking-wider text-white uppercase bg-white/20 px-[0.75rem] py-[0.25rem] rounded-full backdrop-blur-sm">
                                         {course.category}

@@ -1,123 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
-
-//interface for course meta data
-interface Course {
-    id: string;
-    title: string;
-    description: string;
-    category: "Science" | "History" | "Technology" | "Design";
-    currentModule: string;
-    progress: number;
-    timeRemaining: string;
-    status: "in-progress" | "completed";
-    themeColor: {
-        bg: string;
-        text: string;
-        border: string;
-        gradient: string;
-    };
-    iconGlyph: React.ReactNode;
-    publisher?: string;
-    duration?: string;
-    lessonsCount?: number;
-    rating?: number;
-}
+import { useOrganizations } from "@/app/components/organizations/OrganizationContext";
+import { useAuth } from "@/app/components/AuthCOntext";
 
 export default function MyCoursesPage() {
     const { announce } = useAccessibility();
+    const { user } = useAuth();
+    const { getOrganizationsForStudent, getOrgCoursesWithData, getCourseProgress } = useOrganizations();
+    const [courses, setCourses] = useState<any[]>([]);
+    const [progressMap, setProgressMap] = useState<Record<string, number>>({});
+    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<"all" | "in-progress" | "completed">("all");
 
     // mock database state for later firestore integration
 
-    const coursesData: Course[] = [
-        {
-            id: "quantum-mech",
-            title: "Advanced Quantum Mechanics",
-            description: "Study quantum wave functions, operators, quantum tunnels, and particle superposition theory.",
-            category: "Science",
-            currentModule: "Module 4: Wave-Particle Duality and the Double-Slit Experiment",
-            progress: 65,
-            timeRemaining: "2h 15m remaining",
-            status: "in-progress",
-            themeColor: {
-                bg: "bg-blue-100/10",
-                text: "text-blue-400",
-                border: "border-blue-400/20",
-                gradient: "from-[#204068] to-[#3a7590]",
-            },
-            iconGlyph: (
-                <svg className="w-[3rem] h-[3rem]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            ),
+    useEffect(() => {
+        if (!user?.uid) { setLoading(false); return; }
+        const uid: string = user.uid;
+        getOrganizationsForStudent(uid).then(async (orgs) => {
+            const allCourses = await Promise.all(
+                orgs.map(org => getOrgCoursesWithData(org.id))
+            );
+            const flat = allCourses.flat();
+            setCourses(flat);
+            const proms = await Promise.all(
+                flat.filter(c => c.id).map(c => getCourseProgress(c.id!, uid))
+            );
+            const map: Record<string, number> = {};
+            flat.filter(c => c.id).forEach((c, i) => { map[c.id!] = proms[i]; });
+            setProgressMap(map);
+            setLoading(false);
+        });
+    }, [user?.uid, getOrganizationsForStudent, getOrgCoursesWithData, getCourseProgress]);
+
+    const coursesData: any[] = courses.map(c => ({
+        id: c.id,
+        title: c.title,
+        description: c.description,
+        category: c.subject || "General",
+        currentModule: Object.keys(c.modules || {})[0] ? `Module 1: ${c.modules[Object.keys(c.modules)[0]].title}` : "No modules yet",
+        progress: progressMap[c.id] || 0,
+        timeRemaining: progressMap[c.id] === 100 ? "Complete" : "In progress",
+        status: progressMap[c.id] === 100 ? "completed" : "in-progress",
+        themeColor: {
+            bg: "bg-blue-100/10",
+            text: "text-blue-400",
+            border: "border-blue-400/20",
+            gradient: "from-[#204068] to-[#3a7590]",
         },
-        {
-            id: "cellular-bio",
-            title: "Cellular Biology: Structure & Function",
-            description: "Explore the microscopic world of cells and their intricate organelle mechanisms.",
-            category: "Science",
-            currentModule: "Module 2: Membrane Transport & Active Channels",
-            progress: 30,
-            timeRemaining: "4h 10m remaining",
-            status: "in-progress",
-            themeColor: {
-                bg: "bg-blue-100/10",
-                text: "text-blue-400",
-                border: "border-blue-400/20",
-                gradient: "from-sky-950 to-blue-900",
-            },
-            iconGlyph: (
-                <svg className="w-[2.5rem] h-[2.5rem]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v17.792m0-17.792a9.002 9.002 0 017.5 8.896 9.002 9.002 0 01-7.5 8.896m0-17.792a9.002 9.002 0 00-7.5 8.896 9.002 9.002 0 007.5 8.896" />
-                </svg>
-            ),
-        },
-        {
-            id: "euro-history",
-            title: "European History: The Renaissance",
-            description: "A deep dive into the cultural rebirth of Europe, painting masterpieces, and engineering feats.",
-            category: "History",
-            currentModule: "Module 6: Humanism and the Printing Press",
-            progress: 89,
-            timeRemaining: "45m remaining",
-            status: "in-progress",
-            themeColor: {
-                bg: "bg-orange-100/10",
-                text: "text-orange-400",
-                border: "border-orange-400/20",
-                gradient: "from-orange-950 to-amber-900",
-            },
-            iconGlyph: (
-                <svg className="w-[2.5rem] h-[2.5rem]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-            ),
-        },
-        {
-            id: "intro-ml",
-            title: "Introduction to Machine Learning",
-            description: "Fundamentals of predictive algorithms, gradient descent, and training neural net graphs.",
-            category: "Technology",
-            currentModule: "Module 1: Regression Analysis & Feature Fitting",
-            progress: 5,
-            timeRemaining: "12h left",
-            status: "in-progress",
-            themeColor: {
-                bg: "bg-purple-100/10",
-                text: "text-purple-400",
-                border: "border-purple-400/20",
-                gradient: "from-slate-900 to-sky-950",
-            },
-            iconGlyph: (
-                <svg className="w-[2.5rem] h-[2.5rem]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
-                </svg>
-            ),
-        },
-    ];
+        iconGlyph: (
+            <svg className="w-[3rem] h-[3rem]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        ),
+    }));
 
     // filter logic for courses
     const filteredCourses = coursesData.filter((c) => {
@@ -200,13 +139,13 @@ export default function MyCoursesPage() {
                                     />
                                 </div>
                             </div>
-                            <button
-                                type="button"
+                            <Link
+                                href={`/StudentPortal/courses/${coursesData[0].id}`}
                                 className="w-[3rem] h-[3rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.95rem] shadow-lg transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[#ff6b35] focus-visible:outline-offset-2 shrink-0 self-start sm:self-auto"
                                 aria-label={`Resume playing course module for ${coursesData[0].title}`}
                             >
                                 ▶
-                            </button>
+                            </Link>
                         </div>
 
                     </div>
@@ -273,12 +212,12 @@ export default function MyCoursesPage() {
                                         />
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    className="w-full py-[0.5rem] border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-main)] font-extrabold text-[0.82rem] rounded-xl transition-all focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-1"
-                                >
-                                    {course.progress > 0 ? "Resume Course" : "Start Course"}
-                                </button>
+                            <Link
+                                href={`/StudentPortal/courses/${coursesData[0].id}`}
+                                className="block w-full py-[0.5rem] border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-main)] font-extrabold text-[0.82rem] rounded-xl transition-all text-center focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-1"
+                            >
+                                {coursesData[0].progress > 0 ? "Resume Course" : "Start Course"}
+                            </Link>
                             </div>
                         </div>
                     ))}
