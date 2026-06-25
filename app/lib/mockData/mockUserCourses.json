@@ -1,0 +1,58 @@
+[
+    {
+        "id": "course-mock-001",
+        "title": "Intro to Circuit Theory",
+        "description": "Build foundational knowledge in electronics using interactive simulations.",
+        "subject": "Physics",
+        "orgId": "org-mock-001",
+        "ownerId": "tutor-001",
+        "modules": {
+            "mod-a": {
+                "id": "mod-a",
+                "index": 0,
+                "title": "Basic Components",
+                "duration": "45 min",
+                "activityIds": {
+                    "act-001": true,
+                    "act-002": true
+                }
+            },
+            "mod-b": {
+                "id": "mod-b",
+                "index": 1,
+                "title": "Circuit Analysis",
+                "duration": "30 min",
+                "activityIds": {
+                    "act-003": true
+                }
+            }
+        },
+        "leaderboard": {},
+        "moduleLeaderboard": {},
+        "createdAt": "2026-01-10T08:00:00Z",
+        "updatedAt": "2026-06-01T10:00:00Z"
+    },
+    {
+        "id": "course-mock-002",
+        "title": "Advanced UI/UX Principles",
+        "description": "Master design systems, accessibility, and interaction design.",
+        "subject": "Design",
+        "orgId": "org-mock-001",
+        "ownerId": "tutor-002",
+        "modules": {
+            "mod-c": {
+                "id": "mod-c",
+                "index": 0,
+                "title": "Design Tokens",
+                "duration": "60 min",
+                "activityIds": {
+                    "act-004": true
+                }
+            }
+        },
+        "leaderboard": {},
+        "moduleLeaderboard": {},
+        "createdAt": "2026-02-15T08:00:00Z",
+        "updatedAt": "2026-06-10T14:00:00Z"
+    }
+]
