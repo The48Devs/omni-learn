@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useAccessibility } from "@/app/components/AccessibilityContext";
 import { useOrganizations } from "@/app/components/organizations/OrganizationContext";
 import { useAuth } from "@/app/components/AuthCOntext";
+import PDFBlockEditor from "@/app/TutorStudio/courses/[id]/components/PDFBlockEditor";
 
 export default function NewCourseWrapper() {
     return (
@@ -941,6 +942,20 @@ function CourseCreatorStudio() {
                         </button>
 
                         <button
+                            type="button"
+                            onClick={() => handleAddBlock("pdf")}
+                            className="w-full p-[1rem] bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-orange-400 rounded-xl flex items-center gap-[0.75rem] text-left transition-all hover:-translate-y-[1px] hover:shadow-sm focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring,#FF6B35)] focus-visible:outline-offset-2">
+                            <div className="w-[2.2rem] h-[2.2rem] rounded-lg bg-orange-100 flex items-center justify-center shrink-0" aria-hidden="true">
+                                📄
+                            </div>
+                            <div>
+                                <span className="block font-semibold text-[0.95rem] text-[var(--text-main)]">PDF Document</span>
+                                <span className="text-[0.75rem] text-[var(--text-muted)]">Upload and configure a readable PDF document</span>
+                            </div>
+                        </button>
+
+
+                        <button
                             onClick={() => {
                                 setCurrentView("course-overview");
                                 announce("Switched back to Course Outline overview.");
@@ -1524,6 +1539,37 @@ function CourseCreatorStudio() {
                                                 />
                                             </div>
                                         </div>
+                                    )}
+
+                                    {/*PDF block settings */}
+
+                                    {activeBlock.type === "pdf" && (
+                                        <PDFBlockEditor
+                                            initialConfig={{
+                                                title: activeBlock.title,
+                                                fileUrl: activeBlock.pdfFileUrl,
+                                                fileName: activeBlock.pdfFileName,
+                                                allowDownload: activeBlock.pdfAllowDownload,
+                                                forceSequentialReading: activeBlock.pdfForceSequential,
+                                                defaultZoom: activeBlock.pdfDefaultZoom ?? 100,
+                                                durationMinutes: activeBlock.durationMinutes,
+                                            }}
+                                            onChange={(config) => {
+                                                setModules(modules.map(m => ({
+                                                    ...m,
+                                                    blocks: m.blocks.map(b => b.id === selectedBlockId ? {
+                                                        ...b,
+                                                        title: config.title,
+                                                        pdfFileUrl: config.fileUrl,
+                                                        pdfFileName: config.fileName,
+                                                        pdfAllowDownload: config.allowDownload,
+                                                        pdfForceSequential: config.forceSequentialReading,
+                                                        pdfDefaultZoom: config.defaultZoom,
+                                                        durationMinutes: config.durationMinutes,
+                                                    } : b)
+                                                })));
+                                            }}
+                                        />
                                     )}
 
                                     {/* mini circuit builder */}
