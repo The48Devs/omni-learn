@@ -92,6 +92,9 @@ interface OrganizationContextType {
   getCourse: (courseId: string) => Promise<CourseData | null>;
   getCourseLeaderboard: (courseId: string) => Promise<{ studentId: string; points: number }[]>;
   getModuleLeaderboard: (courseId: string, moduleId: string) => Promise<{ studentId: string; points: number }[]>;
+  updateCourse: (courseId: string, data: { title: string; description: string; subject: string; orgId: string; ownerId: string; modules: Record<string, { id: string; index: number; title: string; duration: string; blocks: any[] }> }) => Promise<{ success: boolean; error?: string }>;
+  deleteCourse: (courseId: string, orgId: string) => Promise<{ success: boolean; error?: string }>;
+  deleteOrganization: (orgId: string) => Promise<{ success: boolean; error?: string }>;
   getActivity: (activityId: string) => Promise<ActivityData | null>;
   recordActivityPoints: (activityId: string, courseId: string, moduleId: string, studentId: string, points: number) => Promise<void>;
   getActivityPoints: (activityId: string, studentId: string) => Promise<number>;
@@ -326,6 +329,135 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       return { success: false, error: orgResult.error };
     }
     return { success: true, courseId };
+  };
+
+  const updateCourse = async (courseId: string, data: { title: string; description: string; subject: string; orgId: string; ownerId: string; modules: Record<string, { id: string; index: number; title: string; duration: string; blocks: any[] }> }) => {
+    const courseRef = ref(db, `courses/${courseId}`);
+    const snapshot = await get(courseRef);
+    if (!snapshot.exists()) return { success: false, error: "Course not found" };
+    const oldCourse = snapshot.val() as CourseData;
+    const now = new Date().toISOString();
+
+    // 1. Delete all old activities associated with this course to prevent orphans
+    if (oldCourse.modules) {
+      for (const modId of Object.keys(oldCourse.modules)) {
+        const mod = oldCourse.modules[modId];
+        if (mod.activityIds) {
+          for (const actId of Object.keys(mod.activityIds)) {
+            await remove(ref(db, `activities/${actId}`));
+          }
+        }
+      }
+    }
+
+    const modulesData: Record<string, ModuleData> = {};
+
+    // 2. Insert new activities
+    for (const moduleKey of Object.keys(data.modules)) {
+      const mod = data.modules[moduleKey];
+      const moduleActivityIds: Record<string, boolean> = {};
+
+      for (const block of mod.blocks) {
+        // Generate a new ID if it's a transient frontend-only draft ID, otherwise keep it
+        const activityId = block.id.startsWith("block-") ? push(ref(db, 'activities')).key! : block.id;
+        const maxPoints = block.type === 'quiz'
+          ? (block.quizQuestions?.length || 0) * 10
+          : block.type === 'sandbox' ? 30 : 10;
+
+        const activity: ActivityData = {
+          id: activityId,
+          type: block.type,
+          title: block.title || `${mod.title} Activity`,
+          courseId,
+          moduleId: mod.id,
+          orgId: data.orgId,
+          content: block,
+          durationMinutes: block.durationMinutes || 10,
+          maxPoints,
+          createdAt: now,
+          updatedAt: now,
+        };
+        const cleanActivity = JSON.parse(JSON.stringify(activity));
+        await set(ref(db, `activities/${activityId}`), cleanActivity);
+        moduleActivityIds[activityId] = true;
+      }
+
+      modulesData[mod.id] = {
+        id: mod.id,
+        index: mod.index,
+        title: mod.title,
+        duration: mod.duration,
+        activityIds: moduleActivityIds,
+      };
+    }
+
+    // 3. Update the course document
+    const updatedCourse: CourseData = {
+      ...oldCourse,
+      title: data.title,
+      description: data.description,
+      subject: data.subject,
+      modules: modulesData,
+      updatedAt: now,
+    };
+
+    const cleanCourse = JSON.parse(JSON.stringify(updatedCourse));
+    await set(courseRef, cleanCourse);
+    return { success: true, courseId };
+  };
+
+  const deleteCourse = async (courseId: string, orgId: string) => {
+    const courseRef = ref(db, `courses/${courseId}`);
+    const snapshot = await get(courseRef);
+    if (snapshot.exists()) {
+      const course = snapshot.val() as CourseData;
+      // Delete activities first
+      if (course.modules) {
+        for (const modId of Object.keys(course.modules)) {
+          const mod = course.modules[modId];
+          if (mod.activityIds) {
+            for (const actId of Object.keys(mod.activityIds)) {
+              await remove(ref(db, `activities/${actId}`));
+            }
+          }
+        }
+      }
+    }
+    // Delete course metadata
+    await remove(courseRef);
+    // Remove course from organization listings
+    await remove(ref(db, `organizations/${orgId}/courses/${courseId}`));
+    return { success: true };
+  };
+
+  const deleteOrganization = async (orgId: string) => {
+    // 1. Get all courses belonging to this organization and delete them along with their activities
+    const orgCoursesRef = ref(db, `organizations/${orgId}/courses`);
+    const snapshot = await get(orgCoursesRef);
+    if (snapshot.exists()) {
+      const coursesMap = snapshot.val();
+      for (const courseId of Object.keys(coursesMap)) {
+        const courseRef = ref(db, `courses/${courseId}`);
+        const cSnap = await get(courseRef);
+        if (cSnap.exists()) {
+          const course = cSnap.val() as CourseData;
+          if (course.modules) {
+            for (const modId of Object.keys(course.modules)) {
+              const mod = course.modules[modId];
+              if (mod.activityIds) {
+                for (const actId of Object.keys(mod.activityIds)) {
+                  await remove(ref(db, `activities/${actId}`));
+                }
+              }
+            }
+          }
+        }
+        await remove(courseRef);
+      }
+    }
+    // 2. Delete organization metadata itself
+    await remove(ref(db, `organizations/${orgId}`));
+    return { success: true };
   };
 
 
@@ -710,6 +842,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       getOrgMemberRole,
       addCourseToOrganization,
       createCourse,
+      updateCourse,
+      deleteCourse,
+      deleteOrganization,
       isOrgMember,
       joinOrganization,
       inviteStudentByEmail,
@@ -736,8 +871,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       leaveOrganization,
     }}>
       {children}
-    </OrganizationContext.Provider>
+    </OrganizationContext.Provider >
   );
+
+
 }
 
 export function useOrganizations() {
@@ -746,4 +883,6 @@ export function useOrganizations() {
     throw new Error('useOrganizations must be used within an OrganizationProvider');
   }
   return context;
+
 }
+

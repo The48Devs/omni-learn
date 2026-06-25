@@ -452,23 +452,20 @@ function CourseCreatorStudio() {
     const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
         setUploadingProgress(10);
         announce("Uploading video file...");
-
-        // Simulate upload progress
+        let currentProgress = 10;
         const timer = setInterval(() => {
-            setUploadingProgress((prev) => {
-                if (prev === null) return null;
-                if (prev >= 100) {
-                    clearInterval(timer);
-                    updateVideoSettings("videoFileName", file.name);
-                    updateVideoSettings("videoUrl", `/uploaded-videos/${file.name}`);
-                    announce("Video upload complete.");
-                    return null;
-                }
-                return prev + 30;
-            });
+            currentProgress += 30;
+            if (currentProgress >= 100) {
+                clearInterval(timer);
+                setUploadingProgress(null);
+                updateVideoSettings("videoFileName", file.name);
+                updateVideoSettings("videoUrl", `/uploaded-videos/${file.name}`);
+                announce("Video upload complete.");
+            } else {
+                setUploadingProgress(currentProgress);
+            }
         }, 400);
     };
 

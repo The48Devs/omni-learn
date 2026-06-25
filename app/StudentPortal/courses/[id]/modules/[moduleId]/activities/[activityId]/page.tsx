@@ -9,6 +9,7 @@ import InteractiveSandbox from "@/app/components/InteractiveSandbox";
 import { ArrowLeft, CheckCircle, Clock, Zap, Loader2 } from "lucide-react";
 import CoursePlayerWrapper from "./activities/[activityid]/CoursePlayerWrapper";
 
+
 export default function StudentActivityPage() {
   const params = useParams<{ id: string; moduleId: string; activityId: string }>();
   const router = useRouter();
@@ -121,7 +122,6 @@ export default function StudentActivityPage() {
       >
         <ArrowLeft size={16} /> Back to Course
       </Link>
-
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-4">
           <span className="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded-full capitalize">{activity.type}</span>
@@ -130,41 +130,13 @@ export default function StudentActivityPage() {
           </span>
         </div>
         <h1 className="text-2xl font-extrabold text-slate-900">{activity.title}</h1>
-        {activity.type === 'sandbox' && (
-          <div className="mt-6">
-            <InteractiveSandbox onComplete={(pts) => handleComplete(pts)} />
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => handleComplete(30)}
-                disabled={submitting}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50 inline-flex items-center gap-2"
-              >
-                {submitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
-                {submitting ? 'Submitting...' : 'Mark as Complete'}
-              </button>
-            </div>
-          </div>
-        )}
-        {activity.type === 'quiz' && activity.content?.quizQuestions && (
-          <QuizView questions={activity.content.quizQuestions} onComplete={handleComplete} submitting={submitting} />
-        )}
-        {(activity.type === 'video' || activity.type === 'storyline') && (
-          <div className="mt-6 space-y-4">
-            <div className="bg-slate-50 rounded-xl p-8 text-center">
-              <p className="text-slate-600">{activity.content?.description || 'Review the material below.'}</p>
-            </div>
-            <div className="text-center">
-              <button
-                onClick={() => handleComplete(20)}
-                disabled={submitting}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50 inline-flex items-center gap-2"
-              >
-                {submitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
-                {submitting ? 'Submitting...' : 'Mark as Complete'}
-              </button>
-            </div>
-          </div>
-        )}
+
+        {/* Render activity contents dynamically with the player wrapper */}
+        <CoursePlayerWrapper
+          activity={activity}
+          onComplete={handleComplete}
+          submitting={submitting}
+        />
       </div>
     </div>
   );
