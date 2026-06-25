@@ -7,7 +7,7 @@ import { useOrganizations } from "@/app/components/organizations/OrganizationCon
 import { useAuth } from "@/app/components/AuthCOntext";
 import InteractiveSandbox from "@/app/components/InteractiveSandbox";
 import { ArrowLeft, CheckCircle, Clock, Zap, Loader2 } from "lucide-react";
-import CoursePlayerWrapper from "./activities/[activityid]/CoursePlayerWrapper";
+import CoursePlayerWrapper from "./activities/[activityId]/CoursePlayerWrapper";
 
 export default function StudentActivityPage() {
   const params = useParams<{ id: string; moduleId: string; activityId: string }>();
@@ -129,104 +129,13 @@ export default function StudentActivityPage() {
             <Clock size={14} /> {activity.durationMinutes || 10} min
           </span>
         </div>
-        <h1 className="text-2xl font-extrabold text-slate-900">{activity.title}</h1>
-        {activity.type === 'sandbox' && (
-          <div className="mt-6">
-            <InteractiveSandbox onComplete={(pts) => handleComplete(pts)} />
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => handleComplete(30)}
-                disabled={submitting}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50 inline-flex items-center gap-2"
-              >
-                {submitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
-                {submitting ? 'Submitting...' : 'Mark as Complete'}
-              </button>
-            </div>
-          </div>
-        )}
-        {activity.type === 'quiz' && activity.content?.quizQuestions && (
-          <QuizView questions={activity.content.quizQuestions} onComplete={handleComplete} submitting={submitting} />
-        )}
-        {(activity.type === 'video' || activity.type === 'storyline') && (
-          <div className="mt-6 space-y-4">
-            <div className="bg-slate-50 rounded-xl p-8 text-center">
-              <p className="text-slate-600">{activity.content?.description || 'Review the material below.'}</p>
-            </div>
-            <div className="text-center">
-              <button
-                onClick={() => handleComplete(20)}
-                disabled={submitting}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50 inline-flex items-center gap-2"
-              >
-                {submitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
-                {submitting ? 'Submitting...' : 'Mark as Complete'}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+        <h1 className="text-2xl font-extrabold text-slate-900 mb-6">{activity.title}</h1>
 
-function QuizView({ questions, onComplete, submitting }: { questions: any[]; onComplete: (pts?: number) => void; submitting: boolean }) {
-  const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = () => {
-    setSubmitted(true);
-    const correct = questions.filter((q, i) => answers[i]?.trim().toLowerCase() === q.answer?.trim().toLowerCase()).length;
-    const accuracy = questions.length > 0 ? Math.round((correct / questions.length) * 100) : 0;
-    const points = Math.round(accuracy / 10) * 3;
-    onComplete(points);
-  };
-
-  const allAnswered = questions.every((_, i) => answers[i]?.trim());
-
-  return (
-    <div className="mt-6 space-y-6">
-      {questions.map((q, i) => (
-        <div key={i} className="bg-slate-50 rounded-xl p-5 border border-slate-100">
-          <p className="font-bold text-slate-800 mb-3">{i + 1}. {q.question}</p>
-          {q.options ? (
-            <div className="space-y-2">
-              {q.options.map((opt: string, oi: number) => (
-                <label key={oi} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${answers[i] === opt ? 'bg-blue-100 border border-blue-300' : 'bg-white border border-slate-200 hover:bg-slate-50'}`}>
-                  <input
-                    type="radio"
-                    name={`q-${i}`}
-                    value={opt}
-                    checked={answers[i] === opt}
-                    onChange={() => setAnswers({ ...answers, [i]: opt })}
-                    disabled={submitting}
-                    className="text-blue-600"
-                  />
-                  <span className="text-sm text-slate-700">{opt}</span>
-                </label>
-              ))}
-            </div>
-          ) : (
-            <textarea
-              value={answers[i] || ''}
-              onChange={e => setAnswers({ ...answers, [i]: e.target.value })}
-              disabled={submitting}
-              className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-              rows={3}
-              placeholder="Your answer..."
-            />
-          )}
-        </div>
-      ))}
-      <div className="text-center">
-        <button
-          onClick={handleSubmit}
-          disabled={!allAnswered || submitting}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition-all disabled:opacity-50 inline-flex items-center gap-2"
-        >
-          {submitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle size={18} />}
-          {submitting ? 'Submitting...' : 'Submit Answers'}
-        </button>
+        <CoursePlayerWrapper
+          activity={activity}
+          onComplete={handleComplete}
+          submitting={submitting}
+        />
       </div>
     </div>
   );

@@ -1,9 +1,13 @@
 "use client";
 
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Trophy, Medal, Star, Flame, ChevronLeft, TrendingUp } from "lucide-react";
+import { useOrganizations } from "@/app/components/organizations/OrganizationContext";
+import { db } from "@/app/lib/firebase";
+import { ref, get } from "firebase/database";
 
-const topThree = [
+const staticTopThree = [
   {
     rank: 1,
     name: "Aiko Tanaka",
@@ -72,6 +76,77 @@ function ChangeIndicator({ change }: { change: string }) {
 }
 
 export default function Leaderboard() {
+  const { organizations, getXpProgress } = useOrganizations();
+  const [leaderboard, setLeaderboard] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGlobalLeaderboard = async () => {
+      try {
+        const orgsRef = ref(db, 'organizations');
+        const orgsSnap = await get(orgsRef);
+        if (!orgsSnap.exists()) {
+           setLoading(false);
+           return;
+        }
+
+        const allOrgs = orgsSnap.val();
+        const studentXpMap: Record<string, number> = {};
+
+        // Aggregate XP from all organizations for each student
+        Object.keys(allOrgs).forEach(orgId => {
+          const orgXp = allOrgs[orgId].xp || {};
+          Object.keys(orgXp).forEach(studentId => {
+            studentXpMap[studentId] = (studentXpMap[studentId] || 0) + orgXp[studentId];
+          });
+        });
+
+        const sortedStudentIds = Object.keys(studentXpMap).sort((a, b) => studentXpMap[b] - studentXpMap[a]).slice(0, 20);
+
+        const leaderboardData = await Promise.all(sortedStudentIds.map(async (studentId) => {
+          const totalXp = studentXpMap[studentId];
+          const { level } = getXpProgress(totalXp);
+
+          const userRef = ref(db, `users/${studentId}`);
+          const userSnap = await get(userRef);
+          const userData = userSnap.exists() ? userSnap.val() : {};
+
+          return {
+            id: studentId,
+            name: userData.fullName || userData.displayName || "Unknown Student",
+            score: totalXp,
+            level: level,
+            streak: userData.streak?.current || 0,
+            avatar: (userData.fullName || userData.displayName || "U").split(' ').map((n: string) => n[0]).join('').toUpperCase(),
+            avatarBg: "bg-blue-500", // Default
+            country: "🌐",
+            change: "0"
+          };
+        }));
+
+        setLeaderboard(leaderboardData);
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGlobalLeaderboard();
+  }, [getXpProgress]);
+
+  const displayLeaderboard = leaderboard.length > 0 ? leaderboard : [];
+  const topThree = displayLeaderboard.slice(0, 3);
+  const remaining = displayLeaderboard.slice(3, 13);
+
+  const getLevelName = (level: number) => {
+    if (level >= 50) return "Grandmaster";
+    if (level >= 30) return "Diamond";
+    if (level >= 20) return "Platinum";
+    if (level >= 10) return "Gold";
+    return "Silver";
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Header */}
@@ -116,31 +191,36 @@ export default function Leaderboard() {
       </div>
 
       {/* Top 3 podium */}
-      <div className="max-w-4xl mx-auto px-6 -mt-10 mb-8">
-        <div className="grid grid-cols-3 gap-4">
-          {[topThree[1], topThree[0], topThree[2]].map((player, idx) => {
-            const heights = ["pt-6", "pt-0", "pt-10"];
-            return (
-              <div key={player.rank} className={`${heights[idx]} flex flex-col items-center`}>
-                <div className={`w-14 h-14 rounded-full ${player.avatarBg} flex items-center justify-center text-white text-lg shadow-lg mb-2`} style={{ fontWeight: 700 }}>
-                  {player.avatar}
-                </div>
-                <div className="text-xl mb-1">{player.badge}</div>
-                <div className="bg-white rounded-xl p-4 w-full text-center shadow-sm border border-gray-100">
-                  <div className="text-gray-900 text-sm mb-0.5" style={{ fontWeight: 600 }}>{player.name}</div>
-                  <div className="text-gray-500 text-xs">{player.country}</div>
-                  <div className="text-orange-500 text-sm mt-2" style={{ fontWeight: 700 }}>
-                    {player.score.toLocaleString()}
+      {topThree.length > 0 && (
+        <div className="max-w-4xl mx-auto px-6 -mt-10 mb-8">
+          <div className="grid grid-cols-3 gap-4">
+            {[topThree[1], topThree[0], topThree[2]].map((player, idx) => {
+              if (!player) return <div key={idx} />;
+              const heights = ["pt-6", "pt-0", "pt-10"];
+              const badges = ["🥈", "🏆", "🥉"];
+              const levelName = getLevelName(player.level);
+              return (
+                <div key={player.id} className={`${heights[idx]} flex flex-col items-center`}>
+                  <div className={`w-14 h-14 rounded-full ${player.avatarBg} flex items-center justify-center text-white text-lg shadow-lg mb-2`} style={{ fontWeight: 700 }}>
+                    {player.avatar}
                   </div>
-                  <div className={`text-xs px-2 py-0.5 rounded-full mt-1.5 inline-block ${levelColors[player.level]}`}>
-                    {player.level}
+                  <div className="text-xl mb-1">{badges[idx]}</div>
+                  <div className="bg-white rounded-xl p-4 w-full text-center shadow-sm border border-gray-100">
+                    <div className="text-gray-900 text-sm mb-0.5" style={{ fontWeight: 600 }}>{player.name}</div>
+                    <div className="text-gray-500 text-xs">{player.country}</div>
+                    <div className="text-orange-500 text-sm mt-2" style={{ fontWeight: 700 }}>
+                      {player.score.toLocaleString()} XP
+                    </div>
+                    <div className={`text-xs px-2 py-0.5 rounded-full mt-1.5 inline-block ${levelColors[levelName] || "bg-gray-100 text-gray-600"}`}>
+                      Lvl {player.level} {levelName}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Table */}
       <div className="max-w-4xl mx-auto px-6 pb-16">
@@ -149,58 +229,67 @@ export default function Leaderboard() {
           <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-xs text-gray-400 uppercase tracking-wide">
             <div className="col-span-1">Rank</div>
             <div className="col-span-4">Player</div>
-            <div className="col-span-2 text-right">Score</div>
+            <div className="col-span-2 text-right">XP</div>
             <div className="col-span-2 text-center">Level</div>
             <div className="col-span-2 text-center">Streak</div>
             <div className="col-span-1 text-right">Change</div>
           </div>
 
-          {leaderboardData.map((player, i) => (
-            <div
-              key={player.rank}
-              className={`grid grid-cols-12 gap-4 px-6 py-4 items-center border-b border-gray-50 hover:bg-orange-50/40 transition-colors ${
-                i === leaderboardData.length - 1 ? "border-b-0" : ""
-              }`}
-            >
-              <div className="col-span-1 text-gray-500 text-sm" style={{ fontWeight: 600 }}>
-                {player.rank}
-              </div>
-
-              <div className="col-span-4 flex items-center gap-3">
+          {loading ? (
+             <div className="p-12 text-center text-gray-500">Loading arena data...</div>
+          ) : remaining.length === 0 && topThree.length === 0 ? (
+            <div className="p-12 text-center text-gray-500">No active learners yet. Be the first!</div>
+          ) : (
+            remaining.map((player, i) => {
+              const levelName = getLevelName(player.level);
+              return (
                 <div
-                  className={`w-9 h-9 rounded-full ${player.avatarBg} flex items-center justify-center text-white text-xs flex-shrink-0`}
-                  style={{ fontWeight: 700 }}
+                  key={player.id}
+                  className={`grid grid-cols-12 gap-4 px-6 py-4 items-center border-b border-gray-50 hover:bg-orange-50/40 transition-colors ${
+                    i === remaining.length - 1 ? "border-b-0" : ""
+                  }`}
                 >
-                  {player.avatar}
-                </div>
-                <div>
-                  <div className="text-gray-900 text-sm" style={{ fontWeight: 500 }}>
-                    {player.name}
+                  <div className="col-span-1 text-gray-500 text-sm" style={{ fontWeight: 600 }}>
+                    {i + 4}
                   </div>
-                  <div className="text-gray-400 text-xs">{player.country}</div>
+
+                  <div className="col-span-4 flex items-center gap-3">
+                    <div
+                      className={`w-9 h-9 rounded-full ${player.avatarBg} flex items-center justify-center text-white text-xs flex-shrink-0`}
+                      style={{ fontWeight: 700 }}
+                    >
+                      {player.avatar}
+                    </div>
+                    <div>
+                      <div className="text-gray-900 text-sm" style={{ fontWeight: 500 }}>
+                        {player.name}
+                      </div>
+                      <div className="text-gray-400 text-xs">{player.country}</div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-2 text-right text-gray-900 text-sm" style={{ fontWeight: 600 }}>
+                    {player.score.toLocaleString()}
+                  </div>
+
+                  <div className="col-span-2 flex justify-center">
+                    <span className={`text-xs px-2.5 py-1 rounded-full ${levelColors[levelName] || "bg-gray-100 text-gray-600"}`}>
+                      Lvl {player.level}
+                    </span>
+                  </div>
+
+                  <div className="col-span-2 flex justify-center items-center gap-1 text-orange-500 text-sm">
+                    <Flame size={14} />
+                    <span style={{ fontWeight: 500 }}>{player.streak}d</span>
+                  </div>
+
+                  <div className="col-span-1 flex justify-end">
+                    <ChangeIndicator change={player.change} />
+                  </div>
                 </div>
-              </div>
-
-              <div className="col-span-2 text-right text-gray-900 text-sm" style={{ fontWeight: 600 }}>
-                {player.score.toLocaleString()}
-              </div>
-
-              <div className="col-span-2 flex justify-center">
-                <span className={`text-xs px-2.5 py-1 rounded-full ${levelColors[player.level]}`}>
-                  {player.level}
-                </span>
-              </div>
-
-              <div className="col-span-2 flex justify-center items-center gap-1 text-orange-500 text-sm">
-                <Flame size={14} />
-                <span style={{ fontWeight: 500 }}>{player.streak}d</span>
-              </div>
-
-              <div className="col-span-1 flex justify-end">
-                <ChangeIndicator change={player.change} />
-              </div>
-            </div>
-          ))}
+              );
+            })
+          )}
         </div>
 
         {/* Your rank (placeholder) */}

@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 // slow loading
 const VideoPlayerModule = lazy(() => import("./VideoPlayerModule"));
 const PDFViewerModule = lazy(() => import("./PDFViewModule"));
-// quiz view is inline btw
+const QuizView = lazy(() => import("./QuizView"));
 interface CoursePlayerWrapperProps {
     activity: {
         type: string;
@@ -95,16 +95,15 @@ export default function CoursePlayerWrapper({ activity, onComplete, submitting }
                     </div>
                 );
             case "quiz":
-                // can import and use the exisiting quiz view
-                const quizConfig = content as QuizBlockConfig;
-                if (!quizConfig.quizQuestions?.length) {
-                    return (
-                        <div className="mt-6 p-6 rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] text-center">
-                            <p className="text-[var(--text-muted)]">No quiz questions have been added to this block yet.</p>
-                        </div>
-                    );
-                }
-                return <div className="mt-6 text-[var(--text-muted)] text-center p-6">Quiz renderer — wire in QuizView component here.</div>;
+                return (
+                    <Suspense fallback={<ModuleSkeleton />}>
+                        <QuizView
+                            config={content as QuizBlockConfig}
+                            onComplete={onComplete}
+                            submitting={submitting}
+                        />
+                    </Suspense>
+                );
             case "storyline":
                 return (
                     <div className="mt-6 space-y-4">
