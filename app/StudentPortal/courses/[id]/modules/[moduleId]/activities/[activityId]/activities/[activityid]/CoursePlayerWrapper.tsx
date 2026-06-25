@@ -79,18 +79,14 @@ export default function CoursePlayerWrapper({ activity, onComplete, submitting }
             case "sandbox":
                 return (
                     <div className="mt-6">
-                        <InteractiveSandbox onComplete={(pts) => onComplete(pts)} />
+                        <InteractiveSandbox
+                            config={activity.content as any}
+                            onComplete={(pts) => onComplete(pts)}
+                        />
                         <div className="mt-4 text-center">
-                            <button
-                                onClick={() => onComplete(30)}
-                                disabled={submitting}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50 inline-flex items-center gap-2 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)]"
-                                aria-label="Mark sandbox activity as complete"
-                            >
-                                {submitting
-                                    ? <><Loader2 className="animate-spin" size={18} /> Submitting...</>
-                                    : "Mark as Complete"}
-                            </button>
+                            <p className="text-[0.7rem] text-[var(--text-muted,#6B7280)] italic">
+                                * The completion submit button will appear once you successfully verify the circuit setup.
+                            </p>
                         </div>
                     </div>
                 );
