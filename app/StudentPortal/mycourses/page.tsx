@@ -152,9 +152,35 @@ export default function MyCoursesPage() {
                 </section>
             )}
             {/* Course cards layout */}
+            {!loading && filteredCourses.length === 0 && (
+                <section
+                    className="flex flex-col items-center justify-center py-[5rem] gap-[1.5rem] rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-secondary)]"
+                    aria-label="No courses available"
+                >
+                    <div className="w-[4rem] h-[4rem] rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center text-[2rem]" aria-hidden="true">
+                        📚
+                    </div>
+                    <div className="text-center space-y-[0.4rem]">
+                        <h2 className="text-[1.1rem] font-extrabold text-[var(--text-main)]">
+                            No courses available at the moment.
+                        </h2>
+                        <p className="text-[0.82rem] text-[var(--text-muted)] max-w-[22rem]">
+                            {filter !== "all"
+                                ? `No ${filter.replace("-", " ")} courses found. Try switching to "All Courses".`
+                                : "Join an organization or ask your tutor to enroll you in a course."}
+                        </p>
+                    </div>
+                    <Link
+                        href="/StudentPortal/explore"
+                        className="px-[1.5rem] py-[0.65rem] bg-[var(--text-main)] text-[var(--bg-primary)] text-[0.82rem] font-extrabold rounded-full hover:opacity-90 transition-opacity focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-2"
+                    >
+                        Explore Courses →
+                    </Link>
+                </section>
+            )}
             <section aria-label="Subscribed courses grid">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.5rem]">
-                    {filteredCourses.slice(1).map((course) => (
+                    {filteredCourses.map((course) => (
                         <div
                             key={course.id}
                             className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between hover:shadow-md transition-shadow group"
@@ -212,18 +238,18 @@ export default function MyCoursesPage() {
                                         />
                                     </div>
                                 </div>
-                            <Link
-                                href={`/StudentPortal/courses/${coursesData[0].id}`}
-                                className="block w-full py-[0.5rem] border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-main)] font-extrabold text-[0.82rem] rounded-xl transition-all text-center focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-1"
-                            >
-                                {coursesData[0].progress > 0 ? "Resume Course" : "Start Course"}
-                            </Link>
+                                <Link
+                                    href={`/StudentPortal/courses/${course.id}`}
+                                    className="block w-full py-[0.5rem] border border-[var(--border-color)] bg-[var(--bg-primary)] hover:bg-[var(--bg-tertiary)] text-[var(--text-main)] font-extrabold text-[0.82rem] rounded-xl transition-all text-center focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)] focus-visible:outline-offset-1"
+                                >
+                                    {course.progress > 0 ? "Resume Course" : "Start Course"}
+                                </Link>
                             </div>
                         </div>
                     ))}
                 </div>
             </section>
 
-        </div>
+        </div >
     );
 }
