@@ -6,10 +6,25 @@ import { useAccessibility } from "@/app/components/AccessibilityContext";
 import { useOrganizations } from "@/app/components/organizations/OrganizationContext";
 import { useAuth } from "@/app/components/AuthCOntext";
 
+// Shared subject → visual theme (same mapping as dashboard)
+const SUBJECT_THEME: Record<string, { gradient: string; badgeColor: string; badgeBorder: string }> = {
+    Physics:     { gradient: 'from-[#1e3a5f] to-[#2a5c8f]',  badgeColor: '#60a5fa', badgeBorder: '#bfdbfe' },
+    Chemistry:   { gradient: 'from-[#0c4a6e] to-[#0369a1]',  badgeColor: '#22d3ee', badgeBorder: '#a5f3fc' },
+    Biology:     { gradient: 'from-[#052e16] to-[#14532d]',   badgeColor: '#34d399', badgeBorder: '#a7f3d0' },
+    Design:      { gradient: 'from-[#4a044e] to-[#7e22ce]',   badgeColor: '#f472b6', badgeBorder: '#fbcfe8' },
+    Technology:  { gradient: 'from-[#2e1065] to-[#4c1d95]',   badgeColor: '#a78bfa', badgeBorder: '#ddd6fe' },
+    Robotics:    { gradient: 'from-[#431407] to-[#9a3412]',   badgeColor: '#fb923c', badgeBorder: '#fed7aa' },
+    History:     { gradient: 'from-[#292524] to-[#57534e]',   badgeColor: '#fbbf24', badgeBorder: '#fde68a' },
+    Philosophy:  { gradient: 'from-[#1e1b4b] to-[#3730a3]',   badgeColor: '#818cf8', badgeBorder: '#c7d2fe' },
+    Mathematics: { gradient: 'from-[#0c4a6e] to-[#1e40af]',  badgeColor: '#38bdf8', badgeBorder: '#bae6fd' },
+    General:     { gradient: 'from-[#0f172a] to-[#1e3a5f]',   badgeColor: '#94a3b8', badgeBorder: '#cbd5e1' },
+};
+const getCourseTheme = (subject: string) => SUBJECT_THEME[subject] ?? SUBJECT_THEME['General'];
+
 export default function MyCoursesPage() {
     const { announce } = useAccessibility();
     const { user } = useAuth();
-    const { getOrganizationsForStudent, getOrgCoursesWithData, getCourseProgress } = useOrganizations();
+    const { getOrganizationsForStudent, getOrgCoursesWithData, getCourseProgress, organizations } = useOrganizations();
     const [courses, setCourses] = useState<any[]>([]);
     const [progressMap, setProgressMap] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
@@ -36,27 +51,36 @@ export default function MyCoursesPage() {
         });
     }, [user?.uid, getOrganizationsForStudent, getOrgCoursesWithData, getCourseProgress]);
 
-    const coursesData: any[] = courses.map(c => ({
-        id: c.id,
-        title: c.title,
-        description: c.description,
-        category: c.subject || "General",
-        currentModule: Object.keys(c.modules || {})[0] ? `Module 1: ${c.modules[Object.keys(c.modules)[0]].title}` : "No modules yet",
-        progress: progressMap[c.id] || 0,
-        timeRemaining: progressMap[c.id] === 100 ? "Complete" : "In progress",
-        status: progressMap[c.id] === 100 ? "completed" : "in-progress",
-        themeColor: {
-            bg: "bg-blue-100/10",
-            text: "text-blue-400",
-            border: "border-blue-400/20",
-            gradient: "from-[#204068] to-[#3a7590]",
-        },
-        iconGlyph: (
-            <svg className="w-[3rem] h-[3rem]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-        ),
-    }));
+    const coursesData: any[] = courses.map(c => {
+        const theme = getCourseTheme(c.subject || 'General');
+        // Look up org name from organizations list in context
+        const orgName = organizations.find((o: any) => o.id === c.orgId)?.name ?? 'OmniLearn';
+        const moduleCount = Object.keys(c.modules || {}).length;
+        return {
+            id: c.id,
+            title: c.title,
+            description: c.description,
+            category: c.subject || "General",
+            publisher: orgName,
+            currentModule: Object.keys(c.modules || {})[0]
+                ? `Module 1: ${c.modules[Object.keys(c.modules)[0]].title}`
+                : "No modules yet",
+            progress: progressMap[c.id] || 0,
+            timeRemaining: progressMap[c.id] === 100 ? "Complete" : "In progress",
+            status: progressMap[c.id] === 100 ? "completed" : "in-progress",
+            moduleCount,
+            themeColor: {
+                gradient: theme.gradient,
+                badgeColor: theme.badgeColor,
+                badgeBorder: theme.badgeBorder,
+            },
+            iconGlyph: (
+                <svg className="w-[3rem] h-[3rem]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+            ),
+        };
+    });
 
     // filter logic for courses
     const filteredCourses = coursesData.filter((c) => {
@@ -195,29 +219,23 @@ export default function MyCoursesPage() {
                                 {/* Text content panel */}
                                 <div className="px-[1.2rem] space-y-[0.6rem]">
                                     <div className="self-start px-2 py-1 rounded-md border text-[0.6rem] font-bold uppercase tracking-wider inline-block"
-                                        style={{ color: '#3b82f6', borderColor: '#bfdbfe', backgroundColor: 'transparent' }}>
+                                        style={{ color: course.themeColor.badgeColor, borderColor: course.themeColor.badgeBorder, backgroundColor: 'transparent' }}>
                                         {course.category}
                                     </div>
                                     <h3 className="text-[1.05rem] font-extrabold text-[var(--text-main)] group-hover:text-[#ff6b35] transition-colors leading-snug">
                                         {course.title}
                                     </h3>
 
-                                    {/* New Publisher Display */}
+                                    {/* Publisher (real org name) */}
                                     <p className="text-[0.75rem] font-medium" style={{ color: 'var(--text-muted)' }}>
-                                        By {course.publisher || "OmniLearn Partner"}
+                                        By {course.publisher}
                                     </p>
                                     <p className="text-[0.78rem] text-[var(--text-muted)] leading-relaxed line-clamp-2">
                                         {course.description}
                                     </p>
                                 </div>
-                                <div className="px-[1.2rem] flex justify-between items-center text-[0.75rem] font-bold mt-2" style={{ color: 'var(--text-muted)' }}>
-                                    <span className="flex items-center gap-1 text-amber-500">
-                                        ★ <span style={{ color: 'var(--text-main)' }}>{course.rating || "4.8"}</span>
-                                    </span>
-                                    <div className="flex items-center gap-2">
-                                        <span>⏱ {course.duration || "2h 45m"}</span>
-                                        <span style={{ color: 'var(--text-main)' }}>{course.lessonsCount || 10} Lessons</span>
-                                    </div>
+                                <div className="px-[1.2rem] flex justify-end items-center text-[0.75rem] font-bold mt-2" style={{ color: 'var(--text-muted)' }}>
+                                    <span style={{ color: 'var(--text-main)' }}>{course.moduleCount} {course.moduleCount === 1 ? 'Module' : 'Modules'}</span>
                                 </div>
                             </div>
                             {/* Footer */}

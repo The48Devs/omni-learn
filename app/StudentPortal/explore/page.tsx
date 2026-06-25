@@ -6,29 +6,67 @@ import { useOrganizations } from "../../components/organizations/OrganizationCon
 import { useAuth } from "../../components/AuthCOntext";
 import { Building2, Globe, Users, BookOpen } from "lucide-react";
 
-//mock data arrays
+// Deterministic subject → image theme for course cards
+const SUBJECT_IMAGE_THEME: Record<string, string> = {
+    Physics:     'bg-[#1a2b4c]',
+    Chemistry:   'bg-[#0c4a6e]',
+    Biology:     'bg-[#052e16]',
+    Design:      'bg-[#4a044e]',
+    Technology:  'bg-[#2e1065]',
+    Robotics:    'bg-[#431407]',
+    History:     'bg-stone-800',
+    Philosophy:  'bg-indigo-900',
+    Mathematics: 'bg-slate-900',
+    General:     'bg-zinc-800',
+};
+const getImageTheme = (subject: string) => SUBJECT_IMAGE_THEME[subject] ?? SUBJECT_IMAGE_THEME['General'];
 
-const trendingCourses = [
-    { id: 1, title: 'Organic Chemistry Synthesis', category: 'Science', publisher: 'Dr. Sarah Collins', rating: 4.9, lessonsCount: 12, duration: '4h 30m', imageTheme: 'bg-[#1a2b4c]' },
-    { id: 2, title: 'Advanced UI/UX Principles', category: 'Design', publisher: 'Design Academy', rating: 4.8, lessonsCount: 8, duration: '3h 15m', imageTheme: 'bg-purple-900' },
-    { id: 3, title: 'Quantum Mechanics Basics', category: 'Physics', publisher: 'Prof. Alan Turing', rating: 4.9, lessonsCount: 15, duration: '6h 00m', imageTheme: 'bg-slate-900' },
-];
-const narrativeCourses = [
-    { id: 4, title: 'The Fall of Rome: An Interactive Journey', category: 'History', publisher: 'Omni History Dept', rating: 4.7, lessonsCount: 10, duration: '2h 30m', imageTheme: 'bg-stone-800' },
-    { id: 5, title: 'Cyberpunk Ethics & Philosophy', category: 'Philosophy', publisher: 'Tech Ethics Org', rating: 4.8, lessonsCount: 6, duration: '1h 45m', imageTheme: 'bg-indigo-900' },
-];
-const sandboxCourses = [
-    { id: 6, title: 'Kinematics Mechanics Lab', category: 'Physics', publisher: 'Newton Labs', rating: 4.9, lessonsCount: 5, duration: '3h 00m', imageTheme: 'bg-slate-800' },
-    { id: 7, title: 'Neural Net Architecture', category: 'Technology', publisher: 'AI Fundamentals', rating: 4.9, lessonsCount: 8, duration: '4h 20m', imageTheme: 'bg-zinc-800' },
-];
+// Which subjects map to each discover section
+const STORYLINE_SUBJECTS = new Set(['History', 'Philosophy', 'Literature', 'Social Studies', 'Ethics']);
+const SANDBOX_SUBJECTS   = new Set(['Physics', 'Chemistry', 'Biology', 'Robotics', 'Technology', 'Mathematics']);
 
 export default function ExploreCourses() {
     const [searchQuery, setSearchQuery] = useState('');
-    const { organizations, getPublicOrganizations, getOrgCourseCount, getOrgMemberCount } = useOrganizations();
+    const { organizations, getPublicOrganizations, getOrgCourseCount, getOrgMemberCount, getOrgCoursesWithData } = useOrganizations();
     const { user } = useAuth();
     const publicOrgs = getPublicOrganizations();
     const [orgCounts, setOrgCounts] = useState<Record<string, { courses: number; members: number }>>({});
+    const [allPublicCourses, setAllPublicCourses] = useState<any[]>([]);
+    const [orgNameMap, setOrgNameMap] = useState<Record<string, string>>({});
+    const [coursesLoading, setCoursesLoading] = useState(true);
 
+    // Fetch courses from all public orgs
+    useEffect(() => {
+        const visibleOrgs = publicOrgs.slice(0, 6);
+        if (visibleOrgs.length === 0) {
+            setCoursesLoading(false);
+            return;
+        }
+        let cancelled = false;
+        const fetchAll = async () => {
+            const nameMap: Record<string, string> = {};
+            visibleOrgs.forEach(org => { nameMap[org.id] = org.name; });
+            const results = await Promise.all(visibleOrgs.map(org => getOrgCoursesWithData(org.id)));
+            if (!cancelled) {
+                const flat = results.flat().map((c: any) => ({
+                    ...c,
+                    orgName: nameMap[c.orgId] ?? 'OmniLearn',
+                    moduleCount: Object.keys(c.modules || {}).length,
+                    imageTheme: getImageTheme(c.subject || 'General'),
+                    category: c.subject || 'General',
+                }));
+                // Sort newest first for trending
+                flat.sort((a: any, b: any) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime());
+                setAllPublicCourses(flat);
+                setOrgNameMap(nameMap);
+                setCoursesLoading(false);
+            }
+        };
+        fetchAll();
+        return () => { cancelled = true; };
+    }, [organizations, getOrgCoursesWithData]);
+
+    // Org course/member counts
     useEffect(() => {
         const visibleOrgs = publicOrgs.slice(0, 6);
         if (visibleOrgs.length === 0) return;
@@ -52,26 +90,31 @@ export default function ExploreCourses() {
         return () => { cancelled = true; };
     }, [organizations, getOrgCourseCount, getOrgMemberCount]);
 
+    // Split real courses into sections by subject
+    const trendingCourses   = allPublicCourses; // all courses, sorted newest-first
+    const narrativeCourses  = allPublicCourses.filter(c => STORYLINE_SUBJECTS.has(c.subject || ''));
+    const sandboxCourses    = allPublicCourses.filter(c => SANDBOX_SUBJECTS.has(c.subject || ''));
+
     const q = searchQuery.toLowerCase().trim();
     const filteredTrending = q
         ? trendingCourses.filter(c =>
             c.title.toLowerCase().includes(q) ||
-            c.category.toLowerCase().includes(q) ||
-            c.publisher.toLowerCase().includes(q)
+            (c.category ?? '').toLowerCase().includes(q) ||
+            (c.orgName ?? '').toLowerCase().includes(q)
         )
         : trendingCourses;
     const filteredNarrative = q
         ? narrativeCourses.filter(c =>
             c.title.toLowerCase().includes(q) ||
-            c.category.toLowerCase().includes(q) ||
-            c.publisher.toLowerCase().includes(q)
+            (c.category ?? '').toLowerCase().includes(q) ||
+            (c.orgName ?? '').toLowerCase().includes(q)
         )
         : narrativeCourses;
     const filteredSandbox = q
         ? sandboxCourses.filter(c =>
             c.title.toLowerCase().includes(q) ||
-            c.category.toLowerCase().includes(q) ||
-            c.publisher.toLowerCase().includes(q)
+            (c.category ?? '').toLowerCase().includes(q) ||
+            (c.orgName ?? '').toLowerCase().includes(q)
         )
         : sandboxCourses;
 
@@ -201,30 +244,35 @@ export default function ExploreCourses() {
                     )}
                 </div>
             </section>
-
             {/*Discovery Sections */}
             <div className="w-full max-w-7xl mx-auto flex flex-col gap-16 pb-16">
                 <DiscoverSection title="🔥 Trending This Week" arialabel="Trending Courses Carousel">
                     <div className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory hide-scrollbar">
-                        {filteredTrending.length > 0
-                            ? filteredTrending.map(course => <CourseCard key={course.id} course={course} layout="horizontal" />)
-                            : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
+                        {coursesLoading
+                            ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} layout="horizontal" />)
+                            : filteredTrending.length > 0
+                                ? filteredTrending.map(course => <CourseCard key={course.id} course={course} layout="horizontal" />)
+                                : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
                         }
                     </div>
                 </DiscoverSection>
                 <DiscoverSection title="📖 Courses with Storyline Modules" arialabel="Narrative Storyline Courses">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredNarrative.length > 0
-                            ? filteredNarrative.map(course => <CourseCard key={course.id} course={course} layout="grid" />)
-                            : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
+                        {coursesLoading
+                            ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} layout="grid" />)
+                            : filteredNarrative.length > 0
+                                ? filteredNarrative.map(course => <CourseCard key={course.id} course={course} layout="grid" />)
+                                : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
                         }
                     </div>
                 </DiscoverSection>
                 <DiscoverSection title="🔬 Courses with Sandbox Labs" arialabel="Technical Sandbox Courses">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredSandbox.length > 0
-                            ? filteredSandbox.map(course => <CourseCard key={course.id} course={course} layout="grid" />)
-                            : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
+                        {coursesLoading
+                            ? Array.from({ length: 3 }).map((_, i) => <CourseCardSkeleton key={i} layout="grid" />)
+                            : filteredSandbox.length > 0
+                                ? filteredSandbox.map(course => <CourseCard key={course.id} course={course} layout="grid" />)
+                                : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
                         }
                     </div>
                 </DiscoverSection>
@@ -232,6 +280,7 @@ export default function ExploreCourses() {
         </main>
     );
 }
+
 
 function FilterSelect({ label, options }: {
     label: string, options: string[]
@@ -269,11 +318,29 @@ function DiscoverSection({ title, arialabel, children }: { title: string, ariala
     )
 }
 
-function CourseCard({ course, layout }: { course: any, layout: "horizontal" | "grid" }) {
+function CourseCardSkeleton({ layout }: { layout: "horizontal" | "grid" }) {
     return (
         <div
-            className={`flex flex-col rounded-2xl overflow-hidden shadow-sm ${layout === 'horizontal' ? 'snap-start flex-none w-[85vw] sm:w-[20rem]' : ''}`}
+            className={`flex flex-col rounded-2xl overflow-hidden animate-pulse ${layout === 'horizontal' ? 'snap-start flex-none w-[85vw] sm:w-[20rem]' : ''}`}
+            style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+        >
+            <div className="w-full h-[8rem] bg-[var(--bg-tertiary)]" />
+            <div className="p-5 flex flex-col gap-3">
+                <div className="h-3 w-16 rounded-full bg-[var(--bg-tertiary)]" />
+                <div className="h-4 w-3/4 rounded-full bg-[var(--bg-tertiary)]" />
+                <div className="h-3 w-1/2 rounded-full bg-[var(--bg-tertiary)]" />
+            </div>
+        </div>
+    );
+}
+
+function CourseCard({ course, layout }: { course: any, layout: "horizontal" | "grid" }) {
+    return (
+        <Link
+            href={`/StudentPortal/courses/${course.id}`}
+            className={`flex flex-col rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow ${layout === 'horizontal' ? 'snap-start flex-none w-[85vw] sm:w-[20rem]' : ''}`}
             style={{ backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}
+            aria-label={`View course: ${course.title}`}
         >
             {/* Top Graphic Area with Faded Text */}
             <div className={`w-full h-[8rem] flex items-center justify-center relative overflow-hidden select-none ${course.imageTheme}`}>
@@ -290,36 +357,24 @@ function CourseCard({ course, layout }: { course: any, layout: "horizontal" | "g
                     {course.category}
                 </div>
 
-                {/* Title & Publisher */}
+                {/* Title & Publisher (real org name) */}
                 <div className="flex flex-col gap-1">
                     <h3 className="text-lg font-bold leading-tight line-clamp-2" style={{ color: 'var(--text-main)' }}>
                         {course.title}
                     </h3>
                     <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-                        By {course.publisher}
+                        By {course.orgName}
                     </p>
                 </div>
 
-                {/* Footer Data */}
-                <div className="mt-auto pt-4 border-t flex justify-between items-center text-sm font-semibold"
+                {/* Footer — real module count, no fake rating */}
+                <div className="mt-auto pt-4 border-t flex justify-end items-center text-sm font-semibold"
                     style={{ borderColor: 'var(--border-color)', color: 'var(--text-muted)' }}>
-                    <div className="flex items-center gap-1.5 text-amber-500">
-                        <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span style={{ color: 'var(--text-main)' }}>{course.rating}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        {course.duration && (
-                            <span className="flex items-center gap-1">
-                                <span aria-hidden="true" className="opacity-70">⏱</span> {course.duration}
-                            </span>
-                        )}
-                        <span style={{ color: 'var(--text-main)' }}>{course.lessonsCount} Lessons</span>
-                    </div>
+                    <span style={{ color: 'var(--text-main)' }}>
+                        {course.moduleCount} {course.moduleCount === 1 ? 'Module' : 'Modules'}
+                    </span>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }

@@ -18,61 +18,91 @@ interface ContinueLearningCourse {
     unlockCondition?: string;
 }
 
+// Deterministic subject → visual theme used by dashboard & cards
+const SUBJECT_THEME: Record<string, { category: string; bgGradient: string; badgeStyle: string }> = {
+    Physics: { category: 'SCIENCE', bgGradient: 'from-blue-900 to-indigo-950', badgeStyle: 'bg-blue-100/10 text-blue-400 border-blue-400/25' },
+    Chemistry: { category: 'SCIENCE', bgGradient: 'from-cyan-950 to-sky-900', badgeStyle: 'bg-cyan-100/10 text-cyan-400 border-cyan-400/25' },
+    Biology: { category: 'SCIENCE', bgGradient: 'from-emerald-950 to-teal-900', badgeStyle: 'bg-emerald-100/10 text-emerald-400 border-emerald-400/25' },
+    Design: { category: 'DESIGN', bgGradient: 'from-pink-950 to-rose-900', badgeStyle: 'bg-pink-100/10 text-pink-400 border-pink-400/25' },
+    Technology: { category: 'TECH', bgGradient: 'from-violet-950 to-purple-900', badgeStyle: 'bg-purple-100/10 text-purple-400 border-purple-400/25' },
+    Robotics: { category: 'ROBOTICS', bgGradient: 'from-orange-950 to-amber-900', badgeStyle: 'bg-orange-100/10 text-orange-400 border-orange-400/25' },
+    History: { category: 'HUMANITIES', bgGradient: 'from-stone-800 to-amber-950', badgeStyle: 'bg-amber-100/10 text-amber-500 border-amber-400/25' },
+    Philosophy: { category: 'HUMANITIES', bgGradient: 'from-indigo-900 to-violet-950', badgeStyle: 'bg-indigo-100/10 text-indigo-400 border-indigo-400/25' },
+    Mathematics: { category: 'SCIENCE', bgGradient: 'from-sky-900 to-blue-950', badgeStyle: 'bg-sky-100/10 text-sky-400 border-sky-400/25' },
+    General: { category: 'GENERAL', bgGradient: 'from-slate-900 to-sky-950', badgeStyle: 'bg-slate-100/10 text-slate-400 border-slate-400/25' },
+};
+const getSubjectTheme = (subject: string) => SUBJECT_THEME[subject] ?? SUBJECT_THEME['General'];
+
 interface RecommendedCourse {
     id: string;
     title: string;
-    category: "SCIENCE" | "DESIGN" | "TECH" | "ROBOTICS";
-    rating: number;
+    subject: string;
+    category: string;
     lessonsCount: number;
     bgGradient: string;
+    badgeStyle: string;
 }
 
 export default function StudentDashboard() {
     const { announce } = useAccessibility();
     const { user, profile } = useAuth();
-    const { getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData } = useOrganizations();
+    const { getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData, getCourseProgress } = useOrganizations();
     const [orgLevelData, setOrgLevelData] = useState<{ orgName: string; orgId: string; level: number; currentXp: number; nextLevelXp: number } | null>(null);
     const [streak, setStreak] = useState<{ current: number; longest: number } | null>(null);
     const [allCourses, setAllCourses] = useState<any[]>([]);
+    const [progressMap, setProgressMap] = useState<Record<string, number>>({});
     // true while the async org/course fetch is in-flight — prevents premature empty-state flash
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (!user?.uid) return;
+        const uid = user.uid;
         setIsLoading(true);
-        getOrganizationsForStudent(user.uid).then(async (orgs) => {
+        getOrganizationsForStudent(uid).then(async (orgs) => {
             if (orgs.length === 0) {
                 setIsLoading(false);
                 return;
             }
             const org = orgs[0];
-            const xp = await getStudentXp(org.id, user.uid);
+            const xp = await getStudentXp(org.id, uid);
             const progress = getXpProgress(xp);
             setOrgLevelData({ orgName: org.name, orgId: org.id, ...progress });
             const courses = await getOrgCoursesWithData(org.id);
             setAllCourses(courses);
+            // Fetch real progress for each course concurrently
+            if (courses.length > 0) {
+                const progressValues = await Promise.all(
+                    courses.map((c: any) => getCourseProgress(c.id!, uid))
+                );
+                const map: Record<string, number> = {};
+                courses.forEach((c: any, i: number) => { if (c.id) map[c.id] = progressValues[i]; });
+                setProgressMap(map);
+            }
             setIsLoading(false);
         });
-        getStreak(user.uid).then(data => setStreak(data));
-    }, [user?.uid, getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData]);
+        getStreak(uid).then(data => setStreak(data));
+    }, [user?.uid, getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData, getCourseProgress]);
 
-    // ── Fallback: use mock data when backend returns nothing (dev/disconnected) ──
     const continueLearningCourses: ContinueLearningCourse[] = allCourses.slice(0, 3).map(c => ({
         id: c.id,
         title: c.title,
         status: "in-progress" as const,
-        progress: 0,
+        progress: progressMap[c.id] ?? 0,
         metricText: `${Object.keys(c.modules || {}).length} Modules`,
-        footerText: "Continue",
+        footerText: progressMap[c.id] > 0 ? "Resume" : "Start",
     }));
-    const recommendedCourses: RecommendedCourse[] = allCourses.slice(3).map((c, i) => ({
-        id: c.id,
-        title: c.title,
-        category: (["SCIENCE", "DESIGN", "TECH", "ROBOTICS"])[i % 4] as "SCIENCE" | "DESIGN" | "TECH" | "ROBOTICS",
-        rating: 4.8,
-        lessonsCount: Object.keys(c.modules || {}).length,
-        bgGradient: ["from-blue-900 to-indigo-950", "from-orange-950 to-amber-900", "from-slate-900 to-sky-950", "from-emerald-950 to-teal-900"][i % 4],
-    }));
+    const recommendedCourses: RecommendedCourse[] = allCourses.slice(3).map((c) => {
+        const theme = getSubjectTheme(c.subject || 'General');
+        return {
+            id: c.id,
+            title: c.title,
+            subject: c.subject || 'General',
+            category: theme.category,
+            lessonsCount: Object.keys(c.modules || {}).length,
+            bgGradient: theme.bgGradient,
+            badgeStyle: theme.badgeStyle,
+        };
+    });
 
     const [carouselIndex, setCarouselIndex] = useState(0);
 
@@ -355,45 +385,34 @@ export default function StudentDashboard() {
                         ) : recommendedCourses.length === 0 ? (
                             <EmptyStateCard sectionLabel="Recommended Courses" />
                         ) : (
-                            recommendedCourses.map((course) => {
-                                const badgeStyles = {
-                                    SCIENCE: "bg-blue-100/10 text-blue-400 border border-blue-400/25",
-                                    DESIGN: "bg-pink-100/10 text-pink-400 border border-pink-400/25",
-                                    TECH: "bg-purple-100/10 text-purple-400 border border-purple-400/25",
-                                    ROBOTICS: "bg-emerald-100/10 text-emerald-400 border border-emerald-400/25",
-                                }[course.category];
-                                return (
+                            recommendedCourses.map((course) => (
+                                <div
+                                    key={course.id}
+                                    className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group focus-within:ring-3 focus-within:ring-[#2563eb]"
+                                >
                                     <div
-                                        key={course.id}
-                                        className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group focus-within:ring-3 focus-within:ring-[#2563eb]"
+                                        className={`w-full h-[6.5rem] bg-gradient-to-br ${course.bgGradient} relative flex items-center justify-center text-white/10 text-[2.5rem] font-bold select-none`}
                                     >
-                                        <div
-                                            className={`w-full h-[6.5rem] bg-gradient-to-br ${course.bgGradient} relative flex items-center justify-center text-white/10 text-[2.5rem] font-bold select-none`}
-                                        >
+                                        {course.category}
+                                    </div>
+                                    <div className="p-[1rem] space-y-[0.5rem]">
+                                        <span className={`inline-block px-[0.5rem] py-[0.15rem] rounded-md text-[0.62rem] font-extrabold tracking-wider border ${course.badgeStyle}`}>
                                             {course.category}
-                                        </div>
-                                        <div className="p-[1rem] space-y-[0.5rem]">
-                                            <span className={`inline-block px-[0.5rem] py-[0.15rem] rounded-md text-[0.62rem] font-extrabold tracking-wider ${badgeStyles}`}>
-                                                {course.category}
-                                            </span>
-                                            <h3 className="text-[0.85rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.4rem] group-hover:text-[#ff6b35] transition-colors">
-                                                <a
-                                                    href={`#course-${course.id}`}
-                                                    className="focus:outline-none"
-                                                >
-                                                    {course.title}
-                                                </a>
-                                            </h3>
-                                            <div className="flex justify-between items-center text-[0.72rem] font-bold pt-[0.4rem] border-t border-[var(--border-color)] text-[var(--text-muted)]">
-                                                <span className="flex items-center gap-[0.2rem] text-amber-500">
-                                                    ⭐ {course.rating.toFixed(1)}
-                                                </span>
-                                                <span>{course.lessonsCount} Lessons</span>
-                                            </div>
+                                        </span>
+                                        <h3 className="text-[0.85rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.4rem] group-hover:text-[#ff6b35] transition-colors">
+                                            <Link
+                                                href={`/StudentPortal/courses/${course.id}`}
+                                                className="focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
+                                            >
+                                                {course.title}
+                                            </Link>
+                                        </h3>
+                                        <div className="flex justify-end items-center text-[0.72rem] font-bold pt-[0.4rem] border-t border-[var(--border-color)] text-[var(--text-muted)]">
+                                            <span>{course.lessonsCount} {course.lessonsCount === 1 ? 'Module' : 'Modules'}</span>
                                         </div>
                                     </div>
-                                );
-                            })
+                                </div>
+                            ))
                         )}
                     </div>
                 </div>
