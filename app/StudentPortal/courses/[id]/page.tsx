@@ -39,6 +39,7 @@ export default function StudentCourseDetail() {
   }
 
   const modules = course.modules ? Object.values(course.modules) : [];
+  const totalActivities = modules.reduce((acc: number, mod: any) => acc + Object.keys(mod.activityIds || {}).length, 0);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -63,7 +64,7 @@ export default function StudentCourseDetail() {
           </div>
           <div className="bg-slate-50 rounded-xl p-4 text-center">
             <Zap className="mx-auto text-purple-500 mb-1" size={24} />
-            <div className="text-2xl font-bold text-slate-800">{Object.keys(course.activityIds || {}).length}</div>
+            <div className="text-2xl font-bold text-slate-800">{totalActivities}</div>
             <div className="text-xs text-slate-500 font-medium">Activities</div>
           </div>
           <div className="bg-slate-50 rounded-xl p-4 text-center">

@@ -29,10 +29,11 @@ interface RecommendedCourse {
 export default function StudentDashboard() {
     const { announce } = useAccessibility();
     const { user, profile } = useAuth();
-    const { getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData } = useOrganizations();
+    const { getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData, getCourseProgress } = useOrganizations();
     const [orgLevelData, setOrgLevelData] = useState<{ orgName: string; orgId: string; level: number; currentXp: number; nextLevelXp: number } | null>(null);
     const [streak, setStreak] = useState<{ current: number; longest: number } | null>(null);
     const [allCourses, setAllCourses] = useState<any[]>([]);
+    const [courseProgress, setCourseProgress] = useState<Record<string, number>>({});
 
     useEffect(() => {
         if (!user?.uid) return;
@@ -44,31 +45,46 @@ export default function StudentDashboard() {
             setOrgLevelData({ orgName: org.name, orgId: org.id, ...progress });
             const courses = await getOrgCoursesWithData(org.id);
             setAllCourses(courses);
+
+            const progressData: Record<string, number> = {};
+            await Promise.all(courses.map(async (course) => {
+                if (course.id) {
+                    progressData[course.id] = await getCourseProgress(course.id, user.uid);
+                }
+            }));
+            setCourseProgress(progressData);
         });
         getStreak(user.uid).then(data => setStreak(data));
-    }, [user?.uid, getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData]);
+    }, [user?.uid, getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData, getCourseProgress]);
 
-    const continueLearningCourses: ContinueLearningCourse[] = allCourses.length > 0 ? allCourses.slice(0, 3).map(c => ({
+    const inProgressCourses = allCourses.filter(c => courseProgress[c.id] > 0 && courseProgress[c.id] < 100);
+    const notStartedCourses = allCourses.filter(c => !courseProgress[c.id] || courseProgress[c.id] === 0);
+    const completedCourses = allCourses.filter(c => courseProgress[c.id] === 100);
+
+    const continueLearningCourses: ContinueLearningCourse[] = [...inProgressCourses, ...notStartedCourses].slice(0, 3).map(c => ({
         id: c.id,
         title: c.title,
-        status: "in-progress" as const,
-        progress: 0,
+        status: "in-progress",
+        progress: courseProgress[c.id] || 0,
         metricText: `${Object.keys(c.modules || {}).length} Modules`,
-        footerText: "Continue",
-    })) : [];
+        footerText: courseProgress[c.id] > 0 ? "Continue" : "Start",
+    }));
 
-    const recommendedCourses: RecommendedCourse[] = allCourses.length > 3 ? allCourses.slice(3).map((c, i) => ({
-        id: c.id,
-        title: c.title,
-        category: (["SCIENCE", "DESIGN", "TECH", "ROBOTICS"])[i % 4] as "SCIENCE" | "DESIGN" | "TECH" | "ROBOTICS",
-        rating: 4.8,
-        lessonsCount: Object.keys(c.modules || {}).length,
-        bgGradient: ["from-blue-900 to-indigo-950", "from-orange-950 to-amber-900", "from-slate-900 to-sky-950", "from-emerald-950 to-teal-900"][i % 4],
-    })) : [];
+    const recommendedCourses: RecommendedCourse[] = allCourses
+        .filter(c => !courseProgress[c.id] || courseProgress[c.id] < 100)
+        .map((c, i) => ({
+            id: c.id,
+            title: c.title,
+            category: (["SCIENCE", "DESIGN", "TECH", "ROBOTICS"])[i % 4] as "SCIENCE" | "DESIGN" | "TECH" | "ROBOTICS",
+            rating: 4.8,
+            lessonsCount: Object.keys(c.modules || {}).length,
+            bgGradient: ["from-blue-900 to-indigo-950", "from-orange-950 to-amber-900", "from-slate-900 to-sky-950", "from-emerald-950 to-teal-900"][i % 4],
+        }));
     const [carouselIndex, setCarouselIndex] = useState(0);
 
     const handleNextCarousel = () => {
-        if (carouselIndex < recommendedCourses.length - 1) {
+        const maxIndex = Math.max(0, recommendedCourses.length - 4);
+        if (carouselIndex < maxIndex) {
             setCarouselIndex((prev) => prev + 1);
             announce("Showing next recommended courses");
         }
@@ -275,8 +291,8 @@ export default function StudentDashboard() {
                         <button
                             type="button"
                             onClick={handleNextCarousel}
-                            disabled={carouselIndex >= recommendedCourses.length - 1}
-                            className={`w-[2rem] h-[2rem] rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex >= recommendedCourses.length - 1
+                            disabled={carouselIndex >= Math.max(0, recommendedCourses.length - 4)}
+                            className={`w-[2rem] h-[2rem] rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex >= Math.max(0, recommendedCourses.length - 4)
                                     ? "opacity-40 cursor-not-allowed text-[var(--text-muted)]"
                                     : "hover:bg-[#ff6b35] hover:text-white text-[var(--text-main)]"
                                 }`}
@@ -289,7 +305,7 @@ export default function StudentDashboard() {
                 <div className="overflow-hidden">
                     <div
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1.2rem] transition-transform duration-300 ease-out"
-                        style={{ transform: `translateX(-${carouselIndex * 5}%)` }}
+                        style={{ transform: `translateX(-${carouselIndex * (100 / 4)}%)` }}
                     >
                         {recommendedCourses.map((course) => {
                             const badgeStyles = {

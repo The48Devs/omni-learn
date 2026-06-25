@@ -506,7 +506,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   };
 
   const calculateXpFromPoints = (points: number): number => {
-    return Math.ceil(points / 20) * 5;
+    // 1/4 of all points gained and rounded upto 5 get added as xp
+    const xp = points / 4;
+    return Math.ceil(xp / 5) * 5;
   };
 
   const getStudentXp = async (orgId: string, studentId: string): Promise<number> => {
@@ -535,22 +537,21 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   };
 
   const calculatePoints = (accuracy: number, timeTakenSeconds: number, expectedDurationSeconds: number, deadline: string, completionDateTime: string) => {
-    const accuracyPoints = Math.round(accuracy / 10);
+    // Total 30pts
+    // Accuracy [%/10] -> Max 10pts
+    const accuracyPoints = Math.min(10, Math.round(accuracy / 10));
 
+    // B4 Deadline (If any) [10]
     const deadlineTime = new Date(deadline).getTime();
     const completionTime = new Date(completionDateTime).getTime();
     const isBeforeDeadline = !isNaN(deadlineTime) && !isNaN(completionTime) && completionTime <= deadlineTime;
     const deadlinePoints = isBeforeDeadline ? 10 : 0;
 
+    // Speed [time allocated % (100 -> 0) /10] -> Max 10pts
+    // If student takes 0 time, they get 10pts. If they take >= expectedDuration, they get 0pts.
     const speedRatio = expectedDurationSeconds > 0 ? timeTakenSeconds / expectedDurationSeconds : 1;
-    let speedPoints = 0;
-    if (speedRatio <= 0.5) {
-      speedPoints = 10;
-    } else if (speedRatio <= 1.5) {
-      const countedValue = (speedRatio - 0.5) * 100;
-      speedPoints = (100 - countedValue) / 10;
-    }
-    const finalSpeedPoints = Math.max(0, Math.min(10, Math.round(speedPoints)));
+    const speedPercent = Math.max(0, Math.min(100, 100 - (speedRatio * 100)));
+    const finalSpeedPoints = Math.round(speedPercent / 10);
 
     const total = accuracyPoints + deadlinePoints + finalSpeedPoints;
     return { accuracyPoints, speedPoints: finalSpeedPoints, deadlinePoints, total };
