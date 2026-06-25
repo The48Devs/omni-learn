@@ -5,7 +5,8 @@ import { useAccessibility } from "@/app/components/AccessibilityContext";
 import { useAuth } from "../../components/AuthCOntext";
 import { useOrganizations } from "../../components/organizations/OrganizationContext";
 import Link from "next/link";
-import { Zap, Flame } from "lucide-react";
+import { Zap, Flame, BookOpen } from "lucide-react";
+
 
 interface ContinueLearningCourse {
     id: string;
@@ -33,38 +34,46 @@ export default function StudentDashboard() {
     const [orgLevelData, setOrgLevelData] = useState<{ orgName: string; orgId: string; level: number; currentXp: number; nextLevelXp: number } | null>(null);
     const [streak, setStreak] = useState<{ current: number; longest: number } | null>(null);
     const [allCourses, setAllCourses] = useState<any[]>([]);
+    // true while the async org/course fetch is in-flight — prevents premature empty-state flash
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (!user?.uid) return;
+        setIsLoading(true);
         getOrganizationsForStudent(user.uid).then(async (orgs) => {
-            if (orgs.length === 0) return;
+            if (orgs.length === 0) {
+                setIsLoading(false);
+                return;
+            }
             const org = orgs[0];
             const xp = await getStudentXp(org.id, user.uid);
             const progress = getXpProgress(xp);
             setOrgLevelData({ orgName: org.name, orgId: org.id, ...progress });
             const courses = await getOrgCoursesWithData(org.id);
             setAllCourses(courses);
+            setIsLoading(false);
         });
         getStreak(user.uid).then(data => setStreak(data));
     }, [user?.uid, getOrganizationsForStudent, getStudentXp, getXpProgress, getStreak, getOrgCoursesWithData]);
 
-    const continueLearningCourses: ContinueLearningCourse[] = allCourses.length > 0 ? allCourses.slice(0, 3).map(c => ({
+    // ── Fallback: use mock data when backend returns nothing (dev/disconnected) ──
+    const continueLearningCourses: ContinueLearningCourse[] = allCourses.slice(0, 3).map(c => ({
         id: c.id,
         title: c.title,
         status: "in-progress" as const,
         progress: 0,
         metricText: `${Object.keys(c.modules || {}).length} Modules`,
         footerText: "Continue",
-    })) : [];
-
-    const recommendedCourses: RecommendedCourse[] = allCourses.length > 3 ? allCourses.slice(3).map((c, i) => ({
+    }));
+    const recommendedCourses: RecommendedCourse[] = allCourses.slice(3).map((c, i) => ({
         id: c.id,
         title: c.title,
         category: (["SCIENCE", "DESIGN", "TECH", "ROBOTICS"])[i % 4] as "SCIENCE" | "DESIGN" | "TECH" | "ROBOTICS",
         rating: 4.8,
         lessonsCount: Object.keys(c.modules || {}).length,
         bgGradient: ["from-blue-900 to-indigo-950", "from-orange-950 to-amber-900", "from-slate-900 to-sky-950", "from-emerald-950 to-teal-900"][i % 4],
-    })) : [];
+    }));
+
     const [carouselIndex, setCarouselIndex] = useState(0);
 
     const handleNextCarousel = () => {
@@ -80,6 +89,36 @@ export default function StudentDashboard() {
             announce("Showing Previous recommended courses");
         }
     };
+
+    // Empty state
+
+    const EmptyStateCard = ({ sectionLabel }: { sectionLabel: string }) => (
+        <div
+            role="status"
+            aria-label={`${sectionLabel} — no courses available`}
+            className="col-span-full flex flex-col items-center justify-center gap-[1.2rem] py-[2.5rem] px-[1.5rem] rounded-2xl border border-dashed border-[var(--border-color)] bg-[var(--bg-secondary)] text-center"
+        >
+            <div className="w-[3.5rem] h-[3.5rem] rounded-full bg-[var(--bg-tertiary)] flex items-center justify-center">
+                <BookOpen size={22} className="text-[var(--text-muted)]" />
+            </div>
+            <div className="space-y-[0.4rem]">
+                <p className="text-[0.95rem] font-extrabold text-[var(--text-main)]">
+                    No courses available at the moment.
+                </p>
+                <p className="text-[0.8rem] text-[var(--text-muted)] max-w-[26rem]">
+                    Explore the catalog or join an organization to start learning.
+                </p>
+            </div>
+            <Link
+                href="/StudentPortal/explore"
+                className="mt-[0.5rem] px-[1.2rem] py-[0.55rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white text-[0.8rem] font-extrabold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff6b35]"
+            >
+                Explore Courses →
+            </Link>
+        </div>
+    );
+
+
 
     return (
         <div className="space-y-[2rem]">
@@ -170,87 +209,101 @@ export default function StudentDashboard() {
                     </Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.2rem]">
-                    {continueLearningCourses.map((course) => {
-                        const isLocked = course.status === "up-next";
-                        const isReview = course.status === "review";
-                        return (
+                    {isLoading ? (
+                        // Skeleton shimmer — prevents layout-jump during fetch
+                        Array.from({ length: 3 }).map((_, i) => (
                             <div
-                                key={course.id}
-                                className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
-                            >
-                                <div className="p-[1.2rem] space-y-[1rem]">
-                                    <div className="flex items-center justify-between">
-                                        <span
-                                            className={`px-[0.6rem] py-[0.25rem] rounded-full text-[0.68rem] font-extrabold uppercase tracking-wider ${isLocked
+                                key={i}
+                                className="h-[11rem] rounded-2xl bg-[var(--bg-secondary)] animate-pulse border border-[var(--border-color)]"
+                                aria-hidden="true"
+                            />
+                        ))
+                    ) : continueLearningCourses.length === 0 ? (
+                        <EmptyStateCard sectionLabel="Continue Learning" />
+                    ) : (
+                        continueLearningCourses.map((course) => {
+                            const isLocked = course.status === "up-next";
+                            const isReview = course.status === "review";
+                            return (
+                                <div
+                                    key={course.id}
+                                    className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-shadow relative"
+                                >
+                                    <div className="p-[1.2rem] space-y-[1rem]">
+                                        <div className="flex items-center justify-between">
+                                            <span
+                                                className={`px-[0.6rem] py-[0.25rem] rounded-full text-[0.68rem] font-extrabold uppercase tracking-wider ${isLocked
                                                     ? "bg-[var(--bg-tertiary)] text-[var(--text-muted)]"
                                                     : "bg-[var(--bg-secondary)] text-[var(--text-main)] border border-[var(--border-color)]"
-                                                }`}
-                                        >
-                                            {course.status === "in-progress" ? "In Progress" : course.status === "up-next" ? "Up Next" : "In Progress"}
+                                                    }`}
+                                            >
+                                                {course.status === "in-progress" ? "In Progress" : course.status === "up-next" ? "Up Next" : "In Progress"}
+                                            </span>
+                                            {isLocked ? (
+                                                <div className="w-[1.8rem] h-[1.8rem] rounded-full bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex items-center justify-center text-[0.9rem] shadow-sm">
+                                                    🔒
+                                                </div>
+                                            ) : (
+                                                <Link
+                                                    href={`/StudentPortal/courses/${course.id}`}
+                                                    className="w-[1.8rem] h-[1.8rem] rounded-full bg-[var(--button-primary,var(--text-main))] text-[var(--bg-primary)] flex items-center justify-center text-[0.7rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
+                                                    aria-label={`Play Lesson content for ${course.title}`}
+                                                >
+                                                    ▶
+                                                </Link>
+                                            )}
+                                        </div>
+                                        <h3 className="text-[0.98rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.6rem]">
+                                            {course.title}
+                                        </h3>
+                                        <div className="space-y-[0.35rem]">
+                                            <div className="flex justify-between text-[0.72rem] font-bold text-[var(--text-muted)]">
+                                                <span>{course.metricText}</span>
+                                            </div>
+                                            <div className="w-full h-[0.3rem] bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full ${isLocked ? "bg-gray-300" : "bg-[#ff6b35]"}`}
+                                                    style={{ width: `${course.progress || 10}%` }}
+                                                    aria-valuenow={course.progress}
+                                                    aria-valuemin={0}
+                                                    aria-valuemax={100}
+                                                    role="progressbar"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="bg-[var(--bg-secondary)] border-t border-[var(--border-color)] px-[1.2rem] py-[0.75rem] flex items-center justify-between gap-[0.5rem]">
+                                        <span className="text-[0.72rem] font-extrabold text-[var(--text-main)]">
+                                            {course.footerText}
                                         </span>
                                         {isLocked ? (
-                                            <div className="w-[1.8rem] h-[1.8rem] rounded-full bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex items-center justify-center text-[0.9rem] shadow-sm">
+                                            <div className="w-[1.5rem] h-[1.5rem] rounded-full bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex items-center justify-center text-[0.7rem]">
                                                 🔒
                                             </div>
+                                        ) : isReview ? (
+                                            <Link
+                                                href={`/StudentPortal/courses/${course.id}`}
+                                                className="w-[1.5rem] h-[1.5rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.75rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
+                                                aria-label={`Restart/Review last module of ${course.title}`}
+                                            >
+                                                ↻
+                                            </Link>
                                         ) : (
                                             <Link
                                                 href={`/StudentPortal/courses/${course.id}`}
-                                                className="w-[1.8rem] h-[1.8rem] rounded-full bg-[var(--button-primary,var(--text-main))] text-[var(--bg-primary)] flex items-center justify-center text-[0.7rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
-                                                aria-label={`Play Lesson content for ${course.title}`}
+                                                className="w-[1.5rem] h-[1.5rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.75rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
+                                                aria-label={`Proceed with recommended next step in ${course.title}`}
                                             >
-                                                ▶
+                                                →
                                             </Link>
                                         )}
                                     </div>
-                                    <h3 className="text-[0.98rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.6rem]">
-                                        {course.title}
-                                    </h3>
-                                    <div className="space-y-[0.35rem]">
-                                        <div className="flex justify-between text-[0.72rem] font-bold text-[var(--text-muted)]">
-                                            <span>{course.metricText}</span>
-                                        </div>
-                                        <div className="w-full h-[0.3rem] bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full rounded-full ${isLocked ? "bg-gray-300" : "bg-[#ff6b35]"}`}
-                                                style={{ width: `${course.progress || 10}%` }}
-                                                aria-valuenow={course.progress}
-                                                aria-valuemin={0}
-                                                aria-valuemax={100}
-                                                role="progressbar"
-                                            />
-                                        </div>
-                                    </div>
                                 </div>
-                                <div className="bg-[var(--bg-secondary)] border-t border-[var(--border-color)] px-[1.2rem] py-[0.75rem] flex items-center justify-between gap-[0.5rem]">
-                                    <span className="text-[0.72rem] font-extrabold text-[var(--text-main)]">
-                                        {course.footerText}
-                                    </span>
-                                    {isLocked ? (
-                                        <div className="w-[1.5rem] h-[1.5rem] rounded-full bg-[var(--bg-tertiary)] text-[var(--text-muted)] flex items-center justify-center text-[0.7rem]">
-                                            🔒
-                                        </div>
-                                    ) : isReview ? (
-                                        <Link
-                                            href={`/StudentPortal/courses/${course.id}`}
-                                            className="w-[1.5rem] h-[1.5rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.75rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
-                                            aria-label={`Restart/Review last module of ${course.title}`}
-                                        >
-                                            ↻
-                                        </Link>
-                                    ) : (
-                                        <Link
-                                            href={`/StudentPortal/courses/${course.id}`}
-                                            className="w-[1.5rem] h-[1.5rem] rounded-full bg-[#ff6b35] hover:bg-[#e05621] text-white flex items-center justify-center text-[0.75rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35]"
-                                            aria-label={`Proceed with recommended next step in ${course.title}`}
-                                        >
-                                            →
-                                        </Link>
-                                    )}
-                                </div>
-                            </div>
-                        );
-                    })}
+                            );
+                        })
+                    )}
                 </div>
+
             </section>
 
             {/* Recommended courses */}
@@ -265,8 +318,8 @@ export default function StudentDashboard() {
                             onClick={handlePrevCarousel}
                             disabled={carouselIndex === 0}
                             className={`w-[2rem] h-[2rem] rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex === 0
-                                    ? "opacity-40 cursor-not-allowed text-[var(--text-muted)]"
-                                    : "hover:bg-[#ff6b35] hover:text-white text-[var(--text-main)]"
+                                ? "opacity-40 cursor-not-allowed text-[var(--text-muted)]"
+                                : "hover:bg-[#ff6b35] hover:text-white text-[var(--text-main)]"
                                 }`}
                             aria-label="Previous recommended courses page"
                         >
@@ -277,8 +330,8 @@ export default function StudentDashboard() {
                             onClick={handleNextCarousel}
                             disabled={carouselIndex >= recommendedCourses.length - 1}
                             className={`w-[2rem] h-[2rem] rounded-full border border-[var(--border-color)] bg-[var(--bg-primary)] flex items-center justify-center font-bold text-[0.8rem] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#ff6b35] ${carouselIndex >= recommendedCourses.length - 1
-                                    ? "opacity-40 cursor-not-allowed text-[var(--text-muted)]"
-                                    : "hover:bg-[#ff6b35] hover:text-white text-[var(--text-main)]"
+                                ? "opacity-40 cursor-not-allowed text-[var(--text-muted)]"
+                                : "hover:bg-[#ff6b35] hover:text-white text-[var(--text-main)]"
                                 }`}
                             aria-label="Next recommended courses page"
                         >
@@ -291,47 +344,60 @@ export default function StudentDashboard() {
                         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1.2rem] transition-transform duration-300 ease-out"
                         style={{ transform: `translateX(-${carouselIndex * 5}%)` }}
                     >
-                        {recommendedCourses.map((course) => {
-                            const badgeStyles = {
-                                SCIENCE: "bg-blue-100/10 text-blue-400 border border-blue-400/25",
-                                DESIGN: "bg-pink-100/10 text-pink-400 border border-pink-400/25",
-                                TECH: "bg-purple-100/10 text-purple-400 border border-purple-400/25",
-                                ROBOTICS: "bg-emerald-100/10 text-emerald-400 border border-emerald-400/25",
-                            }[course.category];
-                            return (
+                        {isLoading ? (
+                            Array.from({ length: 4 }).map((_, i) => (
                                 <div
-                                    key={course.id}
-                                    className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group focus-within:ring-3 focus-within:ring-[#2563eb]"
-                                >
+                                    key={i}
+                                    className="h-[12rem] rounded-2xl bg-[var(--bg-secondary)] animate-pulse border border-[var(--border-color)]"
+                                    aria-hidden="true"
+                                />
+                            ))
+                        ) : recommendedCourses.length === 0 ? (
+                            <EmptyStateCard sectionLabel="Recommended Courses" />
+                        ) : (
+                            recommendedCourses.map((course) => {
+                                const badgeStyles = {
+                                    SCIENCE: "bg-blue-100/10 text-blue-400 border border-blue-400/25",
+                                    DESIGN: "bg-pink-100/10 text-pink-400 border border-pink-400/25",
+                                    TECH: "bg-purple-100/10 text-purple-400 border border-purple-400/25",
+                                    ROBOTICS: "bg-emerald-100/10 text-emerald-400 border border-emerald-400/25",
+                                }[course.category];
+                                return (
                                     <div
-                                        className={`w-full h-[6.5rem] bg-gradient-to-br ${course.bgGradient} relative flex items-center justify-center text-white/10 text-[2.5rem] font-bold select-none`}
+                                        key={course.id}
+                                        className="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all group focus-within:ring-3 focus-within:ring-[#2563eb]"
                                     >
-                                        {course.category}
-                                    </div>
-                                    <div className="p-[1rem] space-y-[0.5rem]">
-                                        <span className={`inline-block px-[0.5rem] py-[0.15rem] rounded-md text-[0.62rem] font-extrabold tracking-wider ${badgeStyles}`}>
+                                        <div
+                                            className={`w-full h-[6.5rem] bg-gradient-to-br ${course.bgGradient} relative flex items-center justify-center text-white/10 text-[2.5rem] font-bold select-none`}
+                                        >
                                             {course.category}
-                                        </span>
-                                        <h3 className="text-[0.85rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.4rem] group-hover:text-[#ff6b35] transition-colors">
-                                            <a
-                                                href={`#course-${course.id}`}
-                                                className="focus:outline-none"
-                                            >
-                                                {course.title}
-                                            </a>
-                                        </h3>
-                                        <div className="flex justify-between items-center text-[0.72rem] font-bold pt-[0.4rem] border-t border-[var(--border-color)] text-[var(--text-muted)]">
-                                            <span className="flex items-center gap-[0.2rem] text-amber-500">
-                                                ⭐ {course.rating.toFixed(1)}
+                                        </div>
+                                        <div className="p-[1rem] space-y-[0.5rem]">
+                                            <span className={`inline-block px-[0.5rem] py-[0.15rem] rounded-md text-[0.62rem] font-extrabold tracking-wider ${badgeStyles}`}>
+                                                {course.category}
                                             </span>
-                                            <span>{course.lessonsCount} Lessons</span>
+                                            <h3 className="text-[0.85rem] font-extrabold text-[var(--text-main)] leading-snug min-h-[2.4rem] group-hover:text-[#ff6b35] transition-colors">
+                                                <a
+                                                    href={`#course-${course.id}`}
+                                                    className="focus:outline-none"
+                                                >
+                                                    {course.title}
+                                                </a>
+                                            </h3>
+                                            <div className="flex justify-between items-center text-[0.72rem] font-bold pt-[0.4rem] border-t border-[var(--border-color)] text-[var(--text-muted)]">
+                                                <span className="flex items-center gap-[0.2rem] text-amber-500">
+                                                    ⭐ {course.rating.toFixed(1)}
+                                                </span>
+                                                <span>{course.lessonsCount} Lessons</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
+                                );
+                            })
+                        )}
                     </div>
                 </div>
+
             </section>
         </div>
     );
