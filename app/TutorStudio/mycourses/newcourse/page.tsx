@@ -8,11 +8,11 @@ import { useOrganizations } from "@/app/components/organizations/OrganizationCon
 import { useAuth } from "@/app/components/AuthCOntext";
 
 export default function NewCourseWrapper() {
-  return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="text-slate-400 text-lg font-semibold">Loading course editor...</div></div>}>
-      <CourseCreatorStudio />
-    </Suspense>
-  );
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="text-slate-400 text-lg font-semibold">Loading course editor...</div></div>}>
+            <CourseCreatorStudio />
+        </Suspense>
+    );
 }
 
 // interface types
@@ -37,7 +37,7 @@ interface Module {
     blocks: ContentBlock[];
 }
 
-type BlockType = "video" | "sandbox" | "quiz" | "storyline";
+type BlockType = "video" | "sandbox" | "quiz" | "storyline" | "pdf";
 
 interface ContentBlock {
     id: string;
@@ -64,6 +64,15 @@ interface ContentBlock {
     storylineTitle?: string;
     storylineIntro?: string;
     storylineNodes?: StorylineNode[];
+
+    //pdf block specifics
+
+    pdfFileUrl?: string;
+    pdfFileName?: string;
+    pdfAllowDownload?: boolean;
+    pdfForceSequential?: boolean;
+    pdfDefaultZoom?: 75 | 100 | 125 | 150;
+    pdfTotalPages?: number;
 }
 
 interface QuizQuestions {
@@ -371,6 +380,15 @@ function CourseCreatorStudio() {
             storylineTitle: type === "storyline" ? "Untitled Scene" : undefined,
             storylineIntro: type === "storyline" ? "" : undefined,
             storylineNodes: type === "storyline" ? [] : undefined,
+
+            //pdf block seeds
+
+            pdfFileUrl: type === "pdf" ? "" : undefined,
+            pdfFileName: type === "pdf" ? "" : undefined,
+            pdfAllowDownload: type === "pdf" ? true : undefined,
+            pdfForceSequential: type === "pdf" ? false : undefined,
+            pdfDefaultZoom: type === "pdf" ? 100 : undefined,
+            pdfTotalPages: type === "pdf" ? undefined : undefined,
         };
 
         setModules(
@@ -859,6 +877,10 @@ function CourseCreatorStudio() {
                         <div className="p-[1rem] bg-gray-50 border border-dashed rounded-xl flex items-center gap-[0.75rem] text-gray-400">
                             <span>📖</span>
                             <span className="font-semibold text-[0.9rem]">Interactive Storyline</span>
+                        </div>
+                        <div className="p-[1rem] bg-gray-50 border border-dashed rounded-xl flex items-center gap-[0.75rem] text-gray-400">
+                            <span>📄</span>
+                            <span className="font-semibold text-[0.9rem]">PDF File</span>
                         </div>
                     </div>
                 ) : (

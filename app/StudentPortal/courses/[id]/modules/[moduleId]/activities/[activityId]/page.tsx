@@ -7,6 +7,7 @@ import { useOrganizations } from "@/app/components/organizations/OrganizationCon
 import { useAuth } from "@/app/components/AuthCOntext";
 import InteractiveSandbox from "@/app/components/InteractiveSandbox";
 import { ArrowLeft, CheckCircle, Clock, Zap, Loader2 } from "lucide-react";
+import CoursePlayerWrapper from "./activities/[activityid]/CoursePlayerWrapper";
 
 export default function StudentActivityPage() {
   const params = useParams<{ id: string; moduleId: string; activityId: string }>();
