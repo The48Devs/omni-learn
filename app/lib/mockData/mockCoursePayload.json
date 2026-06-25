@@ -1,0 +1,76 @@
+{
+    "title": "Intro to Circuit Theory",
+    "description": "Build foundational knowledge in electronics using interactive simulations.",
+    "subject": "Physics",
+    "orgId": "org-mock-001",
+    "ownerId": "tutor-001",
+    "modules": {
+        "mod-a": {
+            "id": "mod-a",
+            "index": 0,
+            "title": "Basic Components",
+            "duration": "45 min",
+            "blocks": [
+                {
+                    "type": "video",
+                    "title": "What is a Circuit?",
+                    "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+                    "allowPlaybackControl": true,
+                    "durationMinutes": 10
+                },
+                {
+                    "type": "pdf",
+                    "title": "Component Reference Sheet",
+                    "fileUrl": "/mock/circuit-reference.pdf",
+                    "fileName": "circuit-reference.pdf",
+                    "allowDownload": true,
+                    "forceSequentialReading": false,
+                    "defaultZoom": 100,
+                    "totalPages": 5,
+                    "durationMinutes": 15
+                }
+            ]
+        },
+        "mod-b": {
+            "id": "mod-b",
+            "index": 1,
+            "title": "Circuit Analysis",
+            "duration": "30 min",
+            "blocks": [
+                {
+                    "type": "sandbox",
+                    "title": "Build a Simple LED Circuit",
+                    "description": "Arrange the Battery, Resistor, and LED in the correct order.",
+                    "durationMinutes": 20
+                },
+                {
+                    "type": "quiz",
+                    "title": "Circuit Knowledge Check",
+                    "quizQuestions": [
+                        {
+                            "question": "What does a resistor do in a circuit?",
+                            "options": [
+                                "Stores energy",
+                                "Limits current",
+                                "Amplifies voltage",
+                                "Generates power"
+                            ],
+                            "answer": "Limits current"
+                        },
+                        {
+                            "question": "What is the unit of electrical resistance?",
+                            "options": [
+                                "Volt",
+                                "Ampere",
+                                "Ohm",
+                                "Watt"
+                            ],
+                            "answer": "Ohm"
+                        }
+                    ],
+                    "durationMinutes": 10
+                }
+            ]
+        }
+    }
+}
