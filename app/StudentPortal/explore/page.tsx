@@ -27,30 +27,53 @@ export default function ExploreCourses() {
     const { organizations, getPublicOrganizations, getOrgCourseCount, getOrgMemberCount } = useOrganizations();
     const { user } = useAuth();
     const publicOrgs = getPublicOrganizations();
-  const [orgCounts, setOrgCounts] = useState<Record<string, { courses: number; members: number }>>({});
+    const [orgCounts, setOrgCounts] = useState<Record<string, { courses: number; members: number }>>({});
 
-  useEffect(() => {
-    const visibleOrgs = publicOrgs.slice(0, 6);
-    if (visibleOrgs.length === 0) return;
-    let cancelled = false;
-    const fetchCounts = async () => {
-      const counts: Record<string, { courses: number; members: number }> = {};
-      await Promise.all(visibleOrgs.map(async (org) => {
-        try {
-          const [courses, members] = await Promise.all([
-            getOrgCourseCount(org.id),
-            getOrgMemberCount(org.id),
-          ]);
-          if (!cancelled) counts[org.id] = { courses, members };
-        } catch {
-          if (!cancelled) counts[org.id] = { courses: 0, members: 0 };
-        }
-      }));
-      if (!cancelled) setOrgCounts(counts);
-    };
-    fetchCounts();
-    return () => { cancelled = true; };
-  }, [organizations, getOrgCourseCount, getOrgMemberCount]);
+    useEffect(() => {
+        const visibleOrgs = publicOrgs.slice(0, 6);
+        if (visibleOrgs.length === 0) return;
+        let cancelled = false;
+        const fetchCounts = async () => {
+            const counts: Record<string, { courses: number; members: number }> = {};
+            await Promise.all(visibleOrgs.map(async (org) => {
+                try {
+                    const [courses, members] = await Promise.all([
+                        getOrgCourseCount(org.id),
+                        getOrgMemberCount(org.id),
+                    ]);
+                    if (!cancelled) counts[org.id] = { courses, members };
+                } catch {
+                    if (!cancelled) counts[org.id] = { courses: 0, members: 0 };
+                }
+            }));
+            if (!cancelled) setOrgCounts(counts);
+        };
+        fetchCounts();
+        return () => { cancelled = true; };
+    }, [organizations, getOrgCourseCount, getOrgMemberCount]);
+
+    const q = searchQuery.toLowerCase().trim();
+    const filteredTrending = q
+        ? trendingCourses.filter(c =>
+            c.title.toLowerCase().includes(q) ||
+            c.category.toLowerCase().includes(q) ||
+            c.publisher.toLowerCase().includes(q)
+        )
+        : trendingCourses;
+    const filteredNarrative = q
+        ? narrativeCourses.filter(c =>
+            c.title.toLowerCase().includes(q) ||
+            c.category.toLowerCase().includes(q) ||
+            c.publisher.toLowerCase().includes(q)
+        )
+        : narrativeCourses;
+    const filteredSandbox = q
+        ? sandboxCourses.filter(c =>
+            c.title.toLowerCase().includes(q) ||
+            c.category.toLowerCase().includes(q) ||
+            c.publisher.toLowerCase().includes(q)
+        )
+        : sandboxCourses;
 
     return (
         < main
@@ -183,17 +206,26 @@ export default function ExploreCourses() {
             <div className="w-full max-w-7xl mx-auto flex flex-col gap-16 pb-16">
                 <DiscoverSection title="🔥 Trending This Week" arialabel="Trending Courses Carousel">
                     <div className="flex overflow-x-auto gap-6 pb-4 snap-x snap-mandatory hide-scrollbar">
-                        {trendingCourses.map(course => <CourseCard key={course.id} course={course} layout="horizontal" />)}
+                        {filteredTrending.length > 0
+                            ? filteredTrending.map(course => <CourseCard key={course.id} course={course} layout="horizontal" />)
+                            : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
+                        }
                     </div>
                 </DiscoverSection>
                 <DiscoverSection title="📖 Courses with Storyline Modules" arialabel="Narrative Storyline Courses">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {narrativeCourses.map(course => <CourseCard key={course.id} course={course} layout="grid" />)}
+                        {filteredNarrative.length > 0
+                            ? filteredNarrative.map(course => <CourseCard key={course.id} course={course} layout="grid" />)
+                            : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
+                        }
                     </div>
                 </DiscoverSection>
                 <DiscoverSection title="🔬 Courses with Sandbox Labs" arialabel="Technical Sandbox Courses">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {sandboxCourses.map(course => <CourseCard key={course.id} course={course} layout="grid" />)}
+                        {filteredSandbox.length > 0
+                            ? filteredSandbox.map(course => <CourseCard key={course.id} course={course} layout="grid" />)
+                            : <p className="text-[var(--text-muted)] py-4 text-sm">No courses available at the moment.</p>
+                        }
                     </div>
                 </DiscoverSection>
             </div>

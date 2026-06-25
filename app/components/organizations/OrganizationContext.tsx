@@ -287,7 +287,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
           createdAt: now,
           updatedAt: now,
         };
-        await set(activityRef, activity);
+
+        // Clean activity payload to remove any 'undefined' properties for Firebase
+        const cleanActivity = JSON.parse(JSON.stringify(activity));
+        await set(activityRef, cleanActivity);
         moduleActivityIds[activityId] = true;
       }
 
@@ -313,7 +316,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       createdAt: now,
       updatedAt: now,
     };
-    await set(courseRef, course);
+
+    // Clean course payload to remove any 'undefined' properties
+    const cleanCourse = JSON.parse(JSON.stringify(course));
+    await set(courseRef, cleanCourse);
     const orgResult = await addCourseToOrganization(data.orgId, courseId, data.ownerId);
     if (!orgResult.success) {
       await remove(courseRef);
@@ -321,6 +327,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     }
     return { success: true, courseId };
   };
+
 
   const getCourse = async (courseId: string): Promise<CourseData | null> => {
     const courseRef = ref(db, `courses/${courseId}`);
