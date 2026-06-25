@@ -5,6 +5,7 @@ import InteractiveSandbox from "@/app/components/InteractiveSandbox";
 import { CourseBlockConfig, VideoBlockConfig, PDFBlockConfig, QuizBlockConfig } from "@/app/lib/course.types";
 import { Loader2 } from "lucide-react";
 import StorylinePlayer from "@/app/components/StorylinePlayer";
+import QuizView from "@/app/components/QuizView";
 // slow loading
 const VideoPlayerModule = lazy(() => import("./VideoPlayerModule"));
 const PDFViewerModule = lazy(() => import("./PDFViewModule"));
@@ -92,7 +93,6 @@ export default function CoursePlayerWrapper({ activity, onComplete, submitting }
                     </div>
                 );
             case "quiz":
-                // can import and use the exisiting quiz view
                 const quizConfig = content as QuizBlockConfig;
                 if (!quizConfig.quizQuestions?.length) {
                     return (
@@ -101,6 +101,20 @@ export default function CoursePlayerWrapper({ activity, onComplete, submitting }
                         </div>
                     );
                 }
+                return (
+                    <div className="mt-6">
+                        <QuizView
+                            config={quizConfig}
+                            onComplete={(pts) => onComplete(pts)}
+                            submitting={submitting}
+                        />
+                        <div className="mt-4 text-center">
+                            <p className="text-[0.7rem] text-[var(--text-muted,#6B7280)] italic">
+                                * Submit all answers to conclude the quiz and earn XP.
+                            </p>
+                        </div>
+                    </div>
+                );
                 return <div className="mt-6 text-[var(--text-muted)] text-center p-6">Quiz renderer — wire in QuizView component here.</div>;
             case "storyline":
                 return (
