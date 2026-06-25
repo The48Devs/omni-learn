@@ -65,11 +65,19 @@
     "courses": {
       ".read": "auth != null",
       "$courseId": {
-        ".write": "auth != null && (root.child('organizations').child(newData.child('orgId').val()).child('ownerId').val() === auth.uid || (root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))",
-        "id": { ".write": "!data.exists()" },
-        "createdAt": { ".write": "!data.exists()" },
-        "ownerId": { ".write": "!data.exists()" },
-        "orgId": { ".write": "!data.exists()" },
+        ".write": "auth != null && ( (newData.exists() && (root.child('organizations').child(newData.child('orgId').val()).child('ownerId').val() === auth.uid || (root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))) || (data.exists() && (root.child('organizations').child(data.child('orgId').val()).child('ownerId').val() === auth.uid || (root.child('organizations').child(data.child('orgId').val()).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child(data.child('orgId').val()).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))) )",
+        "id": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
+        "createdAt": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
+        "ownerId": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
+        "orgId": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
         "leaderboard": {
           "$studentId": {
             ".write": "auth != null && (auth.uid === $studentId || root.child('courses').child($courseId).child('ownerId').val() === auth.uid)",
@@ -89,12 +97,22 @@
     "activities": {
       ".read": "auth != null",
       "$activityId": {
-        ".write": "auth != null && (root.child('organizations').child(newData.child('orgId').val()).child('ownerId').val() === auth.uid || (root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))",
-        "id": { ".write": "!data.exists()" },
-        "createdAt": { ".write": "!data.exists()" },
-        "courseId": { ".write": "!data.exists()" },
-        "moduleId": { ".write": "!data.exists()" },
-        "orgId": { ".write": "!data.exists()" },
+        ".write": "auth != null && ( (newData.exists() && (root.child('organizations').child(newData.child('orgId').val()).child('ownerId').val() === auth.uid || (root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child(newData.child('orgId').val()).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))) || (data.exists() && (root.child('organizations').child(data.child('orgId').val()).child('ownerId').val() === auth.uid || (root.child('organizations').child(data.child('orgId').val()).child('members').child(auth.uid).child('role').val() === 'tutor' && root.child('organizations').child(data.child('orgId').val()).child('members').child(auth.uid).child('permissions').child('canCreateCourses').val() === true))) )",
+        "id": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
+        "createdAt": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
+        "courseId": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
+        "moduleId": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
+        "orgId": {
+          ".write": "!data.exists() || !newData.exists()"
+        },
         "points": {
           "$studentId": {
             ".write": "auth != null && auth.uid === $studentId",
