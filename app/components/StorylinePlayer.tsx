@@ -27,11 +27,7 @@ interface StorylineNode {
 }
 
 interface StorylinePlayerProps {
-    config?: {
-        storylineTitle?: string;
-        storylineIntro?: string;
-        storylineNodes?: StorylineNode[];
-    };
+    config?: any; // Accepting any structure to handle stringified JSON safely
     onComplete?: (points: number) => void;
     submitting?: boolean;
 }
@@ -53,7 +49,7 @@ const defaultNodes: StorylineNode[] = [
         speakerName: "Dr. Elena",
         speakerAvatarUrl: "👩‍🔬",
         dialogueText: "The power grid has been successfully shut down. The lab is dark, but safe. We have avoided a major overload cascade. Excellent risk mitigation!",
-        choices: [] // Terminal Node
+        choices: []
     },
     {
         id: "diagnostic",
@@ -70,47 +66,96 @@ const defaultNodes: StorylineNode[] = [
         speakerName: "Dr. Elena",
         speakerAvatarUrl: "👩‍🔬",
         dialogueText: "The capacitor bank vented successfully! Power levels have stabilized, and the lab is fully operational. Exceptional decision-making skills!",
-        choices: [] // Terminal Node
+        choices: []
     },
     {
         id: "isolate",
         speakerName: "Dr. Elena",
         speakerAvatarUrl: "👩‍🔬",
         dialogueText: "Isolating the capacitor bank caused a secondary surge, triggering an emergency shutdown. The systems are offline, but structural damage was mitigated.",
-        choices: [] // Terminal Node
+        choices: []
     }
 ];
 
 export default function StorylinePlayer({ config, onComplete, submitting }: StorylinePlayerProps) {
     const { announce, theme, fontProfile } = useAccessibility();
 
-    const title = config?.storylineTitle || "Branching Learning Scenario";
-    const introText = config?.storylineIntro || "Read the dialogue and make decisions to guide the narrative.";
-
-    const nodes = useMemo(() => {
-        return config?.storylineNodes && config.storylineNodes.length > 0
-            ? config.storylineNodes
-            : defaultNodes;
+    // 1. Recover and parse config object in case it is loaded as stringified JSON
+    const parsedConfig = useMemo(() => {
+        if (!config) return null;
+        if (typeof config === "string") {
+            try {
+                return JSON.parse(config);
+            } catch (e) {
+                console.error("Failed to parse storyline configuration string:", e);
+                return null;
+            }
+        }
+        return config;
     }, [config]);
 
-    //Traverse states
-    // null represent the Scenario Intro / Cover page
+    const title = parsedConfig?.storylineTitle || parsedConfig?.title || "Branching Learning Scenario";
+    const introText = parsedConfig?.storylineIntro || parsedConfig?.description || "Read the dialogue and make decisions to guide the narrative.";
+
+    // 2. Synchronize and map slides/nodes to safeguard against schema discrepancies
+    const nodes = useMemo<StorylineNode[]>(() => {
+        // Option A: Storyline Nodes (tutor page structure)
+        if (parsedConfig?.storylineNodes && Array.isArray(parsedConfig.storylineNodes)) {
+            const activeNodes = parsedConfig.storylineNodes
+                .filter((n: any) => n && n.id)
+                .map((n: any) => ({
+                    id: n.id,
+                    speakerName: n.speakerName || "System Guide",
+                    speakerAvatarUrl: n.speakerAvatarUrl || "👤",
+                    dialogueText: n.dialogueText || "",
+                    choices: Array.isArray(n.choices)
+                        ? n.choices.map((c: any, cIdx: number) => ({
+                            id: c.id || `choice-${cIdx}`,
+                            text: c.text || "Proceed",
+                            targetNodeId: c.targetNodeId || "",
+                            syncPointsModifier: Number(c.syncPointsModifier) || 0
+                        }))
+                        : []
+                }));
+            if (activeNodes.length > 0) return activeNodes;
+        }
+        // Option B: Slides structure (course.types.tsx alignment mapping)
+        if (parsedConfig?.slides && Array.isArray(parsedConfig.slides)) {
+            const mappedSlides = parsedConfig.slides
+                .filter((slide: any) => slide && slide.id)
+                .map((slide: any) => ({
+                    id: slide.id,
+                    speakerName: "System Guide",
+                    speakerAvatarUrl: "📖",
+                    dialogueText: slide.content || "",
+                    choices: Array.isArray(slide.choices)
+                        ? slide.choices.map((c: any, cIdx: number) => ({
+                            id: c.id || `choice-${cIdx}`,
+                            text: c.label || c.text || "Proceed",
+                            targetNodeId: c.nextSlideId || c.targetNodeId || "",
+                            syncPointsModifier: Number(c.syncPointsModifier) || 0
+                        }))
+                        : []
+                }));
+            if (mappedSlides.length > 0) return mappedSlides;
+        }
+        // Option C: Fallback to default narratives
+        return defaultNodes;
+    }, [parsedConfig]);
+    // Traversal States
     const [currentNodeId, setCurrentNodeId] = useState<string | null>(null);
     const [points, setPoints] = useState<number>(0);
     const [history, setHistory] = useState<string[]>([]);
     const [pointsHistory, setPointsHistory] = useState<number[]>([]);
-
-    // Accessibility announcement block
     const [screenReaderAnnouncement, setScreenReaderAnnouncement] = useState<string>("");
-
     const currentNode = useMemo(() => {
         if (currentNodeId === null) return null;
-        return nodes.find(n => n.id === currentNodeId) || null;
+        return nodes.find((n: StorylineNode) => n.id === currentNodeId) || null;
     }, [currentNodeId, nodes]);
 
     const isTerminal = useMemo(() => {
         if (currentNodeId === null) return false;
-        return !currentNode || !currentNode.choices || currentNode.choices.length === 0;
+        return !currentNode || !Array.isArray(currentNode.choices) || currentNode.choices.length === 0;
     }, [currentNodeId, currentNode]);
 
     // Handle screen reader announcements on slide updates
@@ -120,8 +165,9 @@ export default function StorylinePlayer({ config, onComplete, submitting }: Stor
             setScreenReaderAnnouncement(message);
             announce(message);
         } else if (currentNode) {
-            const choicesDesc = currentNode.choices.length > 0
-                ? `There are ${currentNode.choices.length} choices available below.`
+            const choicesCount = Array.isArray(currentNode.choices) ? currentNode.choices.length : 0;
+            const choicesDesc = choicesCount > 0
+                ? `There are ${choicesCount} choices available below.`
                 : "Scenario concluded. Use the submit button to complete the activity.";
             const message = `${currentNode.speakerName} says: ${currentNode.dialogueText} ${choicesDesc}`;
             setScreenReaderAnnouncement(message);
@@ -197,7 +243,7 @@ export default function StorylinePlayer({ config, onComplete, submitting }: Stor
 
             {/* HEADER METRICS */}
             <div className="flex items-center justify-between border-b border-[var(--border-color,#E5E7EB)] pb-[0.75rem] select-none">
-                <h2 className="text-[1rem] font-extrabold uppercase tracking-wider text-[var(--text-muted,#6B7280)]">
+                <h2 className="text-[1.1rem] font-extrabold uppercase tracking-wider text-[var(--text-muted,#6B7280)]">
                     {title}
                 </h2>
                 {currentNodeId !== null && (
@@ -208,7 +254,7 @@ export default function StorylinePlayer({ config, onComplete, submitting }: Stor
                 )}
             </div>
 
-            {/*COVER SCREEN / SCENARIO INTRO */}
+            {/* COVER SCREEN / SCENARIO INTRO */}
             {currentNodeId === null && (
                 <div className="flex flex-col items-center text-center p-[2rem] gap-[1.5rem] bg-[var(--bg-secondary,#F3F4F6)] border border-[var(--border-color,#E5E7EB)] rounded-xl">
                     <div className="w-[4rem] h-[4rem] bg-indigo-500/10 border border-indigo-500/20 rounded-full flex items-center justify-center text-[2rem]">
@@ -230,7 +276,7 @@ export default function StorylinePlayer({ config, onComplete, submitting }: Stor
                 </div>
             )}
 
-            {/*ACTIVE DIALOGUE DISPLAY */}
+            {/* ACTIVE DIALOGUE DISPLAY */}
             {currentNodeId !== null && !isTerminal && currentNode && (
                 <div className="flex flex-col gap-[1.25rem]">
                     {/* Speaker Header Card */}
@@ -257,7 +303,7 @@ export default function StorylinePlayer({ config, onComplete, submitting }: Stor
                             Select your course of action:
                         </h4>
                         <div className="grid grid-cols-1 gap-[0.5rem]" role="group" aria-label="Branching Choices">
-                            {currentNode.choices.map((choice) => (
+                            {Array.isArray(currentNode.choices) && currentNode.choices.map((choice: StorylineChoice) => (
                                 <button
                                     key={choice.id}
                                     type="button"
@@ -293,7 +339,7 @@ export default function StorylinePlayer({ config, onComplete, submitting }: Stor
                 </div>
             )}
 
-            {/*TERMINAL END NODE SCREEN */}
+            {/* TERMINAL END NODE SCREEN */}
             {currentNodeId !== null && isTerminal && (
                 <div className="flex flex-col items-center text-center p-[2rem] gap-[1.5rem] bg-[var(--bg-secondary,#F3F4F6)] border border-[var(--border-color,#E5E7EB)] rounded-xl">
                     <div className="w-[4rem] h-[4rem] bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center text-[2rem] text-emerald-500">

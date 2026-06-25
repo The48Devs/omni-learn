@@ -4,6 +4,7 @@ import { useAccessibility } from "@/app/components/AccessibilityContext";
 import InteractiveSandbox from "@/app/components/InteractiveSandbox";
 import { CourseBlockConfig, VideoBlockConfig, PDFBlockConfig, QuizBlockConfig } from "@/app/lib/course.types";
 import { Loader2 } from "lucide-react";
+import StorylinePlayer from "@/app/components/StorylinePlayer";
 // slow loading
 const VideoPlayerModule = lazy(() => import("./VideoPlayerModule"));
 const PDFViewerModule = lazy(() => import("./PDFViewModule"));
@@ -103,21 +104,16 @@ export default function CoursePlayerWrapper({ activity, onComplete, submitting }
                 return <div className="mt-6 text-[var(--text-muted)] text-center p-6">Quiz renderer — wire in QuizView component here.</div>;
             case "storyline":
                 return (
-                    <div className="mt-6 space-y-4">
-                        <div className="bg-[var(--bg-secondary)] rounded-xl p-8 text-center border border-[var(--border-color)]">
-                            <p className="text-[var(--text-muted)] font-medium">
-                                {(content as any)?.description || "Work through the storyline scenarios below."}
+                    <div className="mt-6">
+                        <StorylinePlayer
+                            config={activity.content as any}
+                            onComplete={(pts) => onComplete(pts)}
+                            submitting={submitting}
+                        />
+                        <div className="mt-4 text-center">
+                            <p className="text-[0.7rem] text-[var(--text-muted,#6B7280)] italic">
+                                * Traversal through a terminal end slide is required to submit and complete this activity.
                             </p>
-                        </div>
-                        <div className="text-center">
-                            <button
-                                onClick={() => onComplete(20)}
-                                disabled={submitting}
-                                className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-bold transition-all disabled:opacity-50 inline-flex items-center gap-2 focus-visible:outline focus-visible:outline-3 focus-visible:outline-[var(--focus-ring-color,#2563eb)]"
-                            >
-                                {submitting ? <Loader2 className="animate-spin" size={18} /> : null}
-                                {submitting ? "Submitting..." : "Mark as Complete"}
-                            </button>
                         </div>
                     </div>
                 );
